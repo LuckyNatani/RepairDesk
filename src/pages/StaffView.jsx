@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
-import Navbar from '../components/shared/Navbar';
 import TaskCard from '../components/Kanban/TaskCard';
 import TaskDetail from '../components/Tasks/TaskDetail';
 import { useTasks } from '../hooks/useTasks';
 import { useAuth } from '../hooks/useAuth';
-import { Search, Filter, Loader2, ListTodo } from 'lucide-react';
+import { Search, Loader2, ListTodo } from 'lucide-react';
 
 const StaffView = () => {
     const { user } = useAuth();
     const { tasks, loading, updateTaskStatus, addRemark } = useTasks();
-    const [filter, setFilter] = useState('my-tasks'); // 'my-tasks' | 'all' | 'completed'
-    const [selectedTask, setSelectedTask] = useState(null);
+    const [filter, setFilter] = useState('my-tasks');
 
     const filteredTasks = tasks.filter(task => {
         if (filter === 'my-tasks') return task.assigned_to === user.id && task.status !== 'completed';
         if (filter === 'completed') return task.assigned_to === user.id && task.status === 'completed';
-        return true; // 'all'
+        return true;
     });
 
     const handleUpdateStatus = async (taskId, status, assignedTo) => {
         try {
             await updateTaskStatus(taskId, status, assignedTo);
-            // Update selected task in modal to reflect change
             if (selectedTask?.id === taskId) {
                 setSelectedTask(prev => ({ ...prev, status, assigned_to: assignedTo }));
             }
@@ -39,48 +36,48 @@ const StaffView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/30">
-            <Navbar />
+        <div className="h-full">
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                        <ListTodo size={24} className="text-indigo-600 hidden sm:block" />
+                        My Queue
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5">Manage assignments and track progress.</p>
+                </div>
+            </div>
 
-            <main className="max-w-4xl mx-auto px-4 py-8">
-                <header className="mb-8">
-                    <div className="flex items-center space-x-2 text-indigo-900 mb-2">
-                        <ListTodo size={24} strokeWidth={3} />
-                        <h1 className="text-2xl font-black tracking-tight">Service Tasks</h1>
-                    </div>
-                    <p className="text-gray-500 font-medium">Manage your assignments and update job status</p>
-                </header>
-
+            <main className="max-w-4xl mx-auto p-6 md:p-8">
                 {/* Filter Tabs */}
-                <div className="flex p-1.5 bg-gray-100 rounded-2xl mb-8 space-x-1">
+                <div className="flex p-1 bg-slate-100/80 rounded-lg mb-8 space-x-1 border border-slate-200/60 inline-flex">
                     <button
                         onClick={() => setFilter('my-tasks')}
-                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all ${filter === 'my-tasks' ? 'bg-white text-indigo-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`py-2 px-5 rounded-md text-sm font-medium transition-all duration-200 ${filter === 'my-tasks' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                     >
-                        ACTIVE JOBS
-                    </button>
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all ${filter === 'all' ? 'bg-white text-indigo-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        ALL TASKS
+                        Active Jobs
                     </button>
                     <button
                         onClick={() => setFilter('completed')}
-                        className={`flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all ${filter === 'completed' ? 'bg-white text-indigo-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        className={`py-2 px-5 rounded-md text-sm font-medium transition-all duration-200 ${filter === 'completed' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
                     >
-                        COMPLETED
+                        Completed
+                    </button>
+                    <button
+                        onClick={() => setFilter('all')}
+                        className={`py-2 px-5 rounded-md text-sm font-medium transition-all duration-200 ${filter === 'all' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}
+                    >
+                        All Tasks
                     </button>
                 </div>
 
                 {/* Task List */}
                 {loading && tasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-24 text-gray-400">
-                        <Loader2 size={40} className="animate-spin mb-4 text-indigo-100" />
-                        <p className="font-bold">Syncing your tasks...</p>
+                    <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                        <Loader2 size={32} className="animate-spin mb-4 text-indigo-400" />
+                        <p className="font-medium text-sm">Syncing your queue...</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {filteredTasks.length > 0 ? (
                             filteredTasks.map(task => (
                                 <TaskCard
@@ -90,11 +87,12 @@ const StaffView = () => {
                                 />
                             ))
                         ) : (
-                            <div className="py-24 text-center space-y-3">
-                                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-50 rounded-full text-gray-200">
-                                    <Search size={32} />
+                            <div className="col-span-full py-24 flex flex-col items-center justify-center text-center border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white border border-slate-100 shadow-sm mb-4">
+                                    <Search size={20} className="text-slate-400" />
                                 </div>
-                                <p className="text-gray-400 font-bold">No tasks found in this view</p>
+                                <h3 className="text-sm font-medium text-slate-900">No tasks found</h3>
+                                <p className="mt-1 text-sm text-slate-500 max-w-sm">There are no tasks available in this view right now.</p>
                             </div>
                         )}
                     </div>

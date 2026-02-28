@@ -22,7 +22,6 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
         e.preventDefault();
         setLoading(true);
 
-        // Status depends on whether a staff member is assigned
         const status = formData.assigned_to ? 'in_progress' : 'unassigned';
         const assigned_at = formData.assigned_to ? new Date().toISOString() : null;
 
@@ -40,62 +39,62 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-indigo-900 flex items-center">
-                        <UserPlus size={20} className="mr-2" />
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl animate-in fade-in zoom-in duration-200">
+                <div className="flex items-center justify-between p-5 border-b border-slate-100">
+                    <h2 className="text-lg font-semibold text-slate-900 flex items-center">
+                        <UserPlus size={18} className="mr-2 text-indigo-600" />
                         Create New Task
                     </h2>
-                    <button onClick={onCancel} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400">
-                        <X size={20} />
+                    <button onClick={onCancel} className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 transition-colors">
+                        <X size={18} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <form onSubmit={handleSubmit} className="p-5 space-y-5">
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
-                                <ClipboardList size={14} className="mr-1 text-gray-400" />
-                                Client Name*
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center">
+                                <ClipboardList size={14} className="mr-1.5 text-slate-400" />
+                                Client Name
                             </label>
                             <input
                                 required
                                 name="customer_name"
                                 value={formData.customer_name}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
-                                placeholder="e.g. ACME Corp / John Doe"
+                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                placeholder="e.g. John Doe"
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
-                                    <Phone size={14} className="mr-1 text-gray-400" />
-                                    Phone Number*
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center">
+                                    <Phone size={14} className="mr-1.5 text-slate-400" />
+                                    Phone Number
                                 </label>
                                 <input
                                     required
                                     name="customer_phone"
                                     value={formData.customer_phone}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
+                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                                     placeholder="9876543210"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
-                                    <UserPlus size={14} className="mr-1 text-gray-400" />
+                                <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center">
+                                    <UserPlus size={14} className="mr-1.5 text-slate-400" />
                                     Assign Staff
                                 </label>
                                 <select
                                     name="assigned_to"
                                     value={formData.assigned_to}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none appearance-none"
+                                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
                                 >
-                                    <option value="">Leave Unassigned</option>
+                                    <option value="">Unassigned</option>
                                     {staffMembers.map(staff => (
                                         <option key={staff.id} value={staff.id}>{staff.name}</option>
                                     ))}
@@ -104,9 +103,9 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
-                                <MapPin size={14} className="mr-1 text-gray-400" />
-                                Location / Address*
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center">
+                                <MapPin size={14} className="mr-1.5 text-slate-400" />
+                                Address
                             </label>
                             <textarea
                                 required
@@ -114,15 +113,15 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                                 value={formData.customer_address}
                                 onChange={handleChange}
                                 rows="2"
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
-                                placeholder="House No, Street, Landmark, Pincode"
+                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-none"
+                                placeholder="House No, Street, City"
                             ></textarea>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
-                                <ClipboardList size={14} className="mr-1 text-gray-400" />
-                                Task Description*
+                            <label className="block text-sm font-medium text-slate-700 mb-1.5 flex items-center">
+                                <ClipboardList size={14} className="mr-1.5 text-slate-400" />
+                                Description
                             </label>
                             <textarea
                                 required
@@ -130,24 +129,24 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows="3"
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
-                                placeholder="Describe the task to be completed..."
+                                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-none"
+                                placeholder="Describe the task..."
                             ></textarea>
                         </div>
                     </div>
 
-                    <div className="pt-4 flex space-x-3">
+                    <div className="pt-2 flex justify-end gap-3 border-t border-slate-100 mt-6 pt-4">
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
+                            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-3 px-4 py-3 bg-indigo-900 hover:bg-indigo-800 text-white font-bold rounded-xl transition-colors disabled:opacity-50"
+                            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
                             {loading ? 'Creating...' : 'Create Task'}
                         </button>

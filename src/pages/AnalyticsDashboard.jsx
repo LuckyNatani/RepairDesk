@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import Navbar from '../components/shared/Navbar';
 import { useTasks } from '../hooks/useTasks';
 import { useStaff } from '../hooks/useStaff';
 import {
@@ -14,21 +13,23 @@ import {
 } from 'lucide-react';
 
 const StatCard = ({ title, value, color, icon: Icon, trend }) => (
-    <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div className="bg-white p-5 md:p-6 rounded-xl border border-slate-200 flex flex-col justify-between hover:border-indigo-300 transition-colors shadow-sm relative overflow-hidden">
         <div className="flex items-center justify-between mb-4">
-            <div className={`p-3 rounded-2xl ${color.bg} ${color.text}`}>
-                <Icon size={20} />
+            <div className={`p-2.5 rounded-lg ${color.bg} ${color.text} ring-1 ring-inset ${color.ring}`}>
+                <Icon size={18} />
             </div>
             {trend && (
-                <span className="text-[10px] font-black px-2 py-1 bg-green-50 text-green-600 rounded-full tracking-tighter">
+                <span className="text-[10px] font-semibold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md tracking-wide">
                     {trend}
                 </span>
             )}
         </div>
         <div>
-            <h3 className="text-gray-400 text-xs font-black uppercase tracking-widest mb-1">{title}</h3>
-            <p className="text-3xl font-black text-indigo-900 tracking-tighter">{value}</p>
+            <h3 className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{title}</h3>
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">{value}</p>
         </div>
+        {/* Subtle decorative accent */}
+        <div className={`absolute -right-4 -bottom-4 w-16 h-16 rounded-full opacity-[0.03] ${color.decorationBg}`}></div>
     </div>
 );
 
@@ -43,7 +44,6 @@ const AnalyticsDashboard = () => {
         const inProgress = tasks.filter(t => t.status === 'in_progress');
         const unassigned = tasks.filter(t => t.status === 'unassigned');
 
-        // Average completion time in hours
         let avgCompletionHrs = 0;
         if (completed.length > 0) {
             const times = completed
@@ -55,7 +55,6 @@ const AnalyticsDashboard = () => {
             }
         }
 
-        // Tasks by staff member
         const staffImpact = staff.map(s => {
             const staffTasks = tasks.filter(t => t.assigned_to === s.id);
             const done = staffTasks.filter(t => t.status === 'completed').length;
@@ -78,102 +77,117 @@ const AnalyticsDashboard = () => {
 
     if (loading || !stats) {
         return (
-            <div className="min-h-screen bg-gray-50/30">
-                <Navbar />
-                <div className="flex flex-col items-center justify-center h-[70vh] text-gray-400">
-                    <Clock className="animate-pulse mb-4 text-indigo-100" size={48} />
-                    <p className="font-bold">Calculating insights...</p>
+            <div className="h-full w-full">
+                <div className="flex flex-col items-center justify-center h-[70vh] text-slate-400">
+                    <Clock className="animate-spin mb-4 text-indigo-400" size={32} />
+                    <p className="font-medium text-sm">Calculating insights...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50/30">
-            <Navbar />
+        <div className="h-full">
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                        <BarChart3 size={24} className="text-indigo-600 hidden sm:block" />
+                        Performance Analytics
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5">Key metrics and operational health overview</p>
+                </div>
+            </div>
 
-            <main className="max-w-6xl mx-auto px-4 py-8">
-                <header className="mb-10">
-                    <div className="flex items-center space-x-2 text-indigo-900 mb-1">
-                        <BarChart3 size={24} strokeWidth={3} />
-                        <h1 className="text-2xl font-black tracking-tight uppercase">Performance Analytics</h1>
-                    </div>
-                    <p className="text-gray-500 font-medium text-sm">Key metrics and operational health overview</p>
-                </header>
-
+            <main className="max-w-[1400px] mx-auto p-6 md:p-8">
                 {/* Primary Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                     <StatCard
                         title="Total Jobs"
                         value={stats.total}
-                        color={{ bg: 'bg-indigo-50', text: 'text-indigo-600' }}
+                        color={{ bg: 'bg-indigo-50', text: 'text-indigo-600', ring: 'ring-indigo-500/10', decorationBg: 'bg-indigo-600' }}
                         icon={LayoutGrid}
                         trend="+12% weekly"
                     />
                     <StatCard
                         title="Completed"
                         value={stats.completedCount}
-                        color={{ bg: 'bg-green-50', text: 'text-green-600' }}
+                        color={{ bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'ring-emerald-500/10', decorationBg: 'bg-emerald-600' }}
                         icon={CheckCircle2}
                     />
                     <StatCard
                         title="In Progress"
                         value={stats.progressCount}
-                        color={{ bg: 'bg-blue-50', text: 'text-blue-600' }}
+                        color={{ bg: 'bg-blue-50', text: 'text-blue-600', ring: 'ring-blue-500/10', decorationBg: 'bg-blue-600' }}
                         icon={TrendingUp}
                     />
                     <StatCard
                         title="Avg Resolve Time"
                         value={`${stats.avgTime}h`}
-                        color={{ bg: 'bg-amber-50', text: 'text-amber-600' }}
+                        color={{ bg: 'bg-amber-50', text: 'text-amber-600', ring: 'ring-amber-500/10', decorationBg: 'bg-amber-600' }}
                         icon={Clock}
                     />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Staff Performance Chart (Simplified) */}
-                    <div className="lg:col-span-2 bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                        <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest flex items-center mb-8">
-                            <Users size={16} className="mr-2 text-indigo-900" />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                    {/* Staff Performance Chart */}
+                    <div className="lg:col-span-2 bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <Users size={120} />
+                        </div>
+                        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest flex items-center mb-8 relative z-10">
+                            <Users size={14} className="mr-2 text-indigo-600" />
                             Staff Productivity
                         </h3>
 
-                        <div className="space-y-6">
+                        <div className="space-y-6 relative z-10">
                             {stats.staffImpact.slice(0, 5).map((s, idx) => (
                                 <div key={idx} className="space-y-2">
-                                    <div className="flex justify-between items-center text-xs font-bold uppercase tracking-tight">
-                                        <span className="text-gray-900">{s.name}</span>
-                                        <span className="text-gray-400">{s.completion}% Success Rate • {s.total} Jobs</span>
+                                    <div className="flex justify-between items-center text-xs font-semibold tracking-wide">
+                                        <span className="text-slate-800">{s.name}</span>
+                                        <span className="text-slate-500">{s.completion}% Success • {s.total} Jobs</span>
                                     </div>
-                                    <div className="w-full h-3 bg-gray-50 rounded-full overflow-hidden">
+                                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-indigo-900 rounded-full transition-all duration-1000"
+                                            className="h-full bg-indigo-500 rounded-full transition-all duration-1000 ease-out"
                                             style={{ width: `${s.completion}%` }}
                                         ></div>
                                     </div>
                                 </div>
                             ))}
+                            {stats.staffImpact.length === 0 && (
+                                <div className="py-8 text-center text-sm text-slate-500">
+                                    No staff data available
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     {/* Quick Insights */}
                     <div className="space-y-6">
-                        <div className="bg-indigo-900 rounded-3xl p-8 text-white shadow-xl shadow-indigo-900/20">
-                            <Calendar size={32} className="mb-4 text-indigo-400" />
-                            <h3 className="text-xl font-bold mb-2">Weekly Summary</h3>
-                            <p className="text-indigo-200 text-sm leading-relaxed mb-6 font-medium">
+                        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-6 md:p-8 text-white shadow-xl shadow-indigo-600/10">
+                            <Calendar size={28} className="mb-4 text-indigo-200 opacity-80" />
+                            <h3 className="text-lg font-semibold mb-2">Weekly Summary</h3>
+                            <p className="text-indigo-100 text-sm leading-relaxed mb-6 font-medium opacity-90">
                                 You have resolved {stats.completedCount} tasks this month. Completion rate is {Math.round((stats.completedCount / stats.total) * 100)}%.
                             </p>
-                            <div className="flex items-center text-[10px] font-black space-x-2">
-                                <span className="bg-white/10 px-2 py-1 rounded-full uppercase">Operational Health: GOOD</span>
+                            <div className="flex items-center text-[10px] font-bold space-x-2">
+                                <span className="bg-white/10 backdrop-blur-sm px-2.5 py-1 rounded-md uppercase tracking-wider border border-white/10">
+                                    Operational Health: GOOD
+                                </span>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-                            <AlertCircle size={24} className="mb-4 text-amber-500" />
-                            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">Attention Required</h3>
-                            <p className="text-3xl font-black text-indigo-900 tracking-tighter mb-1">{stats.pendingCount}</p>
-                            <p className="text-xs text-gray-400 font-bold uppercase">Unassigned Tickets</p>
+                        <div className="bg-white rounded-xl p-6 md:p-8 border border-slate-200 shadow-sm flex items-start gap-4 hover:border-amber-300 transition-colors">
+                            <div className="p-3 bg-amber-50 rounded-lg text-amber-500 ring-1 ring-inset ring-amber-500/10 shrink-0">
+                                <AlertCircle size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Attention Required</h3>
+                                <div className="flex items-baseline gap-2">
+                                    <p className="text-3xl font-bold text-slate-900 tracking-tight">{stats.pendingCount}</p>
+                                    <p className="text-xs text-slate-500 font-medium">unassigned tickets</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

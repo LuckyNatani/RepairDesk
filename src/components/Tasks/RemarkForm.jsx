@@ -21,7 +21,7 @@ const RemarkForm = ({ onSubmit, placeholder = "Add a remark..." }) => {
     return (
         <form onSubmit={handleSubmit} className="mt-4">
             <div className="relative">
-                <div className="absolute top-3 left-3 text-gray-400">
+                <div className="absolute top-3 left-3 text-slate-400">
                     <MessageSquare size={16} />
                 </div>
                 <textarea
@@ -29,12 +29,12 @@ const RemarkForm = ({ onSubmit, placeholder = "Add a remark..." }) => {
                     onChange={(e) => setRemark(e.target.value)}
                     placeholder={placeholder}
                     rows="2"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none text-sm resize-none"
+                    className="w-full pl-9 pr-12 py-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-sm resize-none shadow-sm"
                 ></textarea>
                 <button
                     type="submit"
                     disabled={submitting || !remark.trim()}
-                    className="absolute bottom-2.5 right-2.5 p-2 bg-indigo-900 text-white rounded-lg hover:bg-indigo-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute bottom-2.5 right-2.5 p-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                     <Send size={16} />
                 </button>

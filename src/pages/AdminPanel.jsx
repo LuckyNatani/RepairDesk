@@ -1,146 +1,170 @@
 import React, { useState } from 'react';
-import Navbar from '../components/shared/Navbar';
 import { useStaff } from '../hooks/useStaff';
-import { UserPlus, Shield, Smartphone, Mail, Trash2, Loader2, Search } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
+import { UserPlus, Settings, Shield, User, Trash2 } from 'lucide-react';
 
 const AdminPanel = () => {
-    const { staff, loading: staffLoading } = useStaff();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isAdding, setIsAdding] = useState(false);
-    const [newStaff, setNewStaff] = useState({ name: '', email: '', phone: '', password: 'Password@123' });
-    const [submitting, setSubmitting] = useState(false);
+    const { staff, loading, createStaffMember, removeStaffMember } = useStaff();
+    const [isCreating, setIsCreating] = useState(false);
+    const [newStaff, setNewStaff] = useState({ name: '', email: '', password: '' });
+    const [error, setError] = useState(null);
 
-    const filteredStaff = staff.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const handleCreateStaff = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitting(true);
+        setError(null);
         try {
-            // 1. Create User in Supabase Auth (This usually requires a Service Role or Edge Function 
-            // for security, but for this PRD we'll assume the Owner can sign them up via a simplified flow 
-            // or we provide instructions for manual invite.)
-
-            // NOTE: In a production Supabase app, the owner would use an Edge Function 
-            // to create users via the Admin Auth API to avoid local sign-out.
-            alert("Staff creation requires Supabase Admin API. In this demo, create staff users via the Supabase Dashboard > Authentication > Add User.");
-            setIsAdding(false);
+            await createStaffMember(newStaff.name, newStaff.email, newStaff.password);
+            setNewStaff({ name: '', email: '', password: '' });
+            setIsCreating(false);
         } catch (err) {
-            alert(err.message);
-        } finally {
-            setSubmitting(false);
+            setError(err.message);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-[70vh] text-slate-400">
+                <Settings className="animate-spin mb-4 text-indigo-400" size={32} />
+                <p className="font-medium ml-3">Loading staff directory...</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gray-50/30">
-            <Navbar />
-
-            <main className="max-w-5xl mx-auto px-4 py-8">
-                <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <div className="flex items-center space-x-2 text-indigo-900 mb-1">
-                            <Shield size={24} strokeWidth={3} />
-                            <h1 className="text-2xl font-black tracking-tight uppercase">Admin Panel</h1>
-                        </div>
-                        <p className="text-gray-500 font-medium text-sm">Manage staff accounts and system permissions</p>
-                    </div>
-
-                    <button
-                        onClick={() => setIsAdding(true)}
-                        className="px-6 py-3 bg-indigo-900 text-white font-bold rounded-2xl flex items-center shadow-lg hover:bg-indigo-800 transition-all active:scale-95"
-                    >
-                        <UserPlus size={18} className="mr-2" />
-                        Add Staff Member
-                    </button>
-                </header>
-
-                {/* Search Bar */}
-                <div className="relative mb-6">
-                    <Search className="absolute left-4 top-3.5 text-gray-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search staff by name or email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-medium"
-                    />
+        <div className="h-full">
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                        <Shield size={24} className="text-indigo-600 hidden sm:block" />
+                        Team Management
+                    </h1>
+                    <p className="text-sm text-slate-500 mt-0.5">Manage your staff members and assignments</p>
                 </div>
+                <button
+                    onClick={() => setIsCreating(true)}
+                    className="flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                    <UserPlus size={16} className="mr-2" />
+                    Add Team Member
+                </button>
+            </div>
 
-                {/* Staff List */}
-                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                    {staffLoading ? (
-                        <div className="py-20 flex flex-col items-center justify-center text-gray-400">
-                            <Loader2 size={32} className="animate-spin mb-3 text-indigo-200" />
-                            <p className="font-bold">Loading staff directory...</p>
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-gray-50">
-                            {filteredStaff.length > 0 ? (
-                                filteredStaff.map((person) => (
-                                    <div key={person.id} className="p-5 flex items-center justify-between hover:bg-gray-50/50 transition-colors group">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-900 font-black text-lg">
-                                                {person.name[0]}
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900">{person.name}</h3>
-                                                <div className="flex items-center space-x-3 mt-1 text-xs text-gray-400 font-bold tracking-tight">
-                                                    <span className="flex items-center">
-                                                        <Mail size={12} className="mr-1" />
-                                                        {person.email || 'No email'}
-                                                    </span>
-                                                    <span className="flex items-center">
-                                                        <Smartphone size={12} className="mr-1" />
-                                                        {person.phone}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-2">
-                                            <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-black rounded-full uppercase tracking-widest border border-green-100">
-                                                Active
-                                            </span>
-                                            <button className="p-2 transition-colors text-gray-300 hover:text-red-500 rounded-xl hover:bg-red-50">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="py-20 text-center">
-                                    <p className="text-gray-400 font-bold">No staff members found matching your search</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* Add Staff Modal Placeholder */}
-                {isAdding && (
-                    <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                        <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8">
-                            <h2 className="text-xl font-bold text-indigo-900 mb-4 flex items-center">
-                                <UserPlus size={20} className="mr-2" />
-                                Add New Staff
-                            </h2>
-                            <p className="text-gray-500 mb-6 text-sm">
-                                Due to security restrictions, please create staff users via the <strong>Supabase Dashboard</strong>.
-                                Ensure you set the <code>role</code> to <code>'staff'</code> in the <code>public.users</code> table after they sign up.
-                            </p>
-                            <button
-                                onClick={() => setIsAdding(false)}
-                                className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-2xl transition-colors"
-                            >
-                                Got it, Close
-                            </button>
-                        </div>
+            <main className="max-w-[1000px] mx-auto p-6 md:p-8">
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 font-medium">
+                        {error}
                     </div>
                 )}
+
+                {isCreating && (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8 relative overflow-hidden animate-in fade-in slide-in-from-top-4">
+                        <div className="absolute top-0 right-0 p-8 opacity-5">
+                            <UserPlus size={120} />
+                        </div>
+                        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center relative z-10">
+                            <UserPlus size={18} className="mr-2 text-indigo-600" />
+                            Create New Account
+                        </h2>
+
+                        <form onSubmit={handleSubmit} className="relative z-10 max-w-2xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={newStaff.name}
+                                        onChange={e => setNewStaff({ ...newStaff, name: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                        placeholder="Jane Doe"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                                    <input
+                                        required
+                                        type="email"
+                                        value={newStaff.email}
+                                        onChange={e => setNewStaff({ ...newStaff, email: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                        placeholder="jane@example.com"
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Temporary Password</label>
+                                    <input
+                                        required
+                                        type="password"
+                                        minLength={6}
+                                        value={newStaff.password}
+                                        onChange={e => setNewStaff({ ...newStaff, password: e.target.value })}
+                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                        placeholder="Minimum 6 characters"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-3 pt-4 border-t border-slate-100">
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                >
+                                    Create Account
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCreating(false)}
+                                    className="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-medium text-sm rounded-lg hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-slate-800">Active Directory</h3>
+                        <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">{staff.length} Members</span>
+                    </div>
+                    {staff.length === 0 ? (
+                        <div className="p-12 text-center text-slate-500">
+                            <Users size={32} className="mx-auto mb-3 text-slate-300" />
+                            <p className="text-sm font-medium text-slate-600 mb-1">No staff members found</p>
+                            <p className="text-xs">Add a team member to get started.</p>
+                        </div>
+                    ) : (
+                        <ul className="divide-y divide-slate-100">
+                            {staff.map((member) => (
+                                <li key={member.id} className="p-4 md:p-6 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-semibold shadow-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors shrink-0">
+                                            {member.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-900 group-hover:text-indigo-900 transition-colors">{member.name}</p>
+                                            <div className="flex flex-col sm:flex-row sm:items-center text-xs text-slate-500 gap-1 sm:gap-3 mt-0.5">
+                                                <span className="flex items-center"><User size={12} className="mr-1 opacity-70" /> Staff Role</span>
+                                                <span className="hidden sm:inline text-slate-300">•</span>
+                                                <span className="truncate max-w-[200px]">{member.email}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm(`Are you sure you want to remove ${member.name}?`)) {
+                                                removeStaffMember(member.id);
+                                            }
+                                        }}
+                                        className="w-full sm:w-auto px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 rounded-md transition-colors border border-red-100 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex items-center justify-center gap-1.5"
+                                    >
+                                        <Trash2 size={14} />
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </main>
         </div>
     );
