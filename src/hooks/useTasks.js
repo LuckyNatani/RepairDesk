@@ -134,5 +134,26 @@ export const useTasks = () => {
         }
     };
 
-    return { tasks, loading, error, createTask, updateTaskStatus, addRemark, deleteTask, refreshTasks: fetchTasks };
+    const editTask = async (taskId, updates) => {
+        const previousTasks = [...tasks];
+        setTasks(currentTasks => currentTasks.map(task =>
+            task.id === taskId ? { ...task, ...updates } : task
+        ));
+
+        const { data, error } = await supabase
+            .from('tasks')
+            .update(updates)
+            .eq('id', taskId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error editing task:', error);
+            setTasks(previousTasks);
+            throw error;
+        }
+        return data;
+    };
+
+    return { tasks, loading, error, createTask, updateTaskStatus, addRemark, deleteTask, editTask, refreshTasks: fetchTasks };
 };

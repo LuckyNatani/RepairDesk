@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Plus, RefreshCcw, Loader2, LayoutGrid } from 'lucide-react';
 
 const OwnerDashboard = () => {
-    const { tasks, loading, createTask, updateTaskStatus, addRemark, deleteTask, refreshTasks } = useTasks();
+    const { tasks, loading, createTask, updateTaskStatus, addRemark, deleteTask, editTask, refreshTasks } = useTasks();
     const { staff } = useStaff();
     const { user, role } = useAuth();
     const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -105,6 +105,14 @@ const OwnerDashboard = () => {
                         staffMembers={staff}
                         onUpdateStatus={handleUpdateStatus}
                         onAddRemark={handleAddRemark}
+                        onEdit={
+                            role === 'owner'
+                                ? async (id, updates) => {
+                                    const updatedTask = await editTask(id, updates);
+                                    setSelectedTask(updatedTask);
+                                }
+                                : undefined
+                        }
                         onDelete={
                             role === 'owner'
                                 ? async (id) => {
