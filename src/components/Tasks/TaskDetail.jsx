@@ -56,15 +56,15 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                    {/* Customer Info Section */}
+                    {/* Task Info Section */}
                     <section className="space-y-4">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center">
                             <User size={14} className="mr-2" />
-                            Customer Details
+                            Client Info
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                             <div>
-                                <p className="text-xs font-bold text-indigo-900/50 mb-1">Customer Name</p>
+                                <p className="text-xs font-bold text-indigo-900/50 mb-1">Client Name</p>
                                 <p className="text-base font-bold text-gray-900">{task.customer_name}</p>
                             </div>
                             <div>
@@ -75,7 +75,7 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                 </a>
                             </div>
                             <div className="md:col-span-2">
-                                <p className="text-xs font-bold text-indigo-900/50 mb-1">Service Address</p>
+                                <p className="text-xs font-bold text-indigo-900/50 mb-1">Location / Address</p>
                                 <div className="flex items-start">
                                     <MapPin size={16} className="text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
                                     <p className="text-sm font-medium text-gray-700 leading-relaxed">{task.customer_address}</p>
@@ -88,7 +88,7 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                     <section className="space-y-4">
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center">
                             <ClipboardList size={14} className="mr-2" />
-                            Service Description
+                            Task Description
                         </h3>
                         <div className="bg-indigo-50/30 p-4 rounded-2xl border border-indigo-100/50">
                             <p className="text-sm font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">

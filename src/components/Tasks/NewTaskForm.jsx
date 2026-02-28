@@ -57,7 +57,7 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
                                 <ClipboardList size={14} className="mr-1 text-gray-400" />
-                                Customer Name*
+                                Client Name*
                             </label>
                             <input
                                 required
@@ -65,7 +65,7 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                                 value={formData.customer_name}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
-                                placeholder="e.g. Rahul Sharma"
+                                placeholder="e.g. ACME Corp / John Doe"
                             />
                         </div>
 
@@ -106,7 +106,7 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-1 flex items-center">
                                 <MapPin size={14} className="mr-1 text-gray-400" />
-                                Service Address*
+                                Location / Address*
                             </label>
                             <textarea
                                 required
@@ -131,7 +131,7 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                                 onChange={handleChange}
                                 rows="3"
                                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all outline-none"
-                                placeholder="Mention issue: PC not turning on, Blue screen..."
+                                placeholder="Describe the task to be completed..."
                             ></textarea>
                         </div>
                     </div>

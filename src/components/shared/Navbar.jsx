@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LogOut, User, LayoutDashboard, BarChart3, Shield } from 'lucide-react';
+import { LogOut, User, LayoutDashboard, BarChart3, Shield, Layers } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Navbar = () => {
@@ -27,8 +27,10 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                     <Link to={isOwner ? "/owner" : "/staff"} className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-indigo-900 rounded-lg flex items-center justify-center text-white font-black text-xs">RD</div>
-                        <span className="font-extrabold text-indigo-900 tracking-tight text-lg">RepairDesk</span>
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                            <Layers size={18} strokeWidth={2.5} />
+                        </div>
+                        <span className="font-extrabold text-indigo-900 tracking-tight text-lg">TaskPod</span>
                     </Link>
 
                     {isOwner && (

@@ -8,7 +8,7 @@ self.addEventListener('push', function (e) {
         try {
             const pushData = e.data.json();
             const options = {
-                body: pushData.body || pushData.message || 'New update from RepairDesk',
+                body: pushData.body || pushData.message || 'New update from TaskPod',
                 icon: '/icons/icon-192.png',
                 badge: '/icons/icon-192.png',
                 vibrate: [100, 50, 100],
@@ -19,12 +19,12 @@ self.addEventListener('push', function (e) {
                 }
             };
             e.waitUntil(
-                self.registration.showNotification(pushData.title || 'RepairDesk', options)
+                self.registration.showNotification(pushData.title || 'TaskPod', options)
             );
         } catch (err) {
             // Backup text message
             e.waitUntil(
-                self.registration.showNotification('RepairDesk Update', {
+                self.registration.showNotification('TaskPod Update', {
                     body: e.data.text(),
                     icon: '/icons/icon-192.png'
                 })

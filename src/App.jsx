@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import OwnerDashboard from './pages/OwnerDashboard';
 import StaffView from './pages/StaffView';
@@ -13,7 +14,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-900 rounded-full animate-spin mb-4"></div>
-            <p className="font-bold text-gray-500 animate-pulse">RepairDesk is loading...</p>
+            <p className="font-bold text-gray-500 animate-pulse">Loading...</p>
         </div>
     );
 
@@ -26,6 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const AppContent = () => {
     return (
         <Routes>
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
 
             <Route path="/owner" element={
@@ -51,8 +53,6 @@ const AppContent = () => {
                     <AdminPanel />
                 </ProtectedRoute>
             } />
-
-            <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
     );
 };

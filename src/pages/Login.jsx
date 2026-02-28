@@ -31,8 +31,11 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
                 <div className="text-center">
-                    <h1 className="text-4xl font-extrabold text-indigo-900 tracking-tight">RepairDesk</h1>
-                    <p className="mt-2 text-sm text-gray-600 font-medium">Task Management for Repair Shops</p>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-xl mb-4 shadow-sm text-white">
+                        <svg className="w-6 h-6" fill="none" strokeWidth="2.5" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2l7-7 2 2" /></svg>
+                    </div>
+                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">TaskPod</h1>
+                    <p className="mt-2 text-sm text-gray-500 font-medium">The Operating System for Work</p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     {error && (
@@ -47,8 +50,8 @@ const Login = () => {
                                 id="email"
                                 type="email"
                                 required
-                                className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
-                                placeholder="you@repairdesk.com"
+                                className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all shadow-sm"
+                                placeholder="you@taskpod.app"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -59,7 +62,7 @@ const Login = () => {
                                 id="password"
                                 type="password"
                                 required
-                                className="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent transition-all"
+                                className="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all shadow-sm"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -71,7 +74,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loggingIn || loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-900 hover:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gray-900 hover:bg-gray-800 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loggingIn ? 'Signing in...' : 'Sign In'}
                         </button>
