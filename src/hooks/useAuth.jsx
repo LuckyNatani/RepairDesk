@@ -10,36 +10,49 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check initial session
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                setUser(session.user);
-                await fetchUserRole(session.user.id);
-                // Attempt push subscription on session recovery
-                subscribeToPush(session.user.id);
-            } else {
-                setLoading(false);
+        let mounted = true;
+
+        // Initialize session safely without racing getSession and onAuthStateChange
+        const initializeAuth = async () => {
+            try {
+                // Get initial session
+                const { data: { session } } = await supabase.auth.getSession();
+
+                if (session) {
+                    if (mounted) setUser(session.user);
+                    await fetchUserRole(session.user.id);
+                    if (mounted) subscribeToPush(session.user.id);
+                } else {
+                    if (mounted) setLoading(false);
+                }
+            } catch (err) {
+                console.error("Auth init error:", err);
+                if (mounted) setLoading(false);
             }
         };
 
-        checkSession();
+        initializeAuth();
 
-        // Listen for auth changes
+        // Listen for auth changes separately
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            // Ignore the initial session event to prevent duplicate fetches/deadlocks
+            if (_event === 'INITIAL_SESSION') return;
+
             if (session) {
-                setUser(session.user);
+                if (mounted) setUser(session.user);
                 await fetchUserRole(session.user.id);
-                // Attempt push subscription on login/auth change
-                subscribeToPush(session.user.id);
+                if (mounted) subscribeToPush(session.user.id);
             } else {
-                setUser(null);
-                setRole(null);
-                setLoading(false);
+                if (mounted) {
+                    setUser(null);
+                    setRole(null);
+                    setLoading(false);
+                }
             }
         });
 
         return () => {
+            mounted = false;
             if (subscription) subscription.unsubscribe();
         };
     }, []);

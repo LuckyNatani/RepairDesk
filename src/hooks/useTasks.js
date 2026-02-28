@@ -116,5 +116,23 @@ export const useTasks = () => {
         return data;
     };
 
-    return { tasks, loading, error, createTask, updateTaskStatus, addRemark, refreshTasks: fetchTasks };
+    const deleteTask = async (taskId) => {
+        // Optimistic UI update
+        const previousTasks = [...tasks];
+        setTasks(currentTasks => currentTasks.filter(task => task.id !== taskId));
+
+        const { error } = await supabase
+            .from('tasks')
+            .delete()
+            .eq('id', taskId);
+
+        if (error) {
+            console.error('Error deleting task:', error);
+            // Revert UI on error
+            setTasks(previousTasks);
+            throw error;
+        }
+    };
+
+    return { tasks, loading, error, createTask, updateTaskStatus, addRemark, deleteTask, refreshTasks: fetchTasks };
 };

@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Plus, RefreshCcw, Loader2, LayoutGrid } from 'lucide-react';
 
 const OwnerDashboard = () => {
-    const { tasks, loading, createTask, updateTaskStatus, addRemark, refreshTasks } = useTasks();
+    const { tasks, loading, createTask, updateTaskStatus, addRemark, deleteTask, refreshTasks } = useTasks();
     const { staff } = useStaff();
     const { user, role } = useAuth();
     const [showNewTaskForm, setShowNewTaskForm] = useState(false);
@@ -86,13 +86,6 @@ const OwnerDashboard = () => {
                             const newStatus = assignedTo ? 'in_progress' : 'unassigned';
                             handleUpdateStatus(taskId, newStatus, assignedTo);
                         }}
-                        onTaskDragEnd={(taskId, newStatus) => {
-                            const task = tasks.find(t => t.id === taskId);
-                            if (task && task.status !== newStatus) {
-                                const assignedTo = newStatus === 'unassigned' ? null : task.assigned_to;
-                                handleUpdateStatus(taskId, newStatus, assignedTo);
-                            }
-                        }}
                     />
                 )}
 
@@ -112,6 +105,14 @@ const OwnerDashboard = () => {
                         staffMembers={staff}
                         onUpdateStatus={handleUpdateStatus}
                         onAddRemark={handleAddRemark}
+                        onDelete={
+                            role === 'owner'
+                                ? async (id) => {
+                                    await deleteTask(id);
+                                    setSelectedTask(null);
+                                }
+                                : undefined
+                        }
                         onClose={() => setSelectedTask(null)}
                     />
                 )}

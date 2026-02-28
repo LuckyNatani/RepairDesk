@@ -1,6 +1,5 @@
 import React from 'react';
 import TaskCard from './TaskCard';
-import { Droppable } from '@hello-pangea/dnd';
 
 const KanbanColumn = ({ title, status, tasks, onTaskClick, isOwner, staffMembers, onAssign }) => {
     const filteredTasks = tasks.filter(task => task.status === status);
@@ -16,34 +15,24 @@ const KanbanColumn = ({ title, status, tasks, onTaskClick, isOwner, staffMembers
                 </h2>
             </div>
 
-            <Droppable droppableId={status}>
-                {(provided, snapshot) => (
-                    <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={`space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar pb-4 transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-slate-100/50 rounded-xl' : ''}`}
-                    >
-                        {filteredTasks.length > 0 ? (
-                            filteredTasks.map((task, index) => (
-                                <TaskCard
-                                    key={task.id}
-                                    task={task}
-                                    index={index}
-                                    onClick={onTaskClick}
-                                    isOwner={isOwner}
-                                    staffMembers={staffMembers}
-                                    onAssign={onAssign}
-                                />
-                            ))
-                        ) : (
-                            <div className="h-24 border border-dashed border-slate-300 rounded-xl flex items-center justify-center text-xs text-slate-400 font-medium">
-                                No tasks
-                            </div>
-                        )}
-                        {provided.placeholder}
+            <div className="space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar pb-4">
+                {filteredTasks.length > 0 ? (
+                    filteredTasks.map((task) => (
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                            onClick={onTaskClick}
+                            isOwner={isOwner}
+                            staffMembers={staffMembers}
+                            onAssign={onAssign}
+                        />
+                    ))
+                ) : (
+                    <div className="h-24 border border-dashed border-slate-300 rounded-xl flex items-center justify-center text-xs text-slate-400 font-medium">
+                        No tasks
                     </div>
                 )}
-            </Droppable>
+            </div>
         </div>
     );
 };

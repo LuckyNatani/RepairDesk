@@ -9,6 +9,7 @@ const StaffView = () => {
     const { user } = useAuth();
     const { tasks, loading, updateTaskStatus, addRemark } = useTasks();
     const [filter, setFilter] = useState('my-tasks');
+    const [selectedTask, setSelectedTask] = useState(null);
 
     const filteredTasks = tasks.filter(task => {
         if (filter === 'my-tasks') return task.assigned_to === user.id && task.status !== 'completed';
