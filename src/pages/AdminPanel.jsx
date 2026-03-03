@@ -5,15 +5,15 @@ import { UserPlus, Settings, Shield, User, Trash2 } from 'lucide-react';
 const AdminPanel = () => {
     const { staff, loading, createStaffMember, removeStaffMember } = useStaff();
     const [isCreating, setIsCreating] = useState(false);
-    const [newStaff, setNewStaff] = useState({ name: '', email: '', password: '' });
+    const [newStaff, setNewStaff] = useState({ name: '', username: '', password: '' });
     const [error, setError] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         try {
-            await createStaffMember(newStaff.name, newStaff.email, newStaff.password);
-            setNewStaff({ name: '', email: '', password: '' });
+            await createStaffMember(newStaff.name, newStaff.username, newStaff.password);
+            setNewStaff({ name: '', username: '', password: '' });
             setIsCreating(false);
         } catch (err) {
             setError(err.message);
@@ -79,15 +79,16 @@ const AdminPanel = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Unique Username</label>
                                     <input
                                         required
-                                        type="email"
-                                        value={newStaff.email}
-                                        onChange={e => setNewStaff({ ...newStaff, email: e.target.value })}
+                                        type="text"
+                                        value={newStaff.username}
+                                        onChange={e => setNewStaff({ ...newStaff, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
                                         className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                        placeholder="jane@example.com"
+                                        placeholder="jane_doe"
                                     />
+                                    <p className="text-xs text-slate-500 mt-1">Lowercase letters, numbers, and underscores.</p>
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Temporary Password</label>
@@ -145,7 +146,7 @@ const AdminPanel = () => {
                                             <div className="flex flex-col sm:flex-row sm:items-center text-xs text-slate-500 gap-1 sm:gap-3 mt-0.5">
                                                 <span className="flex items-center"><User size={12} className="mr-1 opacity-70" /> Staff Role</span>
                                                 <span className="hidden sm:inline text-slate-300">•</span>
-                                                <span className="truncate max-w-[200px]">{member.email}</span>
+                                                <span className="truncate max-w-[200px] font-mono">@{member.username}</span>
                                             </div>
                                         </div>
                                     </div>

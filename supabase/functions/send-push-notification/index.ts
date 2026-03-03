@@ -1,13 +1,18 @@
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+// @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
+// @ts-ignore
 import WebPush from "https://esm.sh/web-push@3.6.6"
+
+declare const Deno: any;
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -85,7 +90,7 @@ serve(async (req) => {
             status: 200,
         })
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Push Error:', error.message)
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },

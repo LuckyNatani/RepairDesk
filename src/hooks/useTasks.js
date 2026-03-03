@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from './useAuth';
 
 export const useTasks = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { user: currentUser } = useAuth();
 
     const fetchTasks = async () => {
         try {
@@ -51,9 +52,23 @@ export const useTasks = () => {
     }, []);
 
     const createTask = async (taskData) => {
+        // First get the owner's company_id
+        const { data: ownerData, error: ownerError } = await supabase
+            .from('users')
+            .select('company_id')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (ownerError) throw new Error("Could not determine your company.");
+
+        const payload = { ...taskData };
+        if (ownerData.company_id) {
+            payload.company_id = ownerData.company_id;
+        }
+
         const { data, error } = await supabase
             .from('tasks')
-            .insert([taskData])
+            .insert([payload])
             .select()
             .single();
 
@@ -103,9 +118,23 @@ export const useTasks = () => {
     };
 
     const addRemark = async (taskId, staffId, remarkText) => {
+        // Get the current user's company_id
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('company_id')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (userError) throw new Error("Could not determine your company.");
+
+        const payload = { task_id: taskId, staff_id: staffId, remark_text: remarkText };
+        if (userData.company_id) {
+            payload.company_id = userData.company_id;
+        }
+
         const { data, error } = await supabase
             .from('remarks')
-            .insert([{ task_id: taskId, staff_id: staffId, remark_text: remarkText }])
+            .insert([payload])
             .select()
             .single();
 

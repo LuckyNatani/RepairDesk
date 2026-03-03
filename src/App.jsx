@@ -6,6 +6,7 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import StaffView from './pages/StaffView';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import AdminPanel from './pages/AdminPanel';
+import SuperAdminPanel from './pages/SuperAdminPanel';
 import AppLayout from './components/layout/AppLayout';
 
 // Protected Route Component
@@ -30,6 +31,14 @@ const AppContent = () => {
         <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
+
+            <Route path="/superadmin" element={
+                <ProtectedRoute allowedRoles={['superadmin']}>
+                    <AppLayout>
+                        <SuperAdminPanel />
+                    </AppLayout>
+                </ProtectedRoute>
+            } />
 
             <Route path="/owner" element={
                 <ProtectedRoute allowedRoles={['owner']}>

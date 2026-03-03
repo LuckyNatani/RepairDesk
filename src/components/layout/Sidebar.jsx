@@ -8,14 +8,24 @@ const Sidebar = () => {
     const { role, user, logout } = useAuth();
     const location = useLocation();
     const isOwner = role === 'owner';
+    const isSuperAdmin = role === 'superadmin';
 
-    const navItems = isOwner ? [
-        { path: '/owner', icon: LayoutDashboard, label: 'Dashboard' },
-        { path: '/analytics', icon: BarChart3, label: 'Analytics' },
-        { path: '/admin', icon: Shield, label: 'Team Admin' }
-    ] : [
-        { path: '/staff', icon: CheckSquare, label: 'My Tasks' }
-    ];
+    let navItems = [];
+    if (isSuperAdmin) {
+        navItems = [
+            { path: '/superadmin', icon: Shield, label: 'Super Admin' }
+        ];
+    } else if (isOwner) {
+        navItems = [
+            { path: '/owner', icon: LayoutDashboard, label: 'Dashboard' },
+            { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+            { path: '/admin', icon: Shield, label: 'Team Admin' }
+        ];
+    } else {
+        navItems = [
+            { path: '/staff', icon: CheckSquare, label: 'My Tasks' }
+        ];
+    }
 
     return (
         <>

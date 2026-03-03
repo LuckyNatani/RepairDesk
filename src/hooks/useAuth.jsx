@@ -7,6 +7,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
+    const [roleError, setRoleError] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
                 if (session) {
                     if (mounted) setUser(session.user);
-                    await fetchUserRole(session.user.id);
+                    await fetchUserRole(session.user.id, () => mounted);
                     if (mounted) subscribeToPush(session.user.id);
                 } else {
                     if (mounted) setLoading(false);
@@ -40,12 +41,13 @@ export const AuthProvider = ({ children }) => {
 
             if (session) {
                 if (mounted) setUser(session.user);
-                await fetchUserRole(session.user.id);
+                await fetchUserRole(session.user.id, () => mounted);
                 if (mounted) subscribeToPush(session.user.id);
             } else {
                 if (mounted) {
                     setUser(null);
                     setRole(null);
+                    setRoleError(null);
                     setLoading(false);
                 }
             }
@@ -57,21 +59,31 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    const fetchUserRole = async (userId) => {
+    const fetchUserRole = async (userId, isMounted) => {
         try {
+            if (isMounted && isMounted()) setRoleError(null);
             const { data, error } = await supabase
                 .from('users')
                 .select('role')
                 .eq('id', userId)
                 .single();
 
-            if (data && !error) {
+            if (error) throw error;
+            if (!data) throw new Error("User record not found");
+
+            if (isMounted && isMounted()) {
                 setRole(data.role);
             }
         } catch (err) {
             console.error('Error fetching user role:', err);
+            if (isMounted && isMounted()) {
+                setRoleError(err.message || "Failed to fetch role");
+                setRole(null);
+            }
         } finally {
-            setLoading(false);
+            if (isMounted && isMounted()) {
+                setLoading(false);
+            }
         }
     };
 
@@ -85,7 +97,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, role, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, role, roleError, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
