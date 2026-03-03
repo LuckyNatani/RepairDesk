@@ -88,13 +88,13 @@ const AnalyticsDashboard = () => {
 
     return (
         <div className="h-full">
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-30 px-6 py-4 md:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                        <BarChart3 size={24} className="text-indigo-600 hidden sm:block" />
+            <div className="glass-panel sticky top-0 z-30 px-4 py-3 md:px-8 md:py-5 flex items-center justify-between gap-3 border-b border-slate-100/60 shadow-sm transition-all pt-safe-offset-2">
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-lg md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 truncate">
+                        <BarChart3 size={20} className="text-indigo-600 hidden sm:block shrink-0" />
                         Performance Analytics
                     </h1>
-                    <p className="text-sm text-slate-500 mt-0.5">Key metrics and operational health overview</p>
+                    <p className="text-xs md:text-sm text-slate-500 mt-0.5 truncate hidden sm:block">Key metrics and operational health overview</p>
                 </div>
             </div>
 

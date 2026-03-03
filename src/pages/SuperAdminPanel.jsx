@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Shield, Building, UserPlus, Trash2, Key } from 'lucide-react';
+import { Shield, Building, UserPlus, Trash2, Key, Edit2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import EditUserModal from '../components/shared/EditUserModal';
 
 const SuperAdminPanel = () => {
     const { user } = useAuth();
@@ -15,6 +16,10 @@ const SuperAdminPanel = () => {
 
     const [newAdmin, setNewAdmin] = useState({ companyId: '', name: '', username: '', password: '' });
     const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
+
+    // Edit state
+    const [editingAdmin, setEditingAdmin] = useState(null);
+    const [isUpdatingAdmin, setIsUpdatingAdmin] = useState(false);
 
     useEffect(() => {
         fetchCompanies();
@@ -99,6 +104,27 @@ const SuperAdminPanel = () => {
 
         } catch (err) {
             setError(err.message);
+        }
+    };
+
+    const handleEditAdmin = async (userId, updates) => {
+        try {
+            setIsUpdatingAdmin(true);
+            setError(null);
+
+            const { data, error: functionError } = await supabase.functions.invoke('update-user', {
+                body: { targetUserId: userId, updates }
+            });
+
+            if (functionError) throw new Error(functionError.message || 'Failed to update admin');
+            if (data?.error) throw new Error(data.error);
+
+            setEditingAdmin(null);
+            fetchCompanies(); // Refresh data to show changes
+        } catch (err) {
+            setError(err.message || 'An error occurred while updating the admin.');
+        } finally {
+            setIsUpdatingAdmin(false);
         }
     };
 
@@ -270,7 +296,16 @@ const SuperAdminPanel = () => {
                                                         <p className="text-sm font-medium text-slate-900">{admin.name}</p>
                                                         <p className="text-xs text-slate-500 font-mono mt-0.5">@{admin.username}</p>
                                                     </div>
-                                                    <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded">Owner</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded">Owner</span>
+                                                        <button
+                                                            onClick={() => setEditingAdmin(admin)}
+                                                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                            title="Edit Administrator"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))
                                     )}
@@ -288,6 +323,13 @@ const SuperAdminPanel = () => {
                     )}
                 </div>
             </main>
+
+            <EditUserModal
+                user={editingAdmin}
+                onClose={() => setEditingAdmin(null)}
+                onSave={handleEditAdmin}
+                isUpdating={isUpdatingAdmin}
+            />
         </div>
     );
 };

@@ -97,5 +97,34 @@ export const useStaff = () => {
         }
     };
 
-    return { staff, loading, createStaffMember, removeStaffMember };
+    const updateStaffMember = async (userId, updates) => {
+        try {
+            const { data, error } = await supabase.functions.invoke('update-user', {
+                body: { targetUserId: userId, updates }
+            });
+
+            if (error) {
+                console.error('Edge Function Error:', error);
+                throw new Error(error.message || 'Failed to update user');
+            }
+            if (data?.error) {
+                throw new Error(data.error);
+            }
+
+            // Refresh the staff list
+            const { data: newData } = await supabase
+                .from('users')
+                .select('*')
+                .eq('role', 'staff')
+                .order('name');
+
+            if (newData) setStaff(newData);
+
+            return { success: true };
+        } catch (err) {
+            throw err;
+        }
+    };
+
+    return { staff, loading, createStaffMember, removeStaffMember, updateStaffMember };
 };
