@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { Layers } from 'lucide-react';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -18,7 +19,7 @@ const Login = () => {
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gray-50">
                     <div className="flex flex-col items-center space-y-4">
-                        <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-900 rounded-full animate-spin"></div>
+                        <div className="w-12 h-12 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin"></div>
                         <p className="text-gray-500 font-medium animate-pulse">Loading workspace...</p>
                     </div>
                 </div>
@@ -77,8 +78,8 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
                 <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-600 rounded-xl mb-4 shadow-sm text-white">
-                        <svg className="w-6 h-6" fill="none" strokeWidth="2.5" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2l7-7 2 2" /></svg>
+                    <div className="inline-flex items-center justify-center w-12 h-12 bg-rose-600 rounded-xl mb-4 shadow-lg shadow-rose-600/30 text-white border border-rose-500/50">
+                        <Layers size={22} strokeWidth={2.5} />
                     </div>
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">TaskPod</h1>
                     <p className="mt-2 text-sm text-gray-500 font-medium">The Operating System for Work</p>
