@@ -64,15 +64,21 @@ export const AuthProvider = ({ children }) => {
             if (isMounted && isMounted()) setRoleError(null);
             const { data, error } = await supabase
                 .from('users')
-                .select('role')
+                .select('role, company_id')
                 .eq('id', userId)
                 .single();
 
             if (error) throw error;
             if (!data) throw new Error("User record not found");
 
+            // SuperAdmins are allowed to have no company_id. Everyone else needs one.
+            if (data.role !== 'superadmin' && !data.company_id) {
+                throw new Error("Missing company assignment");
+            }
+
             if (isMounted && isMounted()) {
                 setRole(data.role);
+                // Can also store companyId in state if needed later, but role is primary
             }
         } catch (err) {
             console.error('Error fetching user role:', err);
