@@ -70,33 +70,19 @@ const SuperAdminPanel = () => {
         e.preventDefault();
         setError(null);
         try {
-            // 1. Create the user in Auth
-            // Using a system email mapped from username: username@taskpod.system
-            const systemEmail = `${newAdmin.username}@taskpod.system`;
-
-            const { data: authData, error: signUpError } = await supabase.auth.signUp({
-                email: systemEmail,
-                password: newAdmin.password,
-            });
-
-            if (signUpError) throw signUpError;
-            if (!authData.user) throw new Error("Failed to create auth user");
-
-            // 2. Insert into users table
-            const { error: profileError } = await supabase
-                .from('users')
-                .insert([{
-                    id: authData.user.id,
+            // Invoke the create-user Edge Function (server-side user creation)
+            const { data, error: functionError } = await supabase.functions.invoke('create-user', {
+                body: {
                     name: newAdmin.name,
                     username: newAdmin.username,
+                    password: newAdmin.password,
                     role: 'owner',
-                    company_id: newAdmin.companyId
-                }]);
+                    companyId: newAdmin.companyId
+                }
+            });
 
-            if (profileError) {
-                // Cleanup auth user if profile creation fails? (Ideal, but complex for edge case here)
-                throw profileError;
-            }
+            if (functionError) throw new Error(functionError.message || 'Failed to create admin');
+            if (data?.error) throw new Error(data.error);
 
             setNewAdmin({ companyId: '', name: '', username: '', password: '' });
             setIsCreatingAdmin(false);

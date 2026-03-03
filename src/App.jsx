@@ -9,6 +9,14 @@ import AdminPanel from './pages/AdminPanel';
 import SuperAdminPanel from './pages/SuperAdminPanel';
 import AppLayout from './components/layout/AppLayout';
 
+// Helper to get the correct home route for a role
+const getRoleHome = (role) => {
+    if (role === 'superadmin') return '/superadmin';
+    if (role === 'owner') return '/owner';
+    if (role === 'staff') return '/staff';
+    return '/login';
+};
+
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user, role, loading } = useAuth();
@@ -21,7 +29,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
 
     if (!user) return <Navigate to="/login" replace />;
-    if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/login" replace />;
+    // Redirect to correct home page instead of login to avoid loops
+    if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to={getRoleHome(role)} replace />;
 
     return children;
 };
@@ -71,6 +80,9 @@ const AppContent = () => {
                     </AppLayout>
                 </ProtectedRoute>
             } />
+
+            {/* Catch-all route for unknown URLs */}
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
 };

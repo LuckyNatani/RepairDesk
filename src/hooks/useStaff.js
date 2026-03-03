@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './useAuth';
 
@@ -30,49 +31,28 @@ export const useStaff = () => {
 
     const createStaffMember = async (name, username, password) => {
         try {
-            // First get the owner's company_id
-            const { data: ownerData, error: ownerError } = await supabase
-                .from('users')
-                .select('company_id')
-                .eq('id', currentUser.id)
-                .single();
-
-            if (ownerError) throw new Error("Could not determine your company.");
-            if (!ownerData.company_id) throw new Error("You are not assigned to a company.");
-
-            const companyId = ownerData.company_id;
-            const systemEmail = `${username}@taskpod.system`;
-
-            // Create Supabase Auth user
-            const { data: authData, error: signUpError } = await supabase.auth.signUp({
-                email: systemEmail,
-                password: password,
+            // Invoke the create-user Edge Function (server-side user creation)
+            // This avoids the signUp session hijack that would log out the admin
+            const { data, error } = await supabase.functions.invoke('create-user', {
+                body: { name, username, password, role: 'staff' }
             });
 
-            if (signUpError) throw signUpError;
-            if (!authData.user) throw new Error("Failed to create user account system record.");
-
-            // Create profile in our users table
-            const { error: profileError } = await supabase
-                .from('users')
-                .insert([{
-                    id: authData.user.id,
-                    name: name,
-                    username: username,
-                    role: 'staff',
-                    company_id: companyId
-                }]);
-
-            if (profileError) throw profileError;
+            if (error) {
+                console.error('Edge Function Error:', error);
+                throw new Error(error.message || 'Failed to create staff member');
+            }
+            if (data?.error) {
+                throw new Error(data.error);
+            }
 
             // Refresh the staff list
-            const { data } = await supabase
+            const { data: newData } = await supabase
                 .from('users')
                 .select('*')
                 .eq('role', 'staff')
                 .order('name');
 
-            if (data) setStaff(data);
+            if (newData) setStaff(newData);
 
             return { success: true };
         } catch (err) {

@@ -36,7 +36,7 @@ serve(async (req) => {
 
     if (profileError || !callerProfile) throw new Error('Caller profile not found')
 
-    const isSuperAdmin = await isCallerSuperAdmin(supabaseClient, callerUser.email)
+    const isSuperAdmin = callerProfile.role === 'superadmin'
     const isOwner = callerProfile.role === 'owner'
 
     if (!isSuperAdmin && !isOwner) {
@@ -109,11 +109,3 @@ serve(async (req) => {
     })
   }
 })
-
-// Helper to check SuperAdmin status (typically a predefined email or custom claim)
-// Based on current implementation, super_admins table or email domain might be used
-async function isCallerSuperAdmin(client: any, email: string | undefined) {
-  // In TaskPod, superadmin logic is currently handled directly via Auth rules (username check)
-  // We will do a generic check if they exist in a superadmin context, or rely on email.
-  return email === 'superadmin@taskpod.system' || email?.includes('+superadmin')
-}
