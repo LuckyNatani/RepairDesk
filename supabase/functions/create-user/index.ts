@@ -13,25 +13,25 @@ Deno.serve(async (req) => {
     }
 
     try {
-        // Authenticate the caller using their JWT
-        const supabaseClient = createClient(
+        // Initialize Admin Client (service role — bypasses RLS)
+        const supabaseAdmin = createClient(
             Deno.env.get("SUPABASE_URL") ?? "",
-            Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-            {
-                global: {
-                    headers: { Authorization: req.headers.get("Authorization")! },
-                },
-            }
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
         );
 
-        const {
-            data: { user: callerUser },
-            error: userError,
-        } = await supabaseClient.auth.getUser();
+        // Extract the JWT from the Authorization header
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader) throw new Error("Missing authorization header");
+        const jwt = authHeader.replace("Bearer ", "");
+
+        // Verify the caller using the service role client + their JWT
+        const { data: { user: callerUser }, error: userError } =
+            await supabaseAdmin.auth.getUser(jwt);
+
         if (userError || !callerUser) throw new Error("Unauthorized caller");
 
-        // Get caller's profile to verify role
-        const { data: callerProfile, error: profileError } = await supabaseClient
+        // Get caller's profile to verify role (using service role to bypass RLS)
+        const { data: callerProfile, error: profileError } = await supabaseAdmin
             .from("users")
             .select("role, company_id")
             .eq("id", callerUser.id)
@@ -72,25 +72,17 @@ Deno.serve(async (req) => {
         // Determine the company_id for the new user
         let targetCompanyId;
         if (isSuperAdmin) {
-            // SuperAdmin must specify the company for owners
             if (targetRole === "owner" && !companyId) {
                 throw new Error("SuperAdmin must specify companyId when creating owners");
             }
             targetCompanyId = companyId;
         } else if (isOwner) {
-            // Owner creates staff in their own company
             targetCompanyId = callerProfile.company_id;
         }
 
         if (!targetCompanyId) {
             throw new Error("Could not determine company for the new user");
         }
-
-        // Initialize Admin Client (bypasses RLS)
-        const supabaseAdmin = createClient(
-            Deno.env.get("SUPABASE_URL") ?? "",
-            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-        );
 
         // Check for duplicate username
         const { data: existingUser } = await supabaseAdmin
@@ -103,7 +95,7 @@ Deno.serve(async (req) => {
             throw new Error("Username is already taken. Please choose another.");
         }
 
-        // Create the auth user using admin API (does NOT affect caller's session)
+        // Create the auth user using admin API
         const systemEmail = `${username}@taskpod.system`;
         const { data: authData, error: signUpError } =
             await supabaseAdmin.auth.admin.createUser({
@@ -131,7 +123,6 @@ Deno.serve(async (req) => {
             .single();
 
         if (insertError) {
-            // Rollback: delete the auth user if profile insert fails
             await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
             throw new Error(`Profile creation failed: ${insertError.message}`);
         }
@@ -143,7 +134,7 @@ Deno.serve(async (req) => {
                 status: 200,
             }
         );
-    } catch (error) {
+    } catch (error: any) {
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
             status: 400,
