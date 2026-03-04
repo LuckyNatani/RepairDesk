@@ -23,7 +23,53 @@ serve(async (req: Request) => {
             Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         )
 
-        const { task_id, recipient_id, event_type } = await req.json()
+        const payload = await req.json()
+
+        let task_id, recipient_id, event_type;
+
+        // Determine if this is a custom payload (old method) or a Supabase Database Webhook (new method)
+        if (payload.type && payload.record) {
+            // Supabase Database Webhook format
+            const record = payload.record;
+            const old_record = payload.old_record;
+
+            task_id = record.id;
+
+            if (payload.type === 'INSERT' && record.assigned_to) {
+                event_type = 'assigned';
+                recipient_id = record.assigned_to;
+            } else if (payload.type === 'UPDATE') {
+                if (record.assigned_to && old_record?.assigned_to !== record.assigned_to) {
+                    event_type = 'assigned';
+                    recipient_id = record.assigned_to;
+                } else if (record.status === 'completed' && old_record?.status !== 'completed') {
+                    event_type = 'completed';
+                    recipient_id = record.assigned_to || record.created_by; // Fallback to someone relevant
+                } else {
+                    return new Response(JSON.stringify({ message: "No relevant changes for push notification." }), {
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                        status: 200,
+                    });
+                }
+            } else {
+                return new Response(JSON.stringify({ message: "Event ignored." }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    status: 200,
+                });
+            }
+        } else {
+            // Old custom payload format fallback (for direct testing)
+            task_id = payload.task_id;
+            recipient_id = payload.recipient_id;
+            event_type = payload.event_type;
+        }
+
+        if (!recipient_id) {
+            return new Response(JSON.stringify({ message: "No recipient for this event." }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            });
+        }
 
         // 1. Fetch recipient's push subscription
         const { data: user, error: userError } = await supabaseClient

@@ -89,14 +89,11 @@ export const AuthProvider = ({ children }) => {
     const fetchUserRole = async (userId, isMounted) => {
         try {
             if (isMounted && isMounted()) setRoleError(null);
-            const { data, error } = await withTimeout(
-                supabase
-                    .from('users')
-                    .select('role, company_id')
-                    .eq('id', userId)
-                    .single(),
-                5000
-            );
+            const { data, error } = await supabase
+                .from('users')
+                .select('role, company_id')
+                .eq('id', userId)
+                .single();
 
             if (error) throw error;
             if (!data) throw new Error("User record not found");

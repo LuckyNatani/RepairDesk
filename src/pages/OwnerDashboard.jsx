@@ -81,7 +81,7 @@ const OwnerDashboard = () => {
                     <KanbanBoard
                         tasks={tasks}
                         onTaskClick={setSelectedTask}
-                        isOwner={role === 'owner'}
+                        isOwner={role === 'owner' || role === 'admin'}
                         staffMembers={staff}
                         onAssign={(taskId, assignedTo) => {
                             const newStatus = assignedTo ? 'in_progress' : 'unassigned';
@@ -107,7 +107,7 @@ const OwnerDashboard = () => {
                         onUpdateStatus={handleUpdateStatus}
                         onAddRemark={handleAddRemark}
                         onEdit={
-                            role === 'owner'
+                            (role === 'owner' || role === 'admin')
                                 ? async (id, updates) => {
                                     const updatedTask = await editTask(id, updates);
                                     setSelectedTask(updatedTask);
@@ -115,7 +115,7 @@ const OwnerDashboard = () => {
                                 : undefined
                         }
                         onDelete={
-                            role === 'owner'
+                            (role === 'owner' || role === 'admin')
                                 ? async (id) => {
                                     await deleteTask(id);
                                     setSelectedTask(null);
