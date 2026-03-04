@@ -110,7 +110,7 @@ serve(async (req: Request) => {
             body = `Task for ${task.customer_name} has been marked as finished.`
         }
 
-        const payload = JSON.stringify({
+        const pushPayload = JSON.stringify({
             title,
             body,
             icon: '/icons/icon-192.png',
@@ -121,7 +121,7 @@ serve(async (req: Request) => {
         })
 
         // 5. Send Notification
-        await WebPush.sendNotification(user.push_subscription, payload)
+        await WebPush.sendNotification(user.push_subscription, pushPayload)
 
         // 6. Log success
         await supabaseClient.from('push_logs').insert([{
