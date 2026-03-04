@@ -1,8 +1,21 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Layers, Activity, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 const Landing = () => {
+    const { user, role, loading } = useAuth();
+
+    // While checking session, show nothing (prevents flash of landing page)
+    if (loading) return null;
+
+    // Auto-redirect logged-in users to their role-based dashboard
+    if (user && role) {
+        if (role === 'superadmin') return <Navigate to="/superadmin" replace />;
+        if (role === 'owner') return <Navigate to="/owner" replace />;
+        if (role === 'staff') return <Navigate to="/staff" replace />;
+    }
+
     return (
         <div className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col font-sans selection:bg-rose-500/30 selection:text-rose-100 overflow-hidden">
             {/* Background Effects */}

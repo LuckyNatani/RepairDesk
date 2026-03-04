@@ -7,4 +7,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
     console.warn('Supabase URL or Anon Key is missing. Please check your .env file.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+        persistSession: true,        // Store session in localStorage (survives app close)
+        autoRefreshToken: true,       // Auto-refresh JWT before expiry
+        detectSessionInUrl: false,    // No OAuth redirects — username/password only
+        storage: localStorage,        // Explicit: use localStorage for PWA persistence
+    }
+})
