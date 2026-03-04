@@ -5,16 +5,21 @@ import { useAuth } from './useAuth';
 export const useStaff = () => {
     const [staff, setStaff] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, loading: authLoading } = useAuth();
 
     useEffect(() => {
+        // Wait for auth to finish before querying — prevents stale JWT issues
+        if (authLoading || !currentUser) {
+            setLoading(false);
+            return;
+        }
+
         const fetchStaff = async () => {
             try {
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('role', 'staff')
-                    // RLS automatically filters this to their own company
                     .order('name');
 
                 if (error) throw error;
@@ -27,7 +32,7 @@ export const useStaff = () => {
         };
 
         fetchStaff();
-    }, []);
+    }, [authLoading, currentUser]);
 
     const createStaffMember = async (name, username, password) => {
         try {

@@ -6,7 +6,7 @@ export const useTasks = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { user: currentUser } = useAuth();
+    const { user: currentUser, loading: authLoading } = useAuth();
 
     const fetchTasks = async () => {
         try {
@@ -31,6 +31,12 @@ export const useTasks = () => {
     };
 
     useEffect(() => {
+        // Wait for auth to finish before querying — prevents stale JWT issues
+        if (authLoading || !currentUser) {
+            setLoading(false);
+            return;
+        }
+
         fetchTasks();
 
         // Subscribe to real-time changes
@@ -41,7 +47,6 @@ export const useTasks = () => {
                 { event: '*', table: 'tasks', schema: 'public' },
                 (payload) => {
                     console.log('Real-time task change:', payload);
-                    // Re-fetch to get nested user/remarks data correctly or update locally
                     fetchTasks();
                 }
             )
@@ -50,7 +55,7 @@ export const useTasks = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [authLoading, currentUser]);
 
     const createTask = async (taskData) => {
         // First get the owner's company_id

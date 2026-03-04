@@ -70,6 +70,7 @@ const Login = () => {
 
         } catch (err) {
             setError(err.message || 'An error occurred during login');
+        } finally {
             setLoggingIn(false);
         }
     };

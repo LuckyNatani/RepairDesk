@@ -4,6 +4,14 @@ import { subscribeToPush } from '../lib/pushNotifications';
 
 const AuthContext = createContext();
 
+// Helper: wrap a promise with a timeout
+const withTimeout = (promise, ms) => {
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), ms)
+    );
+    return Promise.race([promise, timeout]);
+};
+
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
@@ -15,29 +23,33 @@ export const AuthProvider = ({ children }) => {
 
         const initializeAuth = async () => {
             try {
-                // 1. Check for a stored session in localStorage
+                // 1. Check for a stored session in localStorage (fast, local)
                 const { data: { session: cachedSession } } = await supabase.auth.getSession();
 
                 if (!cachedSession) {
-                    // No session at all — user needs to log in
                     if (mounted) setLoading(false);
                     return;
                 }
 
-                // 2. Force-refresh the session to get a valid (non-expired) JWT.
-                //    This is critical for PWA: users may reopen the app after hours/days,
-                //    and the cached JWT will be expired. refreshSession() uses the
-                //    long-lived refresh token to get a fresh access token.
-                const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
-
-                if (refreshError || !session) {
-                    // Refresh token is invalid — session is dead, user must re-login
-                    console.warn('Session refresh failed:', refreshError?.message);
-                    if (mounted) setLoading(false);
-                    return;
+                // 2. Try to refresh the session (network call) with 6s timeout
+                let session;
+                try {
+                    const { data, error: refreshError } = await withTimeout(
+                        supabase.auth.refreshSession(), 6000
+                    );
+                    if (refreshError || !data?.session) {
+                        console.warn('Session refresh failed, using cached session:', refreshError?.message);
+                        // Fall back to cached session — it might still work if JWT hasn't expired
+                        session = cachedSession;
+                    } else {
+                        session = data.session;
+                    }
+                } catch (timeoutErr) {
+                    console.warn('Session refresh timed out, using cached session');
+                    session = cachedSession;
                 }
 
-                // 3. Now we have a valid session with a fresh JWT — safe to query
+                // 3. Now we have a session — fetch the user role
                 if (mounted) setUser(session.user);
                 await fetchUserRole(session.user.id, () => mounted);
                 if (mounted) subscribeToPush(session.user.id);
@@ -50,14 +62,13 @@ export const AuthProvider = ({ children }) => {
 
         initializeAuth();
 
-        // Listen for future auth changes (login, logout, token refresh)
+        // Listen for future auth changes (login, logout)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            // Skip INITIAL_SESSION — already handled by initializeAuth above
             if (_event === 'INITIAL_SESSION') return;
             if (!mounted) return;
 
             if (_event === 'SIGNED_IN') {
-                // Fresh login
+                setLoading(true);  // Show loading while fetching role
                 setUser(session.user);
                 await fetchUserRole(session.user.id, () => mounted);
                 if (mounted) subscribeToPush(session.user.id);
@@ -67,8 +78,6 @@ export const AuthProvider = ({ children }) => {
                 setRoleError(null);
                 setLoading(false);
             }
-            // TOKEN_REFRESHED is handled automatically by the Supabase client —
-            // no need to re-fetch role since it doesn't change.
         });
 
         return () => {
@@ -80,16 +89,18 @@ export const AuthProvider = ({ children }) => {
     const fetchUserRole = async (userId, isMounted) => {
         try {
             if (isMounted && isMounted()) setRoleError(null);
-            const { data, error } = await supabase
-                .from('users')
-                .select('role, company_id')
-                .eq('id', userId)
-                .single();
+            const { data, error } = await withTimeout(
+                supabase
+                    .from('users')
+                    .select('role, company_id')
+                    .eq('id', userId)
+                    .single(),
+                5000
+            );
 
             if (error) throw error;
             if (!data) throw new Error("User record not found");
 
-            // SuperAdmins are allowed to have no company_id. Everyone else needs one.
             if (data.role !== 'superadmin' && !data.company_id) {
                 throw new Error("Missing company assignment");
             }
