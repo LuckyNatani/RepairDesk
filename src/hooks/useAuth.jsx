@@ -12,44 +12,67 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         let mounted = true;
-        let authInitialized = false;
 
-        // Safety timeout — never stay stuck on loading for more than 8 seconds
-        const safetyTimer = setTimeout(() => {
-            if (mounted && loading) {
-                console.warn('Auth init timed out — forcing loading to false');
-                setLoading(false);
+        const initializeAuth = async () => {
+            try {
+                // 1. Check for a stored session in localStorage
+                const { data: { session: cachedSession } } = await supabase.auth.getSession();
+
+                if (!cachedSession) {
+                    // No session at all — user needs to log in
+                    if (mounted) setLoading(false);
+                    return;
+                }
+
+                // 2. Force-refresh the session to get a valid (non-expired) JWT.
+                //    This is critical for PWA: users may reopen the app after hours/days,
+                //    and the cached JWT will be expired. refreshSession() uses the
+                //    long-lived refresh token to get a fresh access token.
+                const { data: { session }, error: refreshError } = await supabase.auth.refreshSession();
+
+                if (refreshError || !session) {
+                    // Refresh token is invalid — session is dead, user must re-login
+                    console.warn('Session refresh failed:', refreshError?.message);
+                    if (mounted) setLoading(false);
+                    return;
+                }
+
+                // 3. Now we have a valid session with a fresh JWT — safe to query
+                if (mounted) setUser(session.user);
+                await fetchUserRole(session.user.id, () => mounted);
+                if (mounted) subscribeToPush(session.user.id);
+
+            } catch (err) {
+                console.error('Auth init error:', err);
+                if (mounted) setLoading(false);
             }
-        }, 8000);
+        };
 
-        // Use onAuthStateChange as the SINGLE source of truth.
-        // It fires INITIAL_SESSION on setup (with the restored session if any),
-        // then TOKEN_REFRESHED, SIGNED_IN, SIGNED_OUT, etc.
+        initializeAuth();
+
+        // Listen for future auth changes (login, logout, token refresh)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            // Skip INITIAL_SESSION — already handled by initializeAuth above
+            if (_event === 'INITIAL_SESSION') return;
             if (!mounted) return;
 
-            if (session) {
+            if (_event === 'SIGNED_IN') {
+                // Fresh login
                 setUser(session.user);
-
-                // Only fetch role on initial load or sign-in events.
-                // Skip TOKEN_REFRESHED and other maintenance events to avoid redundant fetches.
-                if (!authInitialized || _event === 'SIGNED_IN') {
-                    authInitialized = true;
-                    await fetchUserRole(session.user.id, () => mounted);
-                    if (mounted) subscribeToPush(session.user.id);
-                }
-            } else {
+                await fetchUserRole(session.user.id, () => mounted);
+                if (mounted) subscribeToPush(session.user.id);
+            } else if (_event === 'SIGNED_OUT') {
                 setUser(null);
                 setRole(null);
                 setRoleError(null);
                 setLoading(false);
-                authInitialized = true;
             }
+            // TOKEN_REFRESHED is handled automatically by the Supabase client —
+            // no need to re-fetch role since it doesn't change.
         });
 
         return () => {
             mounted = false;
-            clearTimeout(safetyTimer);
             if (subscription) subscription.unsubscribe();
         };
     }, []);
