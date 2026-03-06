@@ -103,8 +103,8 @@ serve(async (req: Request) => {
         let body = ''
 
         if (event_type === 'assigned') {
-            title = `Task #${task.task_number} Assigned`
-            body = `New task at ${task.customer_address} for ${task.customer_name}`
+            title = `Assigned Task #${task.task_number}`
+            body = `A new task is assigned` // User specified exact text
         } else if (event_type === 'completed') {
             title = `Task #${task.task_number} Completed`
             body = `Task for ${task.customer_name} has been marked as finished.`
@@ -114,6 +114,8 @@ serve(async (req: Request) => {
             title,
             body,
             icon: '/icons/icon-192.png',
+            sound: 'default', // Instructs the device to use default notification sound
+            vibrate: [200, 100, 200], // Haptic feedback
             data: {
                 url: `/tasks/${task_id}`,
                 task_number: task.task_number

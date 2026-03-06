@@ -11,10 +11,16 @@ const Login = () => {
     const [loggingIn, setLoggingIn] = useState(false);
     const { login, logout, user, role, roleError, loading } = useAuth();
 
-    if (loading) return null;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="flex flex-col items-center space-y-4">
+                <div className="w-12 h-12 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin"></div>
+                <p className="text-gray-500 font-medium animate-pulse">Checking authentication...</p>
+            </div>
+        </div>
+    );
 
     if (user) {
-        // Handle gap: user exists but role is still fetching
         if (!role && !roleError) {
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -26,7 +32,6 @@ const Login = () => {
             );
         }
 
-        // Handle error: user exists but their role is missing or corrupt
         if (roleError) {
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -57,21 +62,18 @@ const Login = () => {
         setError(null);
 
         try {
-            // 1. Resolve username to email
             const { data: email, error: rpcError } = await supabase.rpc('get_auth_email', { p_username: username });
 
             if (rpcError || !email) {
                 throw new Error('Invalid username or password');
             }
 
-            // 2. Login with resolved email
             const err = await login(email, password);
             if (err) throw err;
 
         } catch (err) {
             setError(err.message || 'An error occurred during login');
-        } finally {
-            setLoggingIn(false);
+            setLoggingIn(false); // Only set to false on error. If success, onAuthStateChange handles loading
         }
     };
 

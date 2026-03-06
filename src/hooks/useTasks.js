@@ -50,12 +50,17 @@ export const useTasks = () => {
                     fetchTasks();
                 }
             )
-            .subscribe();
+            .subscribe((status, err) => {
+                if (err) {
+                    console.error("Supabase Realtime subscription error:", err);
+                }
+                console.log("Realtime subscription status:", status);
+            });
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [authLoading, currentUser]);
+    }, [authLoading, currentUser?.id]); // Deep compare user id, not object literal
 
     const createTask = async (taskData) => {
         // First get the owner's company_id
