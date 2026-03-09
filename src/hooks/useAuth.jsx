@@ -93,8 +93,18 @@ export const AuthProvider = ({ children }) => {
             }
         });
 
+        // Fallback timeout to prevent infinite loading if Supabase hangs indefinitely
+        const timeoutId = setTimeout(() => {
+            if (mounted && loading) {
+                console.warn("Auth initialization timed out. Forcing loading state to false.");
+                setLoading(false);
+                setRoleError("Authentication request timed out. Please refresh or check your connection.");
+            }
+        }, 8000);
+
         return () => {
             mounted = false;
+            clearTimeout(timeoutId);
             if (subscription) subscription.unsubscribe();
         };
     }, []); // Empty dependency array so this exact effect only runs once on mount.
