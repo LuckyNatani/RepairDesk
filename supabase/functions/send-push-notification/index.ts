@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 // @ts-ignore
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 // @ts-ignore
-import WebPush from "https://esm.sh/web-push@3.6.6"
+import WebPush from "npm:web-push@3.6.6"
 
 declare const Deno: any;
 
