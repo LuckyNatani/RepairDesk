@@ -40,8 +40,9 @@ export const useTasks = () => {
         fetchTasks();
 
         // Subscribe to real-time changes
+        const channelName = `tasks-realtime-${currentUser.id}`; // Add uniqueness
         const channel = supabase
-            .channel('tasks-realtime')
+            .channel(channelName)
             .on(
                 'postgres_changes',
                 { event: '*', table: 'tasks', schema: 'public' },
@@ -60,7 +61,9 @@ export const useTasks = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [authLoading, currentUser?.id]); // Deep compare user id, not object literal
+        // Re-run only if currentUser.id transitions from null -> value, or changes user
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authLoading, currentUser?.id]);
 
     const createTask = async (taskData) => {
         // First get the owner's company_id
