@@ -12,7 +12,9 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserRole = async (userId, isMounted) => {
         try {
-            if (isMounted && isMounted()) setRoleError(null);
+            if (!isMounted()) return;
+            setRoleError(null);
+
             const { data, error } = await supabase
                 .from('users')
                 .select('role, company_id')
@@ -26,19 +28,15 @@ export const AuthProvider = ({ children }) => {
                 throw new Error("Missing company assignment");
             }
 
-            if (isMounted && isMounted()) {
-                setRole(data.role);
-            }
+            if (isMounted()) setRole(data.role);
         } catch (err) {
             console.error('Error fetching user role:', err);
-            if (isMounted && isMounted()) {
+            if (isMounted()) {
                 setRoleError(err.message || "Failed to fetch role");
                 setRole(null);
             }
         } finally {
-            if (isMounted && isMounted()) {
-                setLoading(false);
-            }
+            if (isMounted()) setLoading(false);
         }
     };
 
@@ -47,10 +45,13 @@ export const AuthProvider = ({ children }) => {
 
         const initializeAuth = async () => {
             try {
+                // Check active sessions and sets the user
                 const { data: { session }, error } = await supabase.auth.getSession();
 
                 if (error) {
                     console.error("Error getting session:", error);
+                    if (mounted) setLoading(false);
+                    return;
                 }
 
                 if (session?.user) {
@@ -58,7 +59,12 @@ export const AuthProvider = ({ children }) => {
                     await fetchUserRole(session.user.id, () => mounted);
                     if (mounted) subscribeToPush(session.user.id);
                 } else {
-                    if (mounted) setLoading(false);
+                    // Important: Always set loading to false if no session
+                    if (mounted) {
+                        setUser(null);
+                        setRole(null);
+                        setLoading(false);
+                    }
                 }
             } catch (err) {
                 console.error('Auth init error:', err);
@@ -68,22 +74,22 @@ export const AuthProvider = ({ children }) => {
 
         initializeAuth();
 
+        // Listen for changes on auth state (in, out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (!mounted) return;
 
             if (session?.user) {
-                // Only set loading if we don't already have the user (e.g. initial login vs token refresh)
-                if (!user || user.id !== session.user.id) {
-                    setLoading(true);
-                    setUser(session.user);
-                    await fetchUserRole(session.user.id, () => mounted);
-                    if (mounted) subscribeToPush(session.user.id);
-                }
+                // If user changes, update state and fetch their new role
+                setUser(session.user);
+                setLoading(true); // Temporarily show loading while fetching new roles
+                await fetchUserRole(session.user.id, () => mounted);
+                if (mounted) subscribeToPush(session.user.id);
             } else {
+                // Logged out
                 setUser(null);
                 setRole(null);
                 setRoleError(null);
-                setLoading(false);
+                setLoading(false); // Make sure we stop loading!
             }
         });
 
@@ -91,7 +97,7 @@ export const AuthProvider = ({ children }) => {
             mounted = false;
             if (subscription) subscription.unsubscribe();
         };
-    }, [user?.id]); // Adding user?.id to dependencies prevents stale closures
+    }, []); // Empty dependency array so this exact effect only runs once on mount.
 
     const login = async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
