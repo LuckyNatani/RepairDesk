@@ -75,36 +75,33 @@ export const AuthProvider = ({ children }) => {
         initializeAuth();
 
         // Listen for changes on auth state (in, out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!mounted) return;
 
             if (session?.user) {
-                // If user changes, update state and fetch their new role
-                setUser(session.user);
-                setLoading(true); // Temporarily show loading while fetching new roles
-                await fetchUserRole(session.user.id, () => mounted);
-                if (mounted) subscribeToPush(session.user.id);
-            } else {
+                // Determine if we actually need to show a loading screen and fetch roles
+                // We only do this if it's a completely new user signing in.
+                setUser((prevUser) => {
+                    if (!prevUser || prevUser.id !== session.user.id) {
+                        // User changed or logged in
+                        setLoading(true);
+                        fetchUserRole(session.user.id, () => mounted).then(() => {
+                            if (mounted) subscribeToPush(session.user.id);
+                        });
+                    }
+                    return session.user;
+                });
+            } else if (event === 'SIGNED_OUT') {
                 // Logged out
                 setUser(null);
                 setRole(null);
                 setRoleError(null);
-                setLoading(false); // Make sure we stop loading!
+                setLoading(false);
             }
         });
 
-        // Fallback timeout to prevent infinite loading if Supabase hangs indefinitely
-        const timeoutId = setTimeout(() => {
-            if (mounted && loading) {
-                console.warn("Auth initialization timed out. Forcing loading state to false.");
-                setLoading(false);
-                setRoleError("Authentication request timed out. Please refresh or check your connection.");
-            }
-        }, 8000);
-
         return () => {
             mounted = false;
-            clearTimeout(timeoutId);
             if (subscription) subscription.unsubscribe();
         };
     }, []); // Empty dependency array so this exact effect only runs once on mount.
