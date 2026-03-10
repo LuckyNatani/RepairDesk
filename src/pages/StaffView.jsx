@@ -9,7 +9,8 @@ const StaffView = () => {
     const { user } = useAuth();
     const { tasks, loading, updateTaskStatus, addRemark } = useTasks();
     const [filter, setFilter] = useState('my-tasks');
-    const [selectedTask, setSelectedTask] = useState(null);
+    const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const selectedTask = tasks.find(t => t.id === selectedTaskId);
 
     const filteredTasks = tasks.filter(task => {
         if (filter === 'my-tasks') return task.assigned_to === user.id && task.status !== 'completed';
@@ -25,9 +26,6 @@ const StaffView = () => {
     const handleUpdateStatus = async (taskId, status, assignedTo) => {
         try {
             await updateTaskStatus(taskId, status, assignedTo);
-            if (selectedTask?.id === taskId) {
-                setSelectedTask(prev => ({ ...prev, status, assigned_to: assignedTo }));
-            }
         } catch (err) {
             alert('Failed to update task: ' + err.message);
         }
@@ -124,7 +122,7 @@ const StaffView = () => {
                                 <div key={task.id} className="transform transition duration-300 hover:-translate-y-1 hover:shadow-xl rounded-2xl">
                                     <TaskCard
                                         task={task}
-                                        onClick={() => setSelectedTask(task)}
+                                        onClick={() => setSelectedTaskId(task.id)}
                                     />
                                 </div>
                             ))
@@ -158,7 +156,7 @@ const StaffView = () => {
                         currentUserId={user.id}
                         onUpdateStatus={handleUpdateStatus}
                         onAddRemark={handleAddRemark}
-                        onClose={() => setSelectedTask(null)}
+                        onClose={() => setSelectedTaskId(null)}
                     />
                 )}
             </main>

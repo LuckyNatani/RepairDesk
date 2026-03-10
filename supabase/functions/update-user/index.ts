@@ -43,9 +43,8 @@ Deno.serve(async (req) => {
 
     const isSuperAdmin = callerProfile.role === 'superadmin';
     const isOwner = callerProfile.role === 'owner';
-    const isAdmin = callerProfile.role === 'admin';
 
-    if (!isSuperAdmin && !isOwner && !isAdmin) {
+    if (!isSuperAdmin && !isOwner) {
       throw new Error('Insufficient permissions to perform user updates');
     }
 

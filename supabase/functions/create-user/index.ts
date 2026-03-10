@@ -57,14 +57,13 @@ Deno.serve(async (req) => {
         // Permission check: who can create what
         const isSuperAdmin = callerProfile.role === "superadmin";
         const isOwner = callerProfile.role === "owner";
-        const isAdmin = callerProfile.role === "admin";
         const targetRole = role || "staff";
 
         if (targetRole === "owner" && !isSuperAdmin) {
             throw new Error("Only SuperAdmins can create company owners");
         }
-        if (targetRole === "staff" && !isOwner && !isSuperAdmin && !isAdmin) {
-            throw new Error("Only Owners, Admins and SuperAdmins can create staff");
+        if (targetRole === "staff" && !isOwner && !isSuperAdmin) {
+            throw new Error("Only Owners and SuperAdmins can create staff");
         }
         if (targetRole === "superadmin") {
             throw new Error("SuperAdmin accounts cannot be created via this function");
@@ -77,7 +76,7 @@ Deno.serve(async (req) => {
                 throw new Error("SuperAdmin must specify companyId when creating owners");
             }
             targetCompanyId = companyId;
-        } else if (isOwner || isAdmin) {
+        } else if (isOwner) {
             targetCompanyId = callerProfile.company_id;
         }
 

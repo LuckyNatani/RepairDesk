@@ -17,15 +17,24 @@ const TaskCard = ({ task, onClick, isOwner = false, staffMembers = [], onAssign 
         if (onAssign) onAssign(task.id, e.target.value || null);
     };
 
+    const getStatusBorder = (status) => {
+        switch (status) {
+            case 'unassigned': return 'border-l-slate-400';
+            case 'in_progress': return 'border-l-amber-400';
+            case 'completed': return 'border-l-emerald-500';
+            default: return 'border-l-slate-200';
+        }
+    };
+
     return (
         <div
             onClick={() => onClick(task)}
-            className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col gap-2.5 h-auto relative overflow-hidden"
+            className={`bg-white p-3.5 rounded-xl border border-slate-200 border-l-4 ${getStatusBorder(task.status)} shadow-[0_1px_3px_0_rgba(0,0,0,0.02)] hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col gap-2.5 h-auto relative overflow-hidden`}
         >
             {/* Top Row: Status, Task Number & Time */}
             <div className="flex justify-between items-center mb-0.5">
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 group-hover:text-indigo-500 transition-colors bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                    <span className="text-[10px] font-bold text-slate-400 group-hover:text-indigo-500 transition-colors px-1.5 py-0.5">
                         #{task.task_number}
                     </span>
                     <StatusBadge status={task.status} />

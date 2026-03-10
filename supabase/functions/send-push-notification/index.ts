@@ -65,11 +65,14 @@ serve(async (req: Request) => {
         }
 
         if (!recipient_id) {
+            console.log('No recipient_id found in payload');
             return new Response(JSON.stringify({ message: "No recipient for this event." }), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,
             });
         }
+
+        console.log('Recipient ID identified:', recipient_id);
 
         // 1. Fetch recipient's push subscription
         const { data: user, error: userError } = await supabaseClient
@@ -78,9 +81,20 @@ serve(async (req: Request) => {
             .eq('id', recipient_id)
             .single()
 
-        if (userError || !user?.push_subscription) {
-            throw new Error('User not found or no push subscription')
+        if (userError) {
+            console.error('Error fetching user:', userError.message);
+            throw new Error('User not found');
         }
+
+        if (!user?.push_subscription) {
+            console.log('User has no push subscription registered');
+            return new Response(JSON.stringify({ message: "User has no push subscription" }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+            });
+        }
+
+        console.log('Push subscription found for user:', user.name);
 
         // 2. Fetch task details for the message
         const { data: task, error: taskError } = await supabaseClient
@@ -92,8 +106,13 @@ serve(async (req: Request) => {
         if (taskError) throw taskError
 
         // 3. Configure WebPush
+        let vapidSubject = Deno.env.get('VAPID_SUBJECT') ?? 'admin@taskpod.app'
+        if (!vapidSubject.startsWith('mailto:') && !vapidSubject.startsWith('http')) {
+            vapidSubject = `mailto:${vapidSubject}`
+        }
+
         WebPush.setVapidDetails(
-            Deno.env.get('VAPID_SUBJECT') ?? 'mailto:admin@repairdesk.com',
+            vapidSubject,
             Deno.env.get('VAPID_PUBLIC_KEY') ?? '',
             Deno.env.get('VAPID_PRIVATE_KEY') ?? ''
         )

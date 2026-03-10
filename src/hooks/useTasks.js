@@ -39,10 +39,10 @@ export const useTasks = () => {
 
         fetchTasks();
 
-        // Subscribe to real-time changes
-        const channelName = `tasks-realtime-${currentUser.id}`; // Add uniqueness
-        const channel = supabase
-            .channel(channelName)
+        // Subscribe to real-time changes for tasks
+        const tasksChannelName = `tasks-realtime-${currentUser.id}`;
+        const tasksChannel = supabase
+            .channel(tasksChannelName)
             .on(
                 'postgres_changes',
                 { event: '*', table: 'tasks', schema: 'public' },
@@ -51,15 +51,25 @@ export const useTasks = () => {
                     fetchTasks();
                 }
             )
-            .subscribe((status, err) => {
-                if (err) {
-                    console.error("Supabase Realtime subscription error:", err);
+            .subscribe();
+
+        // Subscribe to real-time changes for remarks
+        const remarksChannelName = `remarks-realtime-${currentUser.id}`;
+        const remarksChannel = supabase
+            .channel(remarksChannelName)
+            .on(
+                'postgres_changes',
+                { event: '*', table: 'remarks', schema: 'public' },
+                (payload) => {
+                    console.log('Real-time remark change:', payload);
+                    fetchTasks();
                 }
-                console.log("Realtime subscription status:", status);
-            });
+            )
+            .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(tasksChannel);
+            supabase.removeChannel(remarksChannel);
         };
         // Re-run only if currentUser.id transitions from null -> value, or changes user
         // eslint-disable-next-line react-hooks/exhaustive-deps

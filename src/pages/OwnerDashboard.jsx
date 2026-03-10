@@ -12,7 +12,8 @@ const OwnerDashboard = () => {
     const { staff } = useStaff();
     const { user, role } = useAuth();
     const [showNewTaskForm, setShowNewTaskForm] = useState(false);
-    const [selectedTask, setSelectedTask] = useState(null);
+    const [selectedTaskId, setSelectedTaskId] = useState(null);
+    const selectedTask = tasks.find(t => t.id === selectedTaskId);
 
     const handleCreateTask = async (taskData) => {
         try {
@@ -26,7 +27,6 @@ const OwnerDashboard = () => {
     const handleUpdateStatus = async (taskId, status, assignedTo) => {
         try {
             await updateTaskStatus(taskId, status, assignedTo);
-            if (selectedTask?.id === taskId) setSelectedTask(null);
         } catch (err) {
             alert('Failed to update task: ' + err.message);
         }
@@ -80,8 +80,8 @@ const OwnerDashboard = () => {
                 ) : (
                     <KanbanBoard
                         tasks={tasks}
-                        onTaskClick={setSelectedTask}
-                        isOwner={role === 'owner' || role === 'admin'}
+                        onTaskClick={(task) => setSelectedTaskId(task.id)}
+                        isOwner={role === 'owner'}
                         staffMembers={staff}
                         onAssign={(taskId, assignedTo) => {
                             const newStatus = assignedTo ? 'in_progress' : 'unassigned';
@@ -107,22 +107,21 @@ const OwnerDashboard = () => {
                         onUpdateStatus={handleUpdateStatus}
                         onAddRemark={handleAddRemark}
                         onEdit={
-                            (role === 'owner' || role === 'admin')
+                            (role === 'owner')
                                 ? async (id, updates) => {
-                                    const updatedTask = await editTask(id, updates);
-                                    setSelectedTask(updatedTask);
+                                    await editTask(id, updates);
                                 }
                                 : undefined
                         }
                         onDelete={
-                            (role === 'owner' || role === 'admin')
+                            (role === 'owner')
                                 ? async (id) => {
                                     await deleteTask(id);
-                                    setSelectedTask(null);
+                                    setSelectedTaskId(null);
                                 }
                                 : undefined
                         }
-                        onClose={() => setSelectedTask(null)}
+                        onClose={() => setSelectedTaskId(null)}
                     />
                 )}
             </main>
