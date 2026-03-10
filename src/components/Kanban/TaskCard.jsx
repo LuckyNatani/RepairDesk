@@ -1,8 +1,12 @@
 import React from 'react';
 import StatusBadge from '../shared/StatusBadge';
-import { Clock, User, MapPin } from 'lucide-react';
+import { Clock, User, MapPin, MessageSquare } from 'lucide-react';
 
 const TaskCard = ({ task, onClick, isOwner = false, staffMembers = [], onAssign }) => {
+    const latestRemark = task.remarks && task.remarks.length > 0
+        ? [...task.remarks].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0]
+        : null;
+
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
         const minutes = Math.floor((new Date() - new Date(dateString)) / 60000);
@@ -58,6 +62,14 @@ const TaskCard = ({ task, onClick, isOwner = false, staffMembers = [], onAssign 
                     <p className="mt-1 text-[11.5px] text-slate-600 bg-slate-50 border border-slate-100/50 p-2 rounded-lg leading-relaxed line-clamp-2">
                         {task.description}
                     </p>
+                )}
+                {latestRemark && (
+                    <div className="mt-1 flex items-start gap-2 bg-indigo-50/50 border border-indigo-100/50 p-2 rounded-lg">
+                        <MessageSquare size={12} className="shrink-0 mt-0.5 text-indigo-400" />
+                        <p className="text-[11px] italic text-indigo-700 leading-relaxed line-clamp-2">
+                            {latestRemark.remark_text}
+                        </p>
+                    </div>
                 )}
             </div>
 
