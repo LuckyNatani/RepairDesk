@@ -43,19 +43,47 @@ const TaskCard = ({ task, onClick, isOwner = false, staffMembers = [], onAssign 
                     </span>
                     <StatusBadge status={task.status} />
                 </div>
+                {task.priority && task.priority !== 'medium' && (
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                        task.priority === 'critical' ? 'bg-red-100 text-red-700' : 
+                        task.priority === 'high' ? 'bg-orange-100 text-orange-700' : 
+                        'bg-slate-100 text-slate-600'
+                    }`}>
+                        {task.priority}
+                    </span>
+                )}
+                {task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-red-100 text-red-700">
+                        Overdue
+                    </span>
+                )}
             </div>
 
             {/* Core Details */}
             <div className="flex flex-col gap-1.5">
-                <h3 className="text-sm font-bold text-slate-900 leading-tight truncate">
-                    {task.customer_name}
-                </h3>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900 leading-tight truncate">
+                        {task.customer_name}
+                    </h3>
+                    {task.category && (
+                        <span className="text-[9px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded capitalize">
+                            {task.category}
+                        </span>
+                    )}
+                </div>
                 {task.customer_address && (
                     <div className="flex items-start gap-1">
                         <MapPin size={12} className="shrink-0 mt-0.5 text-slate-400" />
-                        <p className="text-[11px] font-medium text-slate-500 leading-snug truncate">
+                        <a 
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(task.customer_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 leading-snug truncate hover:underline"
+                            title="Open in Maps"
+                        >
                             {task.customer_address}
-                        </p>
+                        </a>
                     </div>
                 )}
                 {task.description && (

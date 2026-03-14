@@ -9,13 +9,27 @@ const StaffView = () => {
     const { user } = useAuth();
     const { tasks, loading, updateTaskStatus, addRemark } = useTasks();
     const [filter, setFilter] = useState('my-tasks');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const selectedTask = tasks.find(t => t.id === selectedTaskId);
 
     const filteredTasks = tasks.filter(task => {
-        if (filter === 'my-tasks') return task.assigned_to === user.id && task.status !== 'completed';
-        if (filter === 'completed') return task.assigned_to === user.id && task.status === 'completed';
-        return true; // for "all" tasks if needed
+        // First apply tab filter
+        let matchesTab = true;
+        if (filter === 'my-tasks') matchesTab = task.assigned_to === user.id && task.status !== 'completed';
+        if (filter === 'completed') matchesTab = task.assigned_to === user.id && task.status === 'completed';
+        
+        // Then apply search query
+        if (!matchesTab) return false;
+        if (!searchQuery) return true;
+        
+        const lowerQuery = searchQuery.toLowerCase();
+        return (
+            task.customer_name?.toLowerCase().includes(lowerQuery) ||
+            task.customer_phone?.toLowerCase().includes(lowerQuery) ||
+            task.task_number?.toString().includes(lowerQuery) ||
+            task.description?.toLowerCase().includes(lowerQuery)
+        );
     });
 
     const activeCount = tasks.filter(task => task.assigned_to === user.id && task.status !== 'completed').length;
@@ -107,6 +121,18 @@ const StaffView = () => {
                         <ListTodo size={16} className={filter === 'all' ? 'text-gray-500' : 'text-gray-400'} />
                         All Tasks
                     </button>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative mb-8 w-full">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search tasks..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200/80 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm shadow-gray-100 placeholder:text-gray-400 transition-all"
+                    />
                 </div>
 
                 {/* Task Grid */}

@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Logo from '../shared/Logo';
 import { LayoutDashboard, BarChart3, Shield, CheckSquare, LogOut, User } from 'lucide-react';
+import NotificationCenter from '../Notifications/NotificationCenter';
 
 const Sidebar = () => {
     const { role, user, logout } = useAuth();
@@ -31,8 +32,9 @@ const Sidebar = () => {
         <>
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex flex-col w-64 fixed inset-y-0 left-0 bg-white border-r border-slate-100/60 z-50">
-                <div className="p-6 flex items-center justify-center">
+                <div className="p-6 flex items-center justify-between">
                     <Logo />
+                    <NotificationCenter />
                 </div>
                 <nav className="flex-1 px-4 space-y-1 overflow-y-auto mt-4">
                     {navItems.map((item) => {
@@ -71,6 +73,9 @@ const Sidebar = () => {
 
             {/* Mobile Bottom Tab Bar (Native App Feel) */}
             <nav className="md:hidden glass-panel fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around pb-safe pt-2 px-2 border-t border-slate-200/50 rounded-t-3xl shadow-[0_-8px_30px_-15px_rgba(0,0,0,0.1)]">
+                <div className="flex items-center justify-center w-full py-2">
+                    <NotificationCenter />
+                </div>
                 {navItems.map((item) => {
                     const active = location.pathname.startsWith(item.path);
                     return (

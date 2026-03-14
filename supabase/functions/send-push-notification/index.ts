@@ -87,14 +87,10 @@ serve(async (req: Request) => {
         }
 
         if (!user?.push_subscription) {
-            console.log('User has no push subscription registered');
-            return new Response(JSON.stringify({ message: "User has no push subscription" }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200,
-            });
+            console.log('User has no push subscription registered, skipping external push but continuing to in-app notification');
+        } else {
+            console.log('Push subscription found for user:', user.name);
         }
-
-        console.log('Push subscription found for user:', user.name);
 
         // 2. Fetch task details for the message
         const { data: task, error: taskError } = await supabaseClient
@@ -141,8 +137,21 @@ serve(async (req: Request) => {
             }
         })
 
-        // 5. Send Notification
-        await WebPush.sendNotification(user.push_subscription, pushPayload)
+        // 5. Send Notification & Save In-App Notification
+        const notificationPromises = []
+        if (user.push_subscription) {
+            notificationPromises.push(WebPush.sendNotification(user.push_subscription, pushPayload))
+        }
+
+        notificationPromises.push(
+            supabaseClient.from('notifications').insert([{
+                user_id: recipient_id,
+                task_id,
+                message: body
+            }])
+        )
+
+        await Promise.allSettled(notificationPromises)
 
         // 6. Log success
         await supabaseClient.from('push_logs').insert([{

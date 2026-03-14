@@ -9,7 +9,10 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
         customer_phone: '',
         customer_address: '',
         description: '',
-        assigned_to: ''
+        assigned_to: '',
+        priority: 'medium',
+        category: 'repair',
+        due_date: ''
     });
     const [loading, setLoading] = useState(false);
 
@@ -26,13 +29,16 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
         const assigned_at = formData.assigned_to ? new Date().toISOString() : null;
 
         try {
-            await onSubmit({
+            const finalData = {
                 ...formData,
                 status,
                 assigned_at,
                 created_by: user.id,
                 assigned_to: formData.assigned_to || null
-            });
+            };
+            if (!finalData.due_date) delete finalData.due_date; // Remove empty string
+
+            await onSubmit(finalData);
         } finally {
             setLoading(false);
         }
@@ -106,6 +112,52 @@ const NewTaskForm = ({ staffMembers, onSubmit, onCancel }) => {
                                             ))}
                                         </select>
                                     </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center">
+                                            Priority
+                                        </label>
+                                        <select
+                                            name="priority"
+                                            value={formData.priority}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none shadow-sm cursor-pointer"
+                                        >
+                                            <option value="low">Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                            <option value="critical">Critical</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center">
+                                            Category
+                                        </label>
+                                        <select
+                                            name="category"
+                                            value={formData.category}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none shadow-sm cursor-pointer"
+                                        >
+                                            <option value="repair">Repair</option>
+                                            <option value="installation">Installation</option>
+                                            <option value="maintenance">Maintenance</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="mt-2">
+                                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2 flex items-center">
+                                        Due Date (SLA)
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        name="due_date"
+                                        value={formData.due_date}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none shadow-sm placeholder:text-slate-400"
+                                    />
                                 </div>
                             </div>
 

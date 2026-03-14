@@ -5,6 +5,13 @@ const RemarkForm = ({ onSubmit, placeholder = "Add a remark..." }) => {
     const [remark, setRemark] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    const quickRemarks = [
+        "Customer not home",
+        "Need replacement parts",
+        "Delayed due to traffic",
+        "Issue resolved"
+    ];
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!remark.trim()) return;
@@ -19,7 +26,19 @@ const RemarkForm = ({ onSubmit, placeholder = "Add a remark..." }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-4">
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+            <div className="flex flex-wrap gap-2">
+                {quickRemarks.map((qr, idx) => (
+                    <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setRemark(prev => prev ? `${prev} ${qr}` : qr)}
+                        className="px-2.5 py-1 text-[10px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 rounded-full transition-colors whitespace-nowrap"
+                    >
+                        {qr}
+                    </button>
+                ))}
+            </div>
             <div className="relative">
                 <div className="absolute top-3 left-3 text-slate-400">
                     <MessageSquare size={16} />

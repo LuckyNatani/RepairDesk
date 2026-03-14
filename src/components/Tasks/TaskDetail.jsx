@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, User, Phone, MapPin, ClipboardList, CheckCircle2, History, MessageSquare, Trash2, Pencil, Save } from 'lucide-react';
+import { X, User, Phone, MapPin, ClipboardList, CheckCircle2, History, MessageSquare, Trash2, Pencil, Save, BookOpen } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 import RemarkForm from './RemarkForm';
+import CustomerHistoryModal from '../Customers/CustomerHistoryModal';
 
 const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatus, onAddRemark, onEdit, onDelete, onClose }) => {
     const [updating, setUpdating] = useState(false);
@@ -10,8 +11,13 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
         customer_name: task.customer_name || '',
         customer_phone: task.customer_phone || '',
         customer_address: task.customer_address || '',
-        description: task.description || ''
+        description: task.description || '',
+        priority: task.priority || 'medium',
+        category: task.category || 'repair',
+        due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0,16) : ''
     });
+
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
     const formatDate = (dateString) => {
         if (!dateString) return 'Not available';
@@ -27,7 +33,15 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
     const isAssignedToMe = task.assigned_to === currentUserId;
     const isOwner = userRole === 'owner';
 
-    const handleStatusChange = async (e) => {
+    const handleStartWork = async () => {
+        try {
+            await onUpdate(task.id, { started_work_at: new Date().toISOString() });
+        } catch (error) {
+            console.error('Failed to start work:', error);
+        }
+    };
+
+    const handleAssignStaff = async (e) => {
         const newStaffId = e.target.value;
         setUpdating(true);
         try {
@@ -38,10 +52,10 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
         }
     };
 
-    const handleMarkComplete = async () => {
+    const handleStatusChange = async (newStatus) => {
         setUpdating(true);
         try {
-            await onUpdateStatus(task.id, 'completed');
+            await onUpdateStatus(task.id, newStatus);
         } finally {
             setUpdating(false);
         }
@@ -69,12 +83,29 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
             <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200 overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
                 <div className="flex items-center justify-between p-5 md:px-6 border-b border-slate-100 bg-white sticky top-0 z-10 transition-colors">
-                    <div className="flex items-center space-x-3">
-                        <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                            Ticket <span className="text-indigo-600">#{task.task_number}</span>
-                        </h2>
-                        {!isEditing && <StatusBadge status={task.status} />}
-                        {isEditing && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Editing Mode</span>}
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center space-x-3">
+                            <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                                Ticket <span className="text-indigo-600">#{task.task_number}</span>
+                            </h2>
+                            {!isEditing && <StatusBadge status={task.status} />}
+                            {isEditing && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Editing Mode</span>}
+
+                            {!isEditing && task.priority && task.priority !== 'medium' && (
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
+                                    task.priority === 'critical' ? 'bg-red-100 text-red-700' : 
+                                    task.priority === 'high' ? 'bg-orange-100 text-orange-700' : 
+                                    'bg-slate-100 text-slate-600'
+                                }`}>
+                                    {task.priority}
+                                </span>
+                            )}
+                            {!isEditing && task.category && (
+                                <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded capitalize">
+                                    {task.category}
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center">
                         {isOwner && onEdit && !isEditing && task.status !== 'completed' && (
@@ -137,7 +168,18 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                     </div>
                                 ) : (
                                     <>
-                                        <p className="text-[15px] font-bold text-slate-900">{task.customer_name}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-[15px] font-bold text-slate-900">{task.customer_name}</p>
+                                            {isOwner && (
+                                                <button
+                                                    onClick={() => setIsHistoryModalOpen(true)}
+                                                    className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors tooltip-trigger"
+                                                    title="View Customer History"
+                                                >
+                                                    <BookOpen size={14} />
+                                                </button>
+                                            )}
+                                        </div>
                                         <a href={`tel:${task.customer_phone}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center mt-1.5 w-fit bg-indigo-50 px-2 py-0.5 rounded-md transition-colors">
                                             <Phone size={12} className="mr-1.5" />
                                             {task.customer_phone}
@@ -158,7 +200,15 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                             rows="3"
                                         />
                                     ) : (
-                                        <p className="text-sm font-medium text-slate-700 leading-relaxed">{task.customer_address}</p>
+                                        <a 
+                                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(task.customer_address || '')}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-sm font-medium text-indigo-600 hover:text-indigo-800 leading-relaxed hover:underline"
+                                            title="Open in Maps"
+                                        >
+                                            {task.customer_address}
+                                        </a>
                                     )}
                                 </div>
                             </div>
@@ -173,13 +223,55 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                         </h3>
                         <div className={`bg-white rounded-xl shadow-sm ${isEditing ? '' : 'p-5 border border-slate-200'}`}>
                             {isEditing ? (
-                                <textarea
-                                    name="description"
-                                    value={editForm.description}
-                                    onChange={handleEditChange}
-                                    className="w-full text-sm font-medium text-slate-700 border border-indigo-300 rounded-xl p-5 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner resize-y min-h-[120px]"
-                                    placeholder="Task Description"
-                                />
+                                <div className="space-y-4">
+                                    <div className="flex gap-4 mb-4">
+                                        <div className="flex-1">
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 items-center">Priority</label>
+                                            <select
+                                                name="priority"
+                                                value={editForm.priority}
+                                                onChange={handleEditChange}
+                                                className="w-full text-sm font-medium text-slate-700 border border-indigo-200 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                                <option value="low">Low</option>
+                                                <option value="medium">Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="critical">Critical</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 items-center">Category</label>
+                                            <select
+                                                name="category"
+                                                value={editForm.category}
+                                                onChange={handleEditChange}
+                                                className="w-full text-sm font-medium text-slate-700 border border-indigo-200 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                            >
+                                                <option value="repair">Repair</option>
+                                                <option value="installation">Installation</option>
+                                                <option value="maintenance">Maintenance</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 items-center">Due Date / SLA</label>
+                                        <input
+                                            type="datetime-local"
+                                            name="due_date"
+                                            value={editForm.due_date}
+                                            onChange={handleEditChange}
+                                            className="w-full text-sm font-medium text-slate-700 border border-indigo-200 rounded p-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                    <textarea
+                                        name="description"
+                                        value={editForm.description}
+                                        onChange={handleEditChange}
+                                        className="w-full text-sm font-medium text-slate-700 border border-indigo-300 rounded-xl p-5 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner resize-y min-h-[120px]"
+                                        placeholder="Task Description"
+                                    />
+                                </div>
                             ) : (
                                 <p className="text-sm font-medium text-slate-700 leading-relaxed whitespace-pre-wrap">
                                     {task.description}
@@ -201,10 +293,24 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                         <span className="text-slate-500 font-semibold">Created</span>
                                         <span className="text-slate-900 font-semibold">{formatDate(task.created_at)}</span>
                                     </div>
+                                    {task.due_date && (
+                                        <div className="flex items-center text-xs justify-between pb-3 border-b border-slate-100/80">
+                                            <span className="text-slate-500 font-semibold">Due By</span>
+                                            <span className={`font-semibold ${new Date(task.due_date) < new Date() && task.status !== 'completed' ? 'text-red-600 font-bold' : 'text-slate-900'}`}>
+                                                {formatDate(task.due_date)}
+                                            </span>
+                                        </div>
+                                    )}
                                     {task.assigned_at && (
                                         <div className="flex items-center text-xs justify-between pb-3 border-b border-slate-100/80">
                                             <span className="text-slate-500 font-semibold">Assigned</span>
                                             <span className="text-slate-900 font-semibold">{formatDate(task.assigned_at)}</span>
+                                        </div>
+                                    )}
+                                    {task.started_work_at && (
+                                        <div className="flex items-center text-xs justify-between pb-3 border-b border-slate-100/80">
+                                            <span className="text-slate-500 font-semibold">Started</span>
+                                            <span className="text-slate-900 font-semibold">{formatDate(task.started_work_at)}</span>
                                         </div>
                                     )}
                                     {task.completed_at && (
@@ -226,7 +332,7 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                         <select
                                             disabled={updating || task.status === 'completed'}
                                             value={task.assigned_to || ''}
-                                            onChange={handleStatusChange}
+                                            onChange={handleAssignStaff}
                                             className="w-full pl-4 pr-10 py-3.5 bg-white border border-slate-200 rounded-xl font-semibold text-sm text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:opacity-60 transition-all disabled:bg-slate-50 cursor-pointer"
                                         >
                                             <option value="">Unassigned</option>
@@ -302,7 +408,10 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                                         customer_name: task.customer_name || '',
                                         customer_phone: task.customer_phone || '',
                                         customer_address: task.customer_address || '',
-                                        description: task.description || ''
+                                        description: task.description || '',
+                                        priority: task.priority || 'medium',
+                                        category: task.category || 'repair',
+                                        due_date: task.due_date ? new Date(task.due_date).toISOString().slice(0,16) : ''
                                     });
                                     setIsEditing(false);
                                 }}
@@ -341,6 +450,13 @@ const TaskDetail = ({ task, userRole, currentUserId, staffMembers, onUpdateStatu
                     )}
                 </div>
             </div>
+            
+            <CustomerHistoryModal
+                isOpen={isHistoryModalOpen}
+                onClose={() => setIsHistoryModalOpen(false)}
+                customerPhone={task.customer_phone}
+                customerName={task.customer_name}
+            />
         </div>
     );
 };

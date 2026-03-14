@@ -45,23 +45,44 @@ const AnalyticsDashboard = () => {
         const unassigned = tasks.filter(t => t.status === 'unassigned');
 
         let avgCompletionHrs = 0;
+        let slaBreachCount = 0;
+
         if (completed.length > 0) {
             const times = completed
-                .filter(t => t.assigned_at && t.completed_at)
-                .map(t => (new Date(t.completed_at) - new Date(t.assigned_at)) / (1000 * 60 * 60));
+                .filter(t => t.started_work_at && t.completed_at)
+                .map(t => (new Date(t.completed_at) - new Date(t.started_work_at)) / (1000 * 60 * 60));
 
             if (times.length > 0) {
                 avgCompletionHrs = times.reduce((a, b) => a + b, 0) / times.length;
             }
         }
 
+        // Calculate overarching SLA breaches (due_date in past, not completed or completed after due_date)
+        slaBreachCount = tasks.filter(t => {
+            if (!t.due_date) return false;
+            const due = new Date(t.due_date);
+            if (t.status === 'completed' && t.completed_at) {
+                return new Date(t.completed_at) > due;
+            }
+            return new Date() > due;
+        }).length;
+
         const staffImpact = staff.map(s => {
             const staffTasks = tasks.filter(t => t.assigned_to === s.id);
             const done = staffTasks.filter(t => t.status === 'completed').length;
+            
+            // Calculate avg active time for this staff member
+            const staffTimes = staffTasks
+                .filter(t => t.status === 'completed' && t.started_work_at && t.completed_at)
+                .map(t => (new Date(t.completed_at) - new Date(t.started_work_at)) / (1000 * 60 * 60));
+            
+            const avgTime = staffTimes.length > 0 ? (staffTimes.reduce((a, b) => a + b, 0) / staffTimes.length).toFixed(1) : 0;
+
             return {
                 name: s.name,
                 total: staffTasks.length,
-                completion: staffTasks.length > 0 ? Math.round((done / staffTasks.length) * 100) : 0
+                completion: staffTasks.length > 0 ? Math.round((done / staffTasks.length) * 100) : 0,
+                avgTime
             };
         }).sort((a, b) => b.total - a.total);
 
@@ -71,6 +92,7 @@ const AnalyticsDashboard = () => {
             progressCount: inProgress.length,
             pendingCount: unassigned.length,
             avgTime: avgCompletionHrs.toFixed(1),
+            slaBreachCount,
             staffImpact
         };
     }, [tasks, staff]);
@@ -154,7 +176,7 @@ const AnalyticsDashboard = () => {
                                         <div key={idx} className="space-y-2">
                                             <div className="flex justify-between items-center text-xs font-semibold tracking-wide">
                                                 <span className="text-slate-800">{s.name}</span>
-                                                <span className="text-slate-500">{s.completion}% Success • {s.total} Jobs</span>
+                                                <span className="text-slate-500">{s.completion}% Success • {s.total} Jobs • {s.avgTime}h avg</span>
                                             </div>
                                             <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                                                 <div
@@ -195,7 +217,13 @@ const AnalyticsDashboard = () => {
                                         <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Attention Required</h3>
                                         <div className="flex items-baseline gap-2">
                                             <p className="text-3xl font-bold text-slate-900 tracking-tight">{stats.pendingCount}</p>
+                                            <p className="text-xs font-semibold text-slate-500">Unassigned</p>
                                         </div>
+                                        {stats.slaBreachCount > 0 && (
+                                            <p className="mt-2 text-xs font-bold text-red-600 bg-red-50 p-1.5 rounded-md text-center">
+                                                {stats.slaBreachCount} SLA Breaches!
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
