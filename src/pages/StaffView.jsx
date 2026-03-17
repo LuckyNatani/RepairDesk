@@ -3,7 +3,7 @@ import TaskCard from '../components/Kanban/TaskCard';
 import TaskDetail from '../components/Tasks/TaskDetail';
 import { useTasks } from '../hooks/useTasks';
 import { useAuth } from '../hooks/useAuth';
-import { Search, Loader2, ListTodo, MapPin, CheckCircle2, CircleDashed } from 'lucide-react';
+import { Search, Loader2, ListTodo, CheckCircle2, CircleDashed, Filter } from 'lucide-react';
 
 const StaffView = () => {
     const { user } = useAuth();
@@ -14,12 +14,10 @@ const StaffView = () => {
     const selectedTask = tasks.find(t => t.id === selectedTaskId);
 
     const filteredTasks = tasks.filter(task => {
-        // First apply tab filter
         let matchesTab = true;
         if (filter === 'my-tasks') matchesTab = task.assigned_to === user.id && task.status !== 'completed';
         if (filter === 'completed') matchesTab = task.assigned_to === user.id && task.status === 'completed';
         
-        // Then apply search query
         if (!matchesTab) return false;
         if (!searchQuery) return true;
         
@@ -41,7 +39,7 @@ const StaffView = () => {
         try {
             await updateTaskStatus(taskId, status, assignedTo);
         } catch (err) {
-            alert('Failed to update task: ' + err.message);
+            alert('Failed to update: ' + err.message);
         }
     };
 
@@ -54,98 +52,81 @@ const StaffView = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAFAFC]">
-            {/* Elegant Header with decorative gradient */}
-            <div className="relative overflow-hidden bg-white border-b border-gray-100">
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-400"></div>
-
-                {/* Decorative background blobs */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-                <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-
-                <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                        <div>
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100/50 text-indigo-700 text-xs font-semibold tracking-wide uppercase mb-4 shadow-sm">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                                </span>
-                                Field Operations
-                            </div>
-                            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-                                Hello, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Staff'}
-                            </h1>
-                            <p className="mt-2 text-gray-500 font-medium max-w-lg">
-                                You have <strong className="text-gray-900">{activeCount} active tasks</strong> in your queue today.
-                            </p>
-                        </div>
-
-                        {/* Mini Stats Card */}
-                        <div className="hidden sm:flex shrink-0 items-center justify-center p-4 bg-white rounded-2xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] gap-6">
-                            <div className="text-center">
-                                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">Completion</p>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${statsProgress}%` }}></div>
-                                    </div>
-                                    <span className="text-sm font-bold text-gray-900">{statsProgress}%</span>
-                                </div>
-                            </div>
-                        </div>
+        <div className="flex flex-col min-h-full">
+            {/* Native Header */}
+            <div className="px-6 pt-8 pb-6 border-b border-slate-100 bg-white sticky top-0 z-20">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100/50">
+                        <div className="w-2 h-2 rounded-full bg-primary-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest leading-none">Field Ops</span>
                     </div>
+                </div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-1">
+                    Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Technician'}
+                </h1>
+                <p className="text-sm font-medium text-slate-400">
+                    You have <span className="text-slate-900">{activeCount} assignments</span> for today.
+                </p>
+
+                {/* Progress Mini Bar */}
+                <div className="mt-6 flex items-center gap-4">
+                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-primary-500 rounded-full transition-all duration-1000 shadow-[0_0_12px_rgba(92,124,250,0.3)]"
+                            style={{ width: `${statsProgress}%` }}
+                        />
+                    </div>
+                    <span className="text-xs font-black text-slate-900">{statsProgress}%</span>
                 </div>
             </div>
 
-            <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Premium Tab Navigation */}
-                <div className="flex p-1.5 bg-gray-100/80 backdrop-blur-md rounded-2xl mb-8 border border-gray-200/60 w-full sm:max-w-md mx-auto sm:mx-0 shadow-inner">
-                    <button
-                        onClick={() => setFilter('my-tasks')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${filter === 'my-tasks' ? 'bg-white text-indigo-900 shadow-[0_2px_10px_rgb(0,0,0,0.06)]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'}`}
-                    >
-                        <CircleDashed size={16} className={filter === 'my-tasks' ? 'text-indigo-500' : 'text-gray-400'} />
-                        Active Queue
-                    </button>
-                    <button
-                        onClick={() => setFilter('completed')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${filter === 'completed' ? 'bg-white text-emerald-900 shadow-[0_2px_10px_rgb(0,0,0,0.06)]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'}`}
-                    >
-                        <CheckCircle2 size={16} className={filter === 'completed' ? 'text-emerald-500' : 'text-gray-400'} />
-                        Completed
-                    </button>
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all duration-300 ${filter === 'all' ? 'bg-white text-gray-900 shadow-[0_2px_10px_rgb(0,0,0,0.06)]' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'}`}
-                    >
-                        <ListTodo size={16} className={filter === 'all' ? 'text-gray-500' : 'text-gray-400'} />
-                        All Tasks
+            <div className="px-6 py-8">
+                {/* Search & Filter */}
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Find tickets..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-12 pr-4 py-4 bg-slate-100/50 border-none rounded-[1.5rem] text-[15px] font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all placeholder:text-slate-300"
+                        />
+                    </div>
+                    <button className="p-4 bg-white border border-slate-100 rounded-[1.2rem] text-slate-400 hover:text-slate-900 shadow-sm transition-all tap-highlight shrink-0">
+                        <Filter size={20} />
                     </button>
                 </div>
 
-                {/* Search Bar */}
-                <div className="relative mb-8 w-full">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                    <input
-                        type="text"
-                        placeholder="Search tasks..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200/80 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm shadow-gray-100 placeholder:text-gray-400 transition-all"
-                    />
+                {/* Segments (Tabs) */}
+                <div className="flex p-1.5 bg-slate-100/80 rounded-[1.5rem] mb-10 overflow-hidden">
+                    {[
+                        { id: 'my-tasks', label: 'Active', icon: CircleDashed, color: 'text-primary-500' },
+                        { id: 'completed', label: 'Done', icon: CheckCircle2, color: 'text-emerald-500' },
+                        { id: 'all', label: 'All', icon: ListTodo, color: 'text-slate-500' }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setFilter(tab.id)}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-2 rounded-[1.2rem] text-[13px] font-black transition-all duration-300 ${filter === tab.id ? 'bg-white text-slate-900 shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            <tab.icon size={16} className={filter === tab.id ? tab.color : 'text-slate-300'} />
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Task Grid */}
                 {loading && tasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 text-gray-400">
-                        <Loader2 size={40} className="animate-spin mb-4 text-indigo-400" />
-                        <p className="font-semibold text-sm tracking-wide">Syncing operations...</p>
+                    <div className="flex flex-col items-center justify-center py-20 text-slate-300 text-center">
+                        <Loader2 size={32} className="animate-spin mb-4" />
+                        <p className="text-[10px] font-black uppercase tracking-widest italic">Syncing queue...</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredTasks.length > 0 ? (
                             filteredTasks.map(task => (
-                                <div key={task.id} className="transform transition duration-300 hover:-translate-y-1 hover:shadow-xl rounded-2xl">
+                                <div key={task.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <TaskCard
                                         task={task}
                                         onClick={() => setSelectedTaskId(task.id)}
@@ -153,39 +134,42 @@ const StaffView = () => {
                                 </div>
                             ))
                         ) : (
-                            <div className="col-span-full py-24 flex flex-col items-center justify-center text-center rounded-3xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
-                                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none"></div>
-                                <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 shadow-sm mb-5 relative z-10">
-                                    <Search size={24} className="text-gray-400" />
+                            <div className="col-span-full py-24 flex flex-col items-center justify-center text-center">
+                                <div className="w-20 h-20 rounded-[2rem] bg-slate-100 flex items-center justify-center mb-6 relative">
+                                    <Search size={32} className="text-slate-300" />
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                        <div className="w-2 h-2 rounded-full bg-slate-200" />
+                                    </div>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 relative z-10">No tasks in this view</h3>
-                                <p className="mt-2 text-sm text-gray-500 max-w-sm relative z-10">You're all caught up! There are no tasks matching your current filter.</p>
-
+                                <h3 className="text-xl font-black text-slate-900">Quiet day?</h3>
+                                <p className="mt-2 text-sm font-medium text-slate-400 max-w-xs mx-auto italic">
+                                    No tasks found matching this view. Relax or pick something from the main board!
+                                </p>
                                 {filter === 'my-tasks' && (
                                     <button
                                         onClick={() => setFilter('all')}
-                                        className="mt-6 px-6 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all relative z-10"
+                                        className="mt-8 px-10 py-4 bg-slate-900 hover:bg-black text-white text-[13px] font-black rounded-2xl shadow-xl transition-all tap-highlight"
                                     >
-                                        View All Tasks
+                                        BROWSE ALL JOBS
                                     </button>
                                 )}
                             </div>
                         )}
                     </div>
                 )}
+            </div>
 
-                {/* Detail Modal */}
-                {selectedTask && (
-                    <TaskDetail
-                        task={selectedTask}
-                        userRole="staff"
-                        currentUserId={user.id}
-                        onUpdateStatus={handleUpdateStatus}
-                        onAddRemark={handleAddRemark}
-                        onClose={() => setSelectedTaskId(null)}
-                    />
-                )}
-            </main>
+            {/* Detail Overlay */}
+            {selectedTask && (
+                <TaskDetail
+                    task={selectedTask}
+                    userRole="staff"
+                    currentUserId={user.id}
+                    onUpdateStatus={handleUpdateStatus}
+                    onAddRemark={handleAddRemark}
+                    onClose={() => setSelectedTaskId(null)}
+                />
+            )}
         </div>
     );
 };

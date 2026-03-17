@@ -1,36 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #EEF2FF;
-  --color-primary-100: #E0E7FF;
-  --color-primary-200: #C7D2FE;
-  --color-primary-300: #A5B4FC;
-  --color-primary-400: #818CF8;
-  --color-primary-500: #6366F1;
-  --color-primary-600: #4F46E5;
-  --color-primary-700: #4338CA;
-  --color-primary-800: #3730A3;
-  --color-primary-900: #312E81;
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F8FAFC;
-  --color-surface-muted: #F1F5F9;
+  /* Material 3 Inspired Color Palette */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #dbe4ff;
+  --color-primary-200: #bac8ff;
+  --color-primary-300: #91a7ff;
+  --color-primary-400: #748ffc;
+  --color-primary-500: #5c7cfa; /* Primary Brand Color */
+  --color-primary-600: #4c6ef5;
+  --color-primary-700: #4263eb;
+  --color-primary-800: #3b5bdb;
+  --color-primary-900: #364fc7;
+
+  /* Neutral Surface Colors (Notion-like) */
+  --color-surface: #ffffff;
+  --color-surface-hover: #f8fafc;
+  --color-surface-muted: #f1f5f9;
+  --color-background: #ffffff;
+
+  /* Semantic Colors */
+  --color-success: #0ca678;
+  --color-warning: #f59f00;
+  --color-danger: #f03e3e;
+  --color-info: #1098ad;
 }
 
-body {
-  @apply bg-[#F9FAFB] text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /* Prevent native tap highlight on mobile for an app-like feel */
-  -webkit-tap-highlight-color: transparent;
-  /* Smooth scrolling for anchor links or scroll containers */
-  scroll-behavior: smooth;
-  /* Force light mode color scheme */
-  color-scheme: light;
+@layer base {
+  body {
+    @apply bg-background text-slate-800 antialiased selection:bg-primary-100 selection:text-primary-900;
+    /* Using Outfit for a more modern, premium feel. Fallback to Inter. */
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    color-scheme: light;
+    overflow-x: hidden;
+  }
 }
 
-/* Custom Scrollbar - kept minimal */
+/* Custom Scrollbar - Minimal & Elegant */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -44,32 +55,87 @@ body {
   @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
 }
 
-/* Premium Glassmorphism */
+/* Glassmorphism Utilities */
 .glass {
-  @apply bg-white/80 backdrop-blur-lg border border-white/50 shadow-md shadow-slate-200/50;
+  @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
 }
 
 .glass-panel {
-  @apply bg-white/95 backdrop-blur-xl border border-slate-100 shadow-xl shadow-slate-200/60;
+  @apply bg-white/90 backdrop-blur-xl border border-slate-100 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
 }
 
-/* Base card styling */
+/* Native App-like Cards */
 .native-card {
-  @apply bg-white rounded-2xl border border-slate-100 shadow-sm transition-all duration-200 ease-out;
+  @apply bg-white rounded-[2rem] border border-slate-100/80 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out;
 }
 
 .native-card:active {
-  transform: scale(0.98);
+  @apply scale-[0.98] shadow-sm;
 }
 
-/* Hide scrollbars completely where necessary */
+/* Floating Bottom Nav Style */
+.nav-floating {
+  @apply glass-panel rounded-[2rem] mx-4 mb-4 px-6 py-3 border border-white/60;
+}
+
+/* Micro-interactions */
+.tap-highlight {
+  @apply transition-transform active:scale-95 duration-150;
+}
+
+.hover-lift {
+  @apply transition-transform hover:-translate-y-1 duration-200;
+}
+
+/* Typography Enhancements */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-compact {
+  @apply tracking-tight leading-tight;
+}
+
+/* Layout Utilities */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
 .no-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
+
+/* Animations */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+input:focus {
+  @apply border-primary-400 ring-4 ring-primary-100/50 scale-[1.01] transition-all;
+}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Check, CheckCheck } from 'lucide-react';
+import { Bell, Check, CheckCheck, X, Sparkles } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
 
 const NotificationCenter = () => {
@@ -10,11 +10,11 @@ const NotificationCenter = () => {
         <div className="relative">
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors focus:outline-none"
+                className="relative p-2.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50/50 rounded-2xl transition-all tap-highlight outline-none"
             >
-                <Bell size={20} />
+                <Bell size={22} className={unreadCount > 0 ? "animate-pulse" : ""} />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white border-2 border-white shadow-sm">
+                    <span className="absolute top-1.5 right-1.5 flex h-4.5 w-4.5 min-w-[18px] h-[18px] items-center justify-center rounded-full bg-red-500 text-[9px] font-black text-white border-2 border-white shadow-lg shadow-red-200">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -23,54 +23,100 @@ const NotificationCenter = () => {
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
-                        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
-                            <h3 className="font-bold text-slate-900 border-none outline-none">Notifications</h3>
-                            {unreadCount > 0 && (
-                                <button 
-                                    onClick={markAllAsRead}
-                                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                                >
-                                    <CheckCheck size={14} /> Mark all read
+                    <div className="absolute right-0 mt-3 w-80 sm:w-[400px] bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white z-50 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                        
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50/50">
+                            <div>
+                                <h3 className="text-base font-black text-slate-900 tracking-tight">Notifications</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                                    {unreadCount} UNREAD UPDATES
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                {unreadCount > 0 && (
+                                    <button 
+                                        onClick={markAllAsRead}
+                                        className="p-2 text-primary-600 hover:bg-primary-50 rounded-xl transition-all tap-highlight"
+                                        title="Mark all as read"
+                                    >
+                                        <CheckCheck size={18} />
+                                    </button>
+                                )}
+                                <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:bg-slate-50 rounded-xl transition-all">
+                                    <X size={18} />
                                 </button>
-                            )}
+                            </div>
                         </div>
-                        <div className="max-h-[60vh] overflow-y-auto isolate overscroll-contain">
+
+                        {/* List */}
+                        <div className="max-h-[60vh] overflow-y-auto custom-scrollbar overscroll-contain pb-4">
                             {notifications.length === 0 ? (
-                                <div className="p-8 text-center text-slate-500 text-sm">
-                                    <Bell className="mx-auto mb-3 opacity-20" size={32} />
-                                    No new notifications
+                                <div className="py-20 text-center px-10">
+                                    <div className="w-16 h-16 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 border border-slate-100 italic">
+                                        <Sparkles size={24} className="text-slate-200" />
+                                    </div>
+                                    <h4 className="text-[14px] font-black text-slate-400 uppercase tracking-widest">Inbox Zero</h4>
+                                    <p className="text-[12px] font-semibold text-slate-300 mt-2">You're all caught up with the latest updates from the shop.</p>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-slate-100">
+                                <div className="p-2 space-y-1">
                                     {notifications.map(notif => (
                                         <div 
                                             key={notif.id} 
-                                            className={`p-4 flex gap-3 transition-colors ${!notif.is_read ? 'bg-indigo-50/30' : 'hover:bg-slate-50'}`}
+                                            className={`group relative p-4 flex gap-4 rounded-[1.5rem] transition-all cursor-pointer ${
+                                                !notif.is_read 
+                                                ? 'bg-primary-50/40 hover:bg-primary-50/60' 
+                                                : 'hover:bg-slate-50'
+                                            }`}
                                             onClick={() => !notif.is_read && markAsRead(notif.id)}
                                         >
-                                            <div className="mt-0.5 shrink-0">
+                                            <div className="shrink-0 pt-1">
                                                 {!notif.is_read ? (
-                                                    <div className="w-2 h-2 rounded-full bg-indigo-500 mt-1.5 shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-primary-500 shadow-[0_0_12px_rgba(59,130,246,0.5)] ring-4 ring-white" />
                                                 ) : (
-                                                    <Check size={14} className="text-slate-300 mt-1" />
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-slate-200" />
                                                 )}
                                             </div>
-                                            <div className="flex-1 cursor-pointer">
-                                                <p className={`text-sm ${!notif.is_read ? 'font-semibold text-slate-800' : 'text-slate-600'}`}>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-[14px] leading-relaxed transition-all ${
+                                                    !notif.is_read 
+                                                    ? 'font-black text-slate-900' 
+                                                    : 'font-medium text-slate-500'
+                                                }`}>
                                                     {notif.message}
                                                 </p>
-                                                <span className="text-[10px] font-bold text-slate-400 mt-1.5 block uppercase tracking-wider">
-                                                    {new Date(notif.created_at).toLocaleString(undefined, {
-                                                        month: 'short', day: 'numeric', hour: 'numeric', minute:'2-digit'
-                                                    })}
-                                                </span>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                        {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-200">•</span>
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                        {new Date(notif.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                </div>
                                             </div>
+                                            {!notif.is_read && (
+                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center shrink-0">
+                                                    <div className="p-1.5 bg-white rounded-lg shadow-sm border border-slate-100">
+                                                        <Check size={14} className="text-primary-500" />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </div>
+
+                        {/* Footer Link */}
+                        {notifications.length > 0 && (
+                            <div className="p-4 bg-slate-50/50 border-t border-slate-50 text-center">
+                                <button className="text-[11px] font-black text-primary-600 uppercase tracking-widest hover:text-primary-700 transition-colors tap-highlight">
+                                    View Activity Dashboard
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </>
             )}
