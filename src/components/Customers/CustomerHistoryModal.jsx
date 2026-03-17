@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, MapPin, Wrench, CheckCircle2, TrendingUp, CircleDashed } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabaseClient';
 import StatusBadge from '../shared/StatusBadge';
 
 const CustomerHistoryModal = ({ isOpen, onClose, customerPhone, customerName }) => {
