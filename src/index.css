@@ -56,11 +56,11 @@
 }
 
 /* Glassmorphism Utilities */
-.glass {
+@utility glass {
   @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
 }
 
-.glass-panel {
+@utility glass-panel {
   @apply bg-white/90 backdrop-blur-xl border border-slate-100 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
 }
 
