@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Phone, MapPin, ClipboardList, CheckCircle2, History, MessageSquare, Trash2, Pencil, Save, BookOpen, Clock, Calendar } from 'lucide-react';
+import { X, User, Phone, MapPin, ClipboardList, CheckCircle2, History, MessageSquare, Trash2, Pencil, Save, BookOpen, Clock, Calendar, ChevronRight } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 import RemarkForm from './RemarkForm';
 import CustomerHistoryModal from '../Customers/CustomerHistoryModal';

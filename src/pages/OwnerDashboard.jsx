@@ -5,7 +5,7 @@ import TaskDetail from '../components/Tasks/TaskDetail';
 import { useTasks } from '../hooks/useTasks';
 import { useStaff } from '../hooks/useStaff';
 import { useAuth } from '../hooks/useAuth';
-import { Plus, RefreshCcw, Loader2, LayoutGrid } from 'lucide-react';
+import { Plus, RefreshCcw, Loader2 } from 'lucide-react';
 
 const OwnerDashboard = () => {
     const { tasks, loading, createTask, updateTaskStatus, addRemark, deleteTask, editTask, refreshTasks } = useTasks();
@@ -41,90 +41,87 @@ const OwnerDashboard = () => {
     };
 
     return (
-        <div className="h-full">
-            {/* Header Area */}
-            <div className="glass-panel sticky top-0 z-30 px-4 py-3 md:px-8 md:py-5 flex items-center justify-between gap-3 border-b border-slate-100/60 shadow-sm transition-all pt-safe-offset-2">
-                <div className="flex-1 min-w-0">
-                    <h1 className="text-lg md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 truncate">
-                        <LayoutGrid size={20} className="text-indigo-600 hidden sm:block shrink-0" />
-                        Service Dashboard
+        <div className="h-full flex flex-col gap-2.5">
+            {/* Compact Header */}
+            <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                    <h1 className="text-[15px] font-semibold text-slate-900 tracking-tight truncate">
+                        Service Board
                     </h1>
-                    <p className="text-xs md:text-sm text-slate-500 mt-0.5 truncate hidden sm:block">Manage assignments and track operations.</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 hidden sm:block">
+                        {tasks.length} total tickets
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                     <button
                         onClick={refreshTasks}
-                        className="p-2 border border-slate-200 text-slate-600 bg-white rounded-xl hover:bg-slate-50 active:scale-95 transition-all focus:outline-none shadow-sm"
+                        className="p-1.5 border border-slate-200 text-slate-500 bg-white rounded-lg hover:bg-slate-50 active:scale-95 transition-all focus:outline-none"
                         title="Refresh"
                     >
-                        <RefreshCcw size={18} className={loading && tasks.length > 0 ? 'animate-spin' : ''} />
+                        <RefreshCcw size={14} className={loading && tasks.length > 0 ? 'animate-spin' : ''} />
                     </button>
                     <button
                         onClick={() => setShowNewTaskForm(true)}
-                        className="inline-flex items-center justify-center px-4 md:px-5 py-2 text-sm font-semibold text-white transition-all bg-indigo-600 rounded-xl hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-95 shadow-sm shadow-indigo-600/20 transition-all"
                     >
-                        <Plus size={18} className="mr-1.5 hidden sm:block" />
-                        <span className="sm:hidden"><Plus size={20} /></span>
+                        <Plus size={14} />
                         <span className="hidden sm:inline">New Task</span>
                     </button>
                 </div>
             </div>
 
-            <main className="max-w-[1400px] mx-auto p-6 md:p-8">
-                {loading && tasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 text-slate-400">
-                        <Loader2 size={32} className="animate-spin mb-4 text-indigo-400" />
-                        <p className="font-medium text-sm">Loading workspace...</p>
-                    </div>
-                ) : (
-                    <KanbanBoard
-                        tasks={tasks}
-                        onTaskClick={(task) => setSelectedTaskId(task.id)}
-                        isOwner={role === 'owner'}
-                        staffMembers={staff}
-                        onAssign={(taskId, assignedTo) => {
-                            const newStatus = assignedTo ? 'in_progress' : 'unassigned';
-                            handleUpdateStatus(taskId, newStatus, assignedTo);
-                        }}
-                    />
-                )}
+            {/* Board */}
+            {loading && tasks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                    <Loader2 size={24} className="animate-spin mb-3 text-indigo-400" />
+                    <p className="text-[11px] font-medium">Loading workspace...</p>
+                </div>
+            ) : (
+                <KanbanBoard
+                    tasks={tasks}
+                    onTaskClick={(task) => setSelectedTaskId(task.id)}
+                    isOwner={role === 'owner'}
+                    staffMembers={staff}
+                    onAssign={(taskId, assignedTo) => {
+                        const newStatus = assignedTo ? 'in_progress' : 'unassigned';
+                        handleUpdateStatus(taskId, newStatus, assignedTo);
+                    }}
+                />
+            )}
 
-                {showNewTaskForm && (
-                    <NewTaskForm
-                        staffMembers={staff}
-                        onSubmit={handleCreateTask}
-                        onCancel={() => setShowNewTaskForm(false)}
-                    />
-                )}
+            {showNewTaskForm && (
+                <NewTaskForm
+                    staffMembers={staff}
+                    onSubmit={handleCreateTask}
+                    onCancel={() => setShowNewTaskForm(false)}
+                />
+            )}
 
-                {selectedTask && (
-                    <TaskDetail
-                        task={selectedTask}
-                        userRole={role}
-                        currentUserId={user?.id}
-                        staffMembers={staff}
-                        onUpdateStatus={handleUpdateStatus}
-                        onAddRemark={handleAddRemark}
-                        onEdit={
-                            (role === 'owner')
-                                ? async (id, updates) => {
-                                    await editTask(id, updates);
-                                }
-                                : undefined
-                        }
-                        onDelete={
-                            (role === 'owner')
-                                ? async (id) => {
-                                    await deleteTask(id);
-                                    setSelectedTaskId(null);
-                                }
-                                : undefined
-                        }
-                        onClose={() => setSelectedTaskId(null)}
-                    />
-                )}
-            </main>
+            {selectedTask && (
+                <TaskDetail
+                    task={selectedTask}
+                    userRole={role}
+                    currentUserId={user?.id}
+                    staffMembers={staff}
+                    onUpdateStatus={handleUpdateStatus}
+                    onAddRemark={handleAddRemark}
+                    onEdit={
+                        (role === 'owner')
+                            ? async (id, updates) => { await editTask(id, updates); }
+                            : undefined
+                    }
+                    onDelete={
+                        (role === 'owner')
+                            ? async (id) => {
+                                await deleteTask(id);
+                                setSelectedTaskId(null);
+                            }
+                            : undefined
+                    }
+                    onClose={() => setSelectedTaskId(null)}
+                />
+            )}
         </div>
     );
 };

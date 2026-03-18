@@ -38,163 +38,167 @@ const AdminPanel = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-[70vh] text-slate-400">
-                <Settings className="animate-spin mb-4 text-indigo-400" size={32} />
-                <p className="font-medium ml-3">Loading staff directory...</p>
+            <div className="flex items-center justify-center h-40 text-slate-400 gap-2">
+                <Settings className="animate-spin text-indigo-400" size={16} />
+                <p className="text-[12px] font-medium">Loading staff directory...</p>
             </div>
         );
     }
 
     return (
-        <div className="h-full">
-            <div className="glass-panel sticky top-0 z-30 px-4 py-3 md:px-8 md:py-5 flex items-center justify-between gap-3 border-b border-slate-100/60 shadow-sm transition-all pt-safe-offset-2">
-                <div className="flex-1 min-w-0">
-                    <h1 className="text-lg md:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 truncate">
-                        <Shield size={20} className="text-indigo-600 hidden sm:block shrink-0" />
-                        Team Management
-                    </h1>
-                    <p className="text-xs md:text-sm text-slate-500 mt-0.5 truncate hidden sm:block">Manage your staff members and assignments</p>
+        <div className="flex flex-col gap-3">
+            {/* Compact Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-[15px] font-semibold text-slate-900 tracking-tight">Team Management</h1>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Manage staff members and access</p>
                 </div>
                 <button
                     onClick={() => setIsCreating(true)}
-                    className="flex shrink-0 items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-sm rounded-xl transition-all shadow-md shadow-indigo-600/20"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[12px] rounded-lg transition-all shadow-sm shadow-indigo-600/20"
                 >
-                    <UserPlus size={18} className="sm:mr-2" />
+                    <UserPlus size={13} />
                     <span className="hidden sm:inline">Add Member</span>
                 </button>
             </div>
 
-            <main className="max-w-[1000px] mx-auto p-6 md:p-8">
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 font-medium">
-                        {error}
-                        <button onClick={() => setError(null)} className="ml-2 font-bold hover:underline">Dismiss</button>
-                    </div>
-                )}
-
-                {isCreating && (
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <UserPlus size={120} />
-                        </div>
-                        <h2 className="text-lg font-semibold text-slate-900 mb-6 flex items-center relative z-10">
-                            <UserPlus size={18} className="mr-2 text-indigo-600" />
-                            Create New Account
-                        </h2>
-
-                        <form onSubmit={handleSubmit} className="relative z-10 max-w-2xl">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        value={newStaff.name}
-                                        onChange={e => setNewStaff({ ...newStaff, name: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                        placeholder="Jane Doe"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Unique Username</label>
-                                    <input
-                                        required
-                                        type="text"
-                                        value={newStaff.username}
-                                        onChange={e => setNewStaff({ ...newStaff, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                        placeholder="jane_doe"
-                                    />
-                                    <p className="text-xs text-slate-500 mt-1">Lowercase letters, numbers, and underscores.</p>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Temporary Password</label>
-                                    <input
-                                        required
-                                        type="password"
-                                        minLength={6}
-                                        value={newStaff.password}
-                                        onChange={e => setNewStaff({ ...newStaff, password: e.target.value })}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                        placeholder="Minimum 6 characters"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex gap-3 pt-4 border-t border-slate-100">
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg transition-colors shadow-sm"
-                                >
-                                    Create Account
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCreating(false)}
-                                    className="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-medium text-sm rounded-lg hover:bg-slate-50 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                )}
-
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-slate-800">Active Directory</h3>
-                        <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">{staff.length} Members</span>
-                    </div>
-                    {staff.length === 0 ? (
-                        <div className="p-12 text-center text-slate-500">
-                            <Users size={32} className="mx-auto mb-3 text-slate-300" />
-                            <p className="text-sm font-medium text-slate-600 mb-1">No staff members found</p>
-                            <p className="text-xs">Add a team member to get started.</p>
-                        </div>
-                    ) : (
-                        <ul className="divide-y divide-slate-100">
-                            {staff.map((member) => (
-                                <li key={member.id} className="p-4 md:p-6 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-semibold shadow-sm group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors shrink-0">
-                                            {member.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-semibold text-slate-900 group-hover:text-indigo-900 transition-colors">{member.name}</p>
-                                            <div className="flex flex-col sm:flex-row sm:items-center text-xs text-slate-500 gap-1 sm:gap-3 mt-0.5">
-                                                <span className="flex items-center"><User size={12} className="mr-1 opacity-70" /> Staff Role</span>
-                                                <span className="hidden sm:inline text-slate-300">•</span>
-                                                <span className="truncate max-w-[200px] font-mono">@{member.username}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-3 sm:mt-0 w-full sm:w-auto">
-                                        <button
-                                            onClick={() => setEditingStaff(member)}
-                                            className="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 rounded-md transition-colors border border-slate-200 sm:opacity-0 sm:group-hover:opacity-100 flex items-center justify-center gap-1.5"
-                                            title="Edit Staff"
-                                        >
-                                            <Edit2 size={14} />
-                                            <span className="sm:hidden">Edit</span>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (window.confirm(`Are you sure you want to remove ${member.name}?`)) {
-                                                    removeStaffMember(member.id);
-                                                }
-                                            }}
-                                            className="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 hover:text-red-700 rounded-md transition-colors border border-red-100 sm:opacity-0 sm:group-hover:opacity-100 flex items-center justify-center gap-1.5"
-                                            title="Remove Staff"
-                                        >
-                                            <Trash2 size={14} />
-                                            <span className="sm:hidden">Remove</span>
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+            {/* Error banner */}
+            {error && (
+                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-[12px] border border-red-100 font-medium flex items-center justify-between">
+                    <span>{error}</span>
+                    <button onClick={() => setError(null)} className="ml-2 font-bold hover:underline shrink-0">✕</button>
                 </div>
-            </main>
+            )}
+
+            {/* Create form */}
+            {isCreating && (
+                <div className="bg-white rounded-lg border border-slate-200 p-4 relative overflow-hidden">
+                    <h2 className="text-[13px] font-semibold text-slate-900 mb-3 flex items-center gap-1.5">
+                        <UserPlus size={13} className="text-indigo-600" />
+                        Create Staff Account
+                    </h2>
+                    <form onSubmit={handleSubmit} className="max-w-xl">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Full Name</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={newStaff.name}
+                                    onChange={e => setNewStaff({ ...newStaff, name: e.target.value })}
+                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                    placeholder="Jane Doe"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Username</label>
+                                <input
+                                    required
+                                    type="text"
+                                    value={newStaff.username}
+                                    onChange={e => setNewStaff({ ...newStaff, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
+                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                    placeholder="jane_doe"
+                                />
+                                <p className="text-[10px] text-slate-400 mt-0.5">Lowercase, numbers, underscores only</p>
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Temporary Password</label>
+                                <input
+                                    required
+                                    type="password"
+                                    minLength={6}
+                                    value={newStaff.password}
+                                    onChange={e => setNewStaff({ ...newStaff, password: e.target.value })}
+                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
+                                    placeholder="Min. 6 characters"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 pt-3 border-t border-slate-100">
+                            <button
+                                type="submit"
+                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[12px] rounded-md transition-colors"
+                            >
+                                Create Account
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsCreating(false)}
+                                className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 font-medium text-[12px] rounded-md hover:bg-slate-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Staff list */}
+            <div className="bg-white rounded-lg border border-slate-100 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                {/* List header */}
+                <div className="px-3.5 py-2 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                    <h3 className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Active Directory</h3>
+                    <span className="text-[10px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-100">
+                        {staff.length} member{staff.length !== 1 ? 's' : ''}
+                    </span>
+                </div>
+
+                {staff.length === 0 ? (
+                    <div className="py-12 text-center">
+                        <Users size={24} className="mx-auto mb-2 text-slate-200" />
+                        <p className="text-[12px] font-medium text-slate-500 mb-0.5">No staff members yet</p>
+                        <p className="text-[11px] text-slate-400">Add a team member to get started.</p>
+                    </div>
+                ) : (
+                    <ul className="divide-y divide-slate-50">
+                        {staff.map((member) => (
+                            <li
+                                key={member.id}
+                                className="px-3.5 py-2.5 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-3 group"
+                            >
+                                {/* Avatar + info */}
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-semibold text-[11px] shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
+                                        {member.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-[12px] font-semibold text-slate-900 truncate">{member.name}</p>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                                            <User size={9} className="opacity-60 shrink-0" />
+                                            <span>Staff</span>
+                                            <span className="text-slate-200">•</span>
+                                            <span className="font-mono truncate max-w-[140px]">@{member.username}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex items-center gap-1.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => setEditingStaff(member)}
+                                        className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors border border-transparent hover:border-indigo-100"
+                                        title="Edit"
+                                    >
+                                        <Edit2 size={13} />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm(`Remove ${member.name}?`)) {
+                                                removeStaffMember(member.id);
+                                            }
+                                        }}
+                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors border border-transparent hover:border-red-100"
+                                        title="Remove"
+                                    >
+                                        <Trash2 size={13} />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
 
             <EditUserModal
                 user={editingStaff}
