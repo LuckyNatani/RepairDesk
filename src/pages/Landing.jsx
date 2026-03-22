@@ -23,7 +23,7 @@ const Landing = () => {
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="text-xl font-black tracking-tighter text-primary flex items-center gap-2 font-headline">
                         <PenTool className="w-6 h-6 text-primary" strokeWidth={2.5} />
-                        RepairDesk
+                        TaskPod
                     </div>
                     <nav className="hidden md:flex gap-8 items-center">
                         <a className="text-primary font-bold font-headline transition-opacity hover:opacity-80" href="#features">Features</a>
@@ -44,10 +44,10 @@ const Landing = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                         <div className="space-y-8">
                             <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-on-surface leading-[1.1] tracking-tight">
-                                Manage your repair shop <span className="text-primary">effortlessly</span>
+                                Manage your business <span className="text-primary">effortlessly</span>
                             </h1>
                             <p className="text-on-surface-variant text-lg md:text-xl leading-relaxed max-w-lg">
-                                The all-in-one software for mobile, laptop, and electronics repair shops. Built for speed, designed for clarity.
+                                The all-in-one software for mobile, laptop, and electronics businesss. Built for speed, designed for clarity.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <Link
@@ -161,7 +161,7 @@ const Landing = () => {
                 {/* CTA Section */}
                 <section className="max-w-4xl mx-auto px-6 text-center">
                     <h2 className="font-headline text-3xl sm:text-4xl font-bold mb-6 text-on-surface">Ready to grow your shop?</h2>
-                    <p className="text-on-surface-variant text-base sm:text-lg mb-10">Join thousands of repair professionals who rely on RepairDesk every day.</p>
+                    <p className="text-on-surface-variant text-base sm:text-lg mb-10">Join thousands of repair professionals who rely on TaskPod every day.</p>
                     <button className="bg-surface-container-high text-on-surface px-12 py-4 rounded-full font-bold text-lg active:scale-95 duration-200 border-2 border-transparent hover:border-primary/20 transition-all">
                         Contact Us
                     </button>
@@ -174,7 +174,7 @@ const Landing = () => {
                     <div className="flex flex-col gap-4">
                         <div className="text-on-primary font-black text-lg font-headline flex items-center gap-2">
                             <PenTool className="w-5 h-5 text-on-primary" strokeWidth={2.5} />
-                            RepairDesk
+                            TaskPod
                         </div>
                         <p className="text-primary-fixed-dim font-body text-sm leading-relaxed max-w-xs text-center md:text-left">
                             The Utility Editorial. Streamlining repair management for the modern technician.
@@ -186,7 +186,7 @@ const Landing = () => {
                         <a className="text-primary-fixed-dim hover:text-on-primary transition-colors" href="#">Contact</a>
                     </div>
                     <div className="text-primary-fixed-dim text-sm font-body">
-                        © 2026 RepairDesk.
+                        © 2026 TaskPod.
                     </div>
                 </div>
             </footer>

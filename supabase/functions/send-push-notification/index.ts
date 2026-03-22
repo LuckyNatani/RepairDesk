@@ -114,7 +114,7 @@ serve(async (req: Request) => {
         )
 
         // 4. Prepare message
-        let title = 'RepairDesk Update'
+        let title = 'TaskPod Update'
         let body = ''
 
         if (event_type === 'assigned') {

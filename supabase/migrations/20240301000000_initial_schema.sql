@@ -1,4 +1,4 @@
--- Initial Schema for RepairDesk
+-- Initial Schema for TaskPod
 -- Tables: users, tasks, remarks, push_logs
 
 -- 1. Users Table (Maps to auth.users)
