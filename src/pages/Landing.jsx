@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Layers, Activity, Zap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { PenTool, CheckCircle2, FileText, ClipboardList, MessageSquare, ArrowRight } from 'lucide-react';
 
 const Landing = () => {
     const { user, role, loading } = useAuth();
@@ -17,93 +17,179 @@ const Landing = () => {
     }
 
     return (
-        <div className="min-h-screen bg-neutral-950 text-neutral-50 flex flex-col font-sans selection:bg-rose-500/30 selection:text-rose-100 overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-rose-600/20 blur-[120px] mix-blend-screen" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-orange-600/10 blur-[150px] mix-blend-screen" />
-                <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-rose-800/20 blur-[100px] mix-blend-screen" />
-                {/* Subtle noise texture */}
-                <div className="absolute inset-0 bg-[#0a0a0a] opacity-50 mix-blend-overlay"></div>
-            </div>
-
-            {/* Header / Nav */}
-            <header className="px-6 py-5 flex items-center justify-between z-50">
-                <div className="flex items-center space-x-3 group">
-                    <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-600/30 group-hover:scale-105 transition-transform duration-300 border border-rose-500/50">
-                        <Layers size={20} strokeWidth={2.5} />
+        <div className="min-h-screen bg-surface text-on-surface font-body selection:bg-primary-100 selection:text-primary-700">
+            {/* TopAppBar */}
+            <header className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <div className="text-xl font-black tracking-tighter text-primary flex items-center gap-2 font-headline">
+                        <PenTool className="w-6 h-6 text-primary" strokeWidth={2.5} />
+                        RepairDesk
                     </div>
-                    <span className="font-bold text-white tracking-tight text-2xl">TaskPod</span>
-                </div>
-                <div>
+                    <nav className="hidden md:flex gap-8 items-center">
+                        <a className="text-primary font-bold font-headline transition-opacity hover:opacity-80" href="#features">Features</a>
+                        <a className="text-on-surface-variant font-headline transition-opacity hover:opacity-80" href="#pricing">Pricing</a>
+                    </nav>
                     <Link
                         to="/login"
-                        className="px-6 py-2.5 text-sm font-semibold text-neutral-900 bg-white hover:bg-neutral-200 rounded-full transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+                        className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2 rounded-full font-bold text-sm tracking-tight active:scale-95 duration-200 transition-opacity hover:opacity-90 shadow-md shadow-primary/20"
                     >
-                        Sign In
+                        Try Now
                     </Link>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <main className="flex-1 flex flex-col items-center justify-center text-center px-4 py-20 z-10">
-                <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-neutral-900/50 border border-neutral-800/80 text-neutral-300 text-xs font-medium mb-10 backdrop-blur-md">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                    </span>
-                    <span>Task Management Reimagined</span>
-                </div>
+            <main className="pt-32 pb-20 overflow-hidden">
+                {/* Hero Section */}
+                <section className="max-w-7xl mx-auto px-6 mb-24">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div className="space-y-8">
+                            <h1 className="font-headline text-5xl md:text-7xl font-extrabold text-on-surface leading-[1.1] tracking-tight">
+                                Manage your repair shop <span className="text-primary">effortlessly</span>
+                            </h1>
+                            <p className="text-on-surface-variant text-lg md:text-xl leading-relaxed max-w-lg">
+                                The all-in-one software for mobile, laptop, and electronics repair shops. Built for speed, designed for clarity.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                                <Link
+                                    to="/login"
+                                    className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-4 rounded-full font-bold text-lg active:scale-95 duration-200 shadow-[0_8px_32px_rgba(36,56,156,0.2)] flex items-center justify-center"
+                                >
+                                    Start for Free
+                                </Link>
+                                <button className="bg-surface-container-highest text-on-surface px-10 py-4 rounded-full font-bold text-lg active:scale-95 duration-200">
+                                    Book Demo
+                                </button>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <div className="aspect-square rounded-2xl bg-gradient-to-tr from-primary-container/20 to-tertiary-container/10 flex items-center justify-center relative overflow-hidden">
+                                {/* Abstract Geometric Art */}
+                                <div className="absolute inset-0 opacity-30">
+                                    <div className="absolute top-10 left-10 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
+                                    <div className="absolute bottom-20 right-10 w-48 h-48 bg-primary-fixed-dim rounded-full blur-3xl"></div>
+                                </div>
+                                <div className="w-4/5 h-4/5 rounded-2xl bg-surface-container-lowest shadow-[0_8px_32px_rgba(13,30,37,0.08)] flex items-center justify-center p-8 relative z-10">
+                                    <div className="w-full space-y-6">
+                                        <div className="h-4 w-1/3 bg-surface-container-high rounded-full"></div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="h-24 bg-surface-container rounded-xl"></div>
+                                            <div className="h-24 bg-surface-container rounded-xl"></div>
+                                        </div>
+                                        <div className="h-32 bg-primary-container/5 rounded-xl border border-primary/10 flex items-center justify-center">
+                                            <PenTool className="text-primary w-10 h-10" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter leading-[1.1] max-w-5xl mb-8 mix-blend-plus-lighter">
-                    Execute Faster.<br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-rose-500 to-orange-400">
-                        Deliver More.
-                    </span>
-                </h1>
+                {/* Features Bento Grid */}
+                <section id="features" className="max-w-7xl mx-auto px-6 mb-32">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                        <div>
+                            <span className="text-primary font-bold tracking-widest text-xs uppercase font-label">Capabilities</span>
+                            <h2 className="font-headline text-4xl font-bold mt-2">Engineered for Precision</h2>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {/* Feature 1 */}
+                        <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_8px_32px_rgba(13,30,37,0.04)] group hover:bg-primary transition-colors duration-300">
+                            <div className="w-14 h-14 rounded-full bg-primary-container/10 flex items-center justify-center mb-6 group-hover:bg-white/20">
+                                <FileText className="text-primary group-hover:text-white transition-colors h-6 w-6" />
+                            </div>
+                            <h3 className="font-headline text-xl font-bold mb-4 group-hover:text-white transition-colors">Quick Billing</h3>
+                            <p className="text-on-surface-variant group-hover:text-white/80 transition-colors">Generate professional invoices in seconds. Support for multiple tax brackets and discounts.</p>
+                        </div>
+                        {/* Feature 2 */}
+                        <div className="bg-surface-container-low p-8 rounded-2xl group hover:bg-primary transition-colors duration-300">
+                            <div className="w-14 h-14 rounded-full bg-primary-container/10 flex items-center justify-center mb-6 group-hover:bg-white/20">
+                                <ClipboardList className="text-primary group-hover:text-white transition-colors h-6 w-6" />
+                            </div>
+                            <h3 className="font-headline text-xl font-bold mb-4 group-hover:text-white transition-colors">Job Card Management</h3>
+                            <p className="text-on-surface-variant group-hover:text-white/80 transition-colors">Track every repair step. From intake to delivery, keep your workflow organized and transparent.</p>
+                        </div>
+                        {/* Feature 3 */}
+                        <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-[0_8px_32px_rgba(13,30,37,0.04)] group hover:bg-primary transition-colors duration-300">
+                            <div className="w-14 h-14 rounded-full bg-primary-container/10 flex items-center justify-center mb-6 group-hover:bg-white/20">
+                                <MessageSquare className="text-primary group-hover:text-white transition-colors h-6 w-6" />
+                            </div>
+                            <h3 className="font-headline text-xl font-bold mb-4 group-hover:text-white transition-colors">Real-time SMS Alerts</h3>
+                            <p className="text-on-surface-variant group-hover:text-white/80 transition-colors">Automatically notify customers when their device is ready. Reduce follow-up calls by 60%.</p>
+                        </div>
+                    </div>
+                </section>
 
-                <p className="text-lg md:text-2xl text-neutral-400 max-w-2xl mb-12 leading-relaxed font-light">
-                    The ultimate task operating system tailored to keep your team completely aligned, instantly updated, and always moving forward.
-                </p>
+                {/* Pricing Card Section */}
+                <section id="pricing" className="max-w-7xl mx-auto px-6 mb-32">
+                    <div className="bg-primary-container rounded-[2rem] overflow-hidden relative shadow-[0_16px_40px_rgba(36,56,156,0.15)]">
+                        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 p-12 md:p-20">
+                            <div className="flex flex-col justify-center text-on-primary">
+                                <h2 className="font-headline text-4xl md:text-5xl font-bold mb-6">Simple Pricing</h2>
+                                <p className="text-primary-fixed-dim text-lg mb-8 max-w-md">No hidden fees, no complicated tiers. One plan that grows with your business.</p>
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-4">
+                                        <CheckCircle2 className="text-primary-fixed w-6 h-6" />
+                                        <span className="text-on-primary-container mt-0.5">Unlimited Invoices</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <CheckCircle2 className="text-primary-fixed w-6 h-6" />
+                                        <span className="text-on-primary-container mt-0.5">Customer Portal</span>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <CheckCircle2 className="text-primary-fixed w-6 h-6" />
+                                        <span className="text-on-primary-container mt-0.5">Inventory Tracking</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-surface-container-lowest rounded-2xl p-10 flex flex-col items-center justify-center text-center shadow-[0_8px_32px_rgba(13,30,37,0.08)]">
+                                <span className="bg-primary-container/10 text-primary font-bold px-4 py-1 rounded-full text-[10px] uppercase tracking-widest mb-4">Annual Plan</span>
+                                <div className="mb-2">
+                                    <span className="text-on-surface text-4xl md:text-6xl font-black font-headline">₹5000</span>
+                                    <span className="text-on-surface-variant text-lg">/ year</span>
+                                </div>
+                                <p className="text-on-surface-variant font-medium mb-8">For up to 10 employees</p>
+                                <Link to="/login" className="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary py-4 rounded-full font-bold text-lg active:scale-95 duration-200 flex justify-center">
+                                    Get Started Now
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full sm:w-auto">
-                    <Link
-                        to="/login"
-                        className="px-8 py-4 bg-rose-600 text-white font-bold rounded-full shadow-[0_0_40px_rgba(225,29,72,0.4)] hover:shadow-[0_0_60px_rgba(225,29,72,0.6)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group w-full sm:w-auto text-lg border border-rose-500/50"
-                    >
-                        Enter Workspace
-                        <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                </div>
+                {/* CTA Section */}
+                <section className="max-w-4xl mx-auto px-6 text-center">
+                    <h2 className="font-headline text-3xl sm:text-4xl font-bold mb-6 text-on-surface">Ready to grow your shop?</h2>
+                    <p className="text-on-surface-variant text-base sm:text-lg mb-10">Join thousands of repair professionals who rely on RepairDesk every day.</p>
+                    <button className="bg-surface-container-high text-on-surface px-12 py-4 rounded-full font-bold text-lg active:scale-95 duration-200 border-2 border-transparent hover:border-primary/20 transition-all">
+                        Contact Us
+                    </button>
+                </section>
             </main>
 
-            {/* Feature Highlights - Glassmorphism style */}
-            <div className="relative z-10 flex flex-col md:flex-row gap-6 max-w-6xl mx-auto px-6 w-full pb-20">
-                <div className="flex-1 bg-neutral-900/40 backdrop-blur-xl p-8 rounded-3xl border border-neutral-800/50 hover:border-neutral-700/50 hover:bg-neutral-900/60 transition-all group">
-                    <div className="w-12 h-12 bg-neutral-800/80 rounded-2xl flex items-center justify-center text-rose-400 mb-6 border border-neutral-700 group-hover:scale-110 transition-transform">
-                        <Activity size={24} />
+            {/* Footer */}
+            <footer className="bg-primary w-full py-12">
+                <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between gap-8 items-center md:items-start">
+                    <div className="flex flex-col gap-4">
+                        <div className="text-on-primary font-black text-lg font-headline flex items-center gap-2">
+                            <PenTool className="w-5 h-5 text-on-primary" strokeWidth={2.5} />
+                            RepairDesk
+                        </div>
+                        <p className="text-primary-fixed-dim font-body text-sm leading-relaxed max-w-xs text-center md:text-left">
+                            The Utility Editorial. Streamlining repair management for the modern technician.
+                        </p>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">Real-time Sync</h3>
-                    <p className="text-neutral-400 leading-relaxed font-light">Watch tasks move across your board instantly. Perfect synchronization across your entire team.</p>
-                </div>
-
-                <div className="flex-1 bg-neutral-900/40 backdrop-blur-xl p-8 rounded-3xl border border-neutral-800/50 hover:border-neutral-700/50 hover:bg-neutral-900/60 transition-all group lg:-translate-y-8">
-                    <div className="w-12 h-12 bg-neutral-800/80 rounded-2xl flex items-center justify-center text-rose-400 mb-6 border border-neutral-700 group-hover:scale-110 transition-transform">
-                        <Zap size={24} />
+                    <div className="flex gap-8 text-sm font-body">
+                        <a className="text-primary-fixed-dim hover:text-on-primary transition-colors" href="#">Features</a>
+                        <a className="text-primary-fixed-dim hover:text-on-primary transition-colors" href="#">Pricing</a>
+                        <a className="text-primary-fixed-dim hover:text-on-primary transition-colors" href="#">Contact</a>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">Lightning Fast</h3>
-                    <p className="text-neutral-400 leading-relaxed font-light">Built for speed. Navigate between boards, update statuses, and add remarks with zero latency.</p>
-                </div>
-
-                <div className="flex-1 bg-neutral-900/40 backdrop-blur-xl p-8 rounded-3xl border border-neutral-800/50 hover:border-neutral-700/50 hover:bg-neutral-900/60 transition-all group">
-                    <div className="w-12 h-12 bg-neutral-800/80 rounded-2xl flex items-center justify-center text-rose-400 mb-6 border border-neutral-700 group-hover:scale-110 transition-transform">
-                        <ShieldCheck size={24} />
+                    <div className="text-primary-fixed-dim text-sm font-body">
+                        © 2026 RepairDesk.
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3">Role-based Security</h3>
-                    <p className="text-neutral-400 leading-relaxed font-light">Granular permissions ensure clients see only their data, with dedicated staff views.</p>
                 </div>
-            </div>
-
+            </footer>
         </div>
     );
 };

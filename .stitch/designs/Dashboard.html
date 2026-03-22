@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RepairDesk Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#713700",
+              "secondary-fixed": "#dee0ff",
+              "surface-bright": "#f8f9fb",
+              "error": "#ba1a1a",
+              "on-surface": "#191c1e",
+              "surface-dim": "#d9dadc",
+              "secondary-fixed-dim": "#bec4f2",
+              "secondary": "#565c84",
+              "on-error-container": "#93000a",
+              "outline-variant": "#c5c5d4",
+              "primary-fixed-dim": "#bac3ff",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#edeef0",
+              "tertiary-fixed-dim": "#ffb784",
+              "tertiary-fixed": "#ffdcc6",
+              "on-error": "#ffffff",
+              "on-secondary-container": "#51577f",
+              "on-surface-variant": "#454652",
+              "on-secondary": "#ffffff",
+              "on-background": "#191c1e",
+              "on-tertiary-container": "#ffc7a2",
+              "secondary-container": "#c9cffd",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2e3132",
+              "tertiary-container": "#8f4700",
+              "on-primary-fixed-variant": "#293ca0",
+              "surface": "#f8f9fb",
+              "on-tertiary-fixed": "#301400",
+              "on-primary-container": "#cacfff",
+              "primary-fixed": "#dee0ff",
+              "on-secondary-fixed-variant": "#3e446b",
+              "primary-container": "#3f51b5",
+              "inverse-primary": "#bac3ff",
+              "error-container": "#ffdad6",
+              "on-secondary-fixed": "#12183d",
+              "surface-container-highest": "#e1e2e4",
+              "background": "#f8f9fb",
+              "surface-container-low": "#f2f4f6",
+              "primary": "#24389c",
+              "inverse-on-surface": "#f0f1f3",
+              "on-primary": "#ffffff",
+              "surface-variant": "#e1e2e4",
+              "on-primary-fixed": "#00105c",
+              "surface-container-high": "#e7e8ea",
+              "tertiary": "#6c3400",
+              "surface-tint": "#4355b9",
+              "outline": "#757684"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .surface-transition {
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased pb-24">
+<!-- TopAppBar -->
+<header class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl docked full-width top-0 sticky z-50 no-border surface-transition shadow-[0_8px_32px_0_rgba(25,28,30,0.04)]">
+<div class="flex justify-between items-center w-full px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container overflow-hidden active:scale-95 transition-transform duration-200">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="Close up professional male headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrj7R5JLzotFn0mv7beV7r2t_8spUouJPBGt3WyBGBWL8JdUYTO_Y7gO01hiPBPGFgoKNk5TtSlgW5apDruT5q9fYfEgYOez2MYYgaIed5pXDj9YFv8VHE1MmMtQ2Wdcz5ikHGCmD5ies4nZdTy0-FC3z5EnVrZiEAo2xHU0RSpO4irr18I6OQ2EKrVWAu0Wax5P-TSSibhMGYrSy_NP1HoMh4sFzEHKq4Yktmml4vQSh2WKmzASGynkoRHCHTGnAPJEU8bMYLz3XY"/>
+</div>
+<h1 class="font-['Plus_Jakarta_Sans'] font-semibold text-lg tracking-tight text-indigo-700 dark:text-indigo-400">Hello!</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-6 pt-6 space-y-8 max-w-2xl mx-auto">
+<!-- Quick Actions Bento-style Grid -->
+<section>
+<div class="grid grid-cols-2 gap-4">
+<button class="group flex flex-col items-center justify-center p-5 bg-surface-container-lowest rounded-DEFAULT shadow-[0_8px_32px_0_rgba(25,28,30,0.02)] active:scale-95 transition-all">
+<div class="w-12 h-12 mb-3 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</div>
+<span class="font-headline font-semibold text-sm text-on-surface">New Ticket</span>
+</button>
+<button class="group flex flex-col items-center justify-center p-5 bg-surface-container-lowest rounded-DEFAULT shadow-[0_8px_32px_0_rgba(25,28,30,0.02)] active:scale-95 transition-all">
+<div class="w-12 h-12 mb-3 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_add</span>
+</div>
+<span class="font-headline font-semibold text-sm text-on-surface">Add Customer</span>
+</button>
+<button class="group flex flex-col items-center justify-center p-5 bg-surface-container-lowest rounded-DEFAULT shadow-[0_8px_32px_0_rgba(25,28,30,0.02)] active:scale-95 transition-all">
+<div class="w-12 h-12 mb-3 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">point_of_sale</span>
+</div>
+<span class="font-headline font-semibold text-sm text-on-surface">Quick Sale</span>
+</button>
+<button class="group flex flex-col items-center justify-center p-5 bg-surface-container-lowest rounded-DEFAULT shadow-[0_8px_32px_0_rgba(25,28,30,0.02)] active:scale-95 transition-all">
+<div class="w-12 h-12 mb-3 rounded-full bg-error-container/40 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<span class="font-headline font-semibold text-sm text-on-surface">Expenses</span>
+</button>
+</div>
+</section>
+<!-- Stats Row -->
+<section class="flex gap-4">
+<div class="flex-1 p-5 bg-surface-container-low rounded-DEFAULT">
+<p class="font-label text-xs uppercase tracking-wider text-on-surface-variant mb-1">Open Tickets</p>
+<div class="flex items-baseline gap-2">
+<span class="font-headline text-3xl font-bold text-on-surface">14</span>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">+2</span>
+</div>
+</div>
+<div class="flex-1 p-5 bg-surface-container-low rounded-DEFAULT">
+<p class="font-label text-xs uppercase tracking-wider text-on-surface-variant mb-1">Today's Revenue</p>
+<div class="flex items-baseline gap-1">
+<span class="font-headline text-xl font-bold text-on-surface">₹</span>
+<span class="font-headline text-2xl font-bold text-on-surface">8,450</span>
+</div>
+</div>
+</section>
+<!-- Recent Tickets List -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-1">
+<h2 class="font-headline font-bold text-lg text-on-surface">Recent Tickets</h2>
+<button class="text-sm font-semibold text-primary">View All</button>
+</div>
+<div class="bg-surface-container-lowest rounded-DEFAULT overflow-hidden shadow-[0_4px_24px_0_rgba(25,28,30,0.02)]">
+<!-- Ticket Item 1 -->
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/10">
+<div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+<img alt="Customer Profile" class="w-full h-full object-cover" data-alt="Portrait of a smiling male customer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtrpWI0x9tQ9LpZFx9TXEEmba8iPC5wqwhbGr8uGXxZ7qnkNSWu8gCemY_bZE5-Sg4EsIaEUPoTim3wqCLOwL9SZ7NVtIhsqAQeakPKc9tWy6tw_NlIejxpbMK-4DzsplluXpyEaWP6H9nWLWu_0O9LcNs-7SW6dWIXTnRq5uQvt19v8HUIyplcUkK3zyZVDb4Zy0XrNI-425bQOjIIBQSpAC49dqyHKCpBmptgVDZy6fyL14rnlKweorBM3MSRrdIpgE4QiEP33Qm"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface truncate">Rahul Sharma</h3>
+<span class="font-label text-[10px] text-on-surface-variant">10:45 AM</span>
+</div>
+<p class="text-sm text-on-surface-variant truncate">iPhone 13 • Screen Replacement</p>
+</div>
+<div class="shrink-0">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-label font-bold text-[10px] rounded-full uppercase">In Progress</span>
+</div>
+</div>
+<!-- Ticket Item 2 -->
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/10">
+<div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shrink-0">
+<img alt="Customer Profile" class="w-full h-full object-cover" data-alt="Portrait of a female business customer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnmp5PxCufao1JkEa06Eu8hu8rwekWlUTbirOPpycuBqoifzu3noKajOdLQIAQ-dA19gF5JGrLjUXYexsTKCfBTYkjxPbsxGKwR-o2T7zWVSRWlCxEaDNHpX96nMMSygzYxfozVQgXlIrL9NU8HIhsowofvhwcSTQbRBZMrItNmHCcyV9DAWgSXc2Ku7NnTF8YKO_J8Zmc0tsqn6ZEn6aqf97My9kf-2UwdLGNP6Nw9TVQ8mJ_qKzX60QK9I19wVuNld8UzfyHT7NZ"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface truncate">Priya Patel</h3>
+<span class="font-label text-[10px] text-on-surface-variant">9:15 AM</span>
+</div>
+<p class="text-sm text-on-surface-variant truncate">MacBook Air M1 • Battery Issue</p>
+</div>
+<div class="shrink-0">
+<span class="px-3 py-1 bg-primary-fixed text-primary font-label font-bold text-[10px] rounded-full uppercase">Completed</span>
+</div>
+</div>
+<!-- Ticket Item 3 -->
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden shrink-0">
+<span class="font-headline font-bold text-on-surface-variant">AK</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="font-headline font-bold text-on-surface truncate">Amit Kumar</h3>
+<span class="font-label text-[10px] text-on-surface-variant">Yesterday</span>
+</div>
+<p class="text-sm text-on-surface-variant truncate">OnePlus 9R • Charging Port</p>
+</div>
+<div class="shrink-0">
+<span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant font-label font-bold text-[10px] rounded-full uppercase">Pending</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Contextual Help Card -->
+<section class="pb-12">
+<div class="bg-indigo-900 p-6 rounded-DEFAULT relative overflow-hidden group">
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-700/30 rounded-full blur-3xl group-hover:bg-indigo-600/40 transition-all"></div>
+<div class="relative z-10">
+<h3 class="font-headline font-bold text-white text-lg mb-2">Automate your billing</h3>
+<p class="text-indigo-200 text-sm mb-4 leading-relaxed">Send professional invoices to customers via WhatsApp in one click.</p>
+<button class="bg-white text-primary font-headline font-bold text-xs px-6 py-3 rounded-full shadow-lg active:scale-95 transition-all">
+                        Setup Invoicing
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl z-50 rounded-t-none border-t border-slate-200/15 dark:border-slate-800/15 shadow-[0_-4px_24px_0_rgba(25,28,30,0.02)]">
+<a class="flex flex-col items-center justify-center bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 rounded-full px-5 py-2 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-[0.05em] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-indigo-600 dark:hover:text-indigo-300 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">confirmation_number</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-[0.05em] mt-1">Tickets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-indigo-600 dark:hover:text-indigo-300 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-[0.05em] mt-1">Customers</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 px-5 py-2 hover:text-indigo-600 dark:hover:text-indigo-300 active:scale-90 transition-all duration-200 ease-out" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-[0.05em] mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

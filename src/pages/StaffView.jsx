@@ -46,49 +46,48 @@ const StaffView = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-full gap-3">
+        <div className="flex flex-col min-h-full gap-5 pb-20">
             {/* Compact Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-5 bg-primary rounded-2xl text-on-primary shadow-lg shadow-primary/20">
                 <div>
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-primary-600 uppercase tracking-widest">Field Ops</span>
+                    <div className="flex items-center gap-1.5 mb-1.5 opacity-80">
+                        <div className="w-1.5 h-1.5 rounded-full bg-on-primary animate-pulse" />
+                        <span className="font-label text-[9px] font-black uppercase tracking-widest">Field Ops</span>
                     </div>
-                    <h1 className="text-[15px] font-semibold text-slate-900 tracking-tight">
+                    <h1 className="font-headline text-lg font-bold tracking-tight mb-1">
                         Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Technician'}
                     </h1>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                        <span className="text-slate-700 font-semibold">{activeCount}</span> active · <span className="text-slate-700 font-semibold">{completedCount}</span> done
+                    <p className="text-sm opacity-90 font-medium">
+                        {activeCount} active · {completedCount} done
                     </p>
                 </div>
 
                 {/* Mini progress */}
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="text-[20px] font-black text-slate-900 leading-none">{statsProgress}%</span>
-                    <div className="w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="flex flex-col items-end gap-1.5 shrink-0 bg-white/10 p-3 rounded-xl backdrop-blur-md">
+                    <span className="font-headline text-[22px] font-black leading-none">{statsProgress}%</span>
+                    <div className="w-20 h-1.5 bg-black/20 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-primary-500 rounded-full transition-all duration-700"
+                            className="h-full bg-white rounded-full transition-all duration-700"
                             style={{ width: `${statsProgress}%` }}
                         />
                     </div>
-                    <span className="text-[9px] text-slate-400 uppercase tracking-wide">Done</span>
                 </div>
             </div>
 
             {/* Search bar */}
             <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-300" size={13} />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant/70" size={16} />
                 <input
                     type="text"
                     placeholder="Find tickets..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-100 rounded-lg text-[12px] font-medium text-slate-900 focus:outline-none focus:border-primary-400 shadow-sm placeholder:text-slate-300 transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/30 rounded-full font-body text-sm font-medium text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-[0_4px_24px_rgba(25,28,30,0.02)] transition-all placeholder:text-on-surface-variant/50"
                 />
             </div>
 
             {/* Tab Segments — compact pill */}
-            <div className="flex p-1 bg-slate-100/70 rounded-lg overflow-hidden gap-1">
+            <div className="flex p-1 bg-surface-container-high/50 rounded-xl overflow-hidden gap-1">
                 {[
                     { id: 'my-tasks', label: 'Active', icon: CircleDashed },
                     { id: 'completed', label: 'Done', icon: CheckCircle2 },
@@ -97,9 +96,9 @@ const StaffView = () => {
                     <button
                         key={tab.id}
                         onClick={() => setFilter(tab.id)}
-                        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-200 ${filter === tab.id ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${filter === tab.id ? 'bg-surface-container-lowest text-on-surface shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'text-on-surface-variant hover:text-on-surface'}`}
                     >
-                        <tab.icon size={12} className={filter === tab.id ? 'text-primary-500' : 'text-slate-300'} />
+                        <tab.icon size={14} className={filter === tab.id ? 'text-primary' : 'text-outline'} />
                         {tab.label}
                     </button>
                 ))}
@@ -107,12 +106,12 @@ const StaffView = () => {
 
             {/* Task List */}
             {loading && tasks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-slate-300">
-                    <Loader2 size={24} className="animate-spin mb-3" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Syncing...</p>
+                <div className="flex flex-col items-center justify-center py-16 text-on-surface-variant">
+                    <Loader2 size={24} className="animate-spin mb-3 text-primary" />
+                    <p className="font-label text-[10px] font-bold uppercase tracking-widest">Syncing...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {filteredTasks.length > 0 ? (
                         filteredTasks.map(task => (
                             <div key={task.id} className="animate-fade-in">
@@ -124,17 +123,17 @@ const StaffView = () => {
                         ))
                     ) : (
                         <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
-                            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
-                                <Search size={20} className="text-slate-300" />
+                            <div className="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center mb-4">
+                                <Search size={22} className="text-outline" />
                             </div>
-                            <h3 className="text-[13px] font-semibold text-slate-700">Quiet day?</h3>
-                            <p className="mt-1 text-[11px] text-slate-400 max-w-xs mx-auto">
+                            <h3 className="font-headline text-[15px] font-bold text-on-surface">Quiet day?</h3>
+                            <p className="mt-1 text-sm text-on-surface-variant max-w-xs mx-auto">
                                 No tasks match this filter.
                             </p>
                             {filter === 'my-tasks' && (
                                 <button
                                     onClick={() => setFilter('all')}
-                                    className="mt-4 px-4 py-1.5 bg-slate-900 hover:bg-black text-white text-[11px] font-semibold rounded-lg transition-all tap-highlight"
+                                    className="mt-6 px-5 py-2 bg-on-surface hover:bg-black text-surface bg-slate-900 border border-transparent rounded-full font-bold text-xs transition-all active:scale-95"
                                 >
                                     Browse all jobs
                                 </button>
