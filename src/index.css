@@ -7,21 +7,27 @@
 /* ── Design Tokens ─────────────────────────────────────── */
 :root {
   /* Earthy Semantic Colors */
-  --navy:           #4A3B32; /* Deep brown/umber */
-  --navy-hover:     #3A2E27;
-  --sa-purple:      #6B5B4C; /* Warm taupe for SA */
-  --sa-surface:     #F3EFEA;
-  --amber:          #D97D54; /* Terracotta / Rust */
-  --amber-surface:  #FDF3E6;
-  --blue:           #5C715E; /* Sage Green instead of Blue */
-  --blue-surface:   #EFF3F0;
-  --green:          #3E5936; /* Forest Green */
-  --green-surface:  #EBEEDD;
-  --red:            #A44238; /* Earthy brick red */
-  --red-surface:    #F7E9E8;
-  --grey-100:       #F7F6F2; /* Warm off-white background */
-  --grey-600:       #8C847A;
-  --grey-900:       #2B2825; /* Soft earth black */
+  /* TaskPod Brand Colors */
+  --navy:           #002B36; /* Deep Navy */
+  --navy-hover:     #003d4d;
+  --teal:           #00D1B2; /* Vibrant Teal */
+  --teal-hover:     #00bda1;
+  --teal-surface:   #E6FBFA;
+  
+  /* Semantic Tones (Safe to keep or adjust) */
+  --sa-purple:      #6366F1; /* Indigo for SA */
+  --sa-surface:     #EEF2FF;
+  --amber:          #F59E0B; /* True Amber */
+  --amber-surface:  #FFFBEB;
+  --blue:           #3B82F6; /* True Blue */
+  --blue-surface:   #EFF6FF;
+  --green:          #10B981; /* Success Green */
+  --green-surface:  #ECFDF5;
+  --red:            #EF4444; /* Alert Red */
+  --red-surface:    #FEF2F2;
+  --grey-100:       #F8FAFC;
+  --grey-600:       #64748B;
+  --grey-900:       #0F172A;
 
   /* Spacing */
   --space-xs:  4px;

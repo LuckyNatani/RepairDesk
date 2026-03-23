@@ -17,7 +17,7 @@ export default defineConfig({
         name: 'TaskPod',
         short_name: 'TaskPod',
         description: 'Lightweight task management for small businesses',
-        theme_color: '#1E3A5F',
+        theme_color: '#002B36',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',

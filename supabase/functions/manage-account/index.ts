@@ -1,12 +1,21 @@
-import { serve } from "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from "npm:@supabase/supabase-js"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 const SUPERADMIN_USER_ID = Deno.env.get('SUPERADMIN_USER_ID')!
 
-serve(async (req) => {
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   const { data: { user } } = await supabase.auth.getUser(req.headers.get('Authorization')?.split('Bearer ')[1] || '')
-  if (!user || user.id !== SUPERADMIN_USER_ID) return new Response('Forbidden', { status: 403 })
+  if (!user || user.id !== SUPERADMIN_USER_ID) return new Response('Forbidden', { status: 403, headers: corsHeaders })
 
   const { action, businessId, days } = await req.json()
 
@@ -36,11 +45,11 @@ serve(async (req) => {
       eventType = 'trial_extended'
       break
     default:
-      return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 })
+      return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
   const { error } = await supabase.from('businesses').update(update).eq('id', businessId)
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, note: `${action} via SA panel` })
 
@@ -51,5 +60,5 @@ serve(async (req) => {
     await supabase.from('notifications').insert({ user_id: biz2.owner_id, business_id: businessId, task_id: null, event_type: action === 'activate' || action === 'reactivate' ? 'account_activated' : 'account_suspended', message: msg })
   }
 
-  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } })
+  return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 })

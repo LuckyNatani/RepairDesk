@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 
 // Pages
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import ChangePassword from './pages/ChangePassword'
 import TrialExpired from './pages/TrialExpired'
@@ -19,6 +20,7 @@ import SACreateBusiness from './pages/SA/SACreateBusiness'
 
 // Components
 import SidebarNav from './components/layout/SidebarNav'
+import Logo from './components/shared/Logo'
 
 // ── Auth Guard ──────────────────────────────────────────
 function RequireAuth({ children }) {
@@ -95,11 +97,27 @@ function AuthedApp() {
 
 function LoadingScreen() {
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--navy)', flexDirection: 'column', gap: 16 }}>
-      <div style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.15)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#002B36', flexDirection: 'column', gap: 20 }}>
+      <div className="animate-pulse">
+        <Logo className="w-16 h-16" textClassName="hidden" />
       </div>
-      <p style={{ color: 'rgba(255,255,255,0.6)', fontFamily: '"Inter", sans-serif', fontSize: 14, margin: 0 }}>Loading TaskPod…</p>
+      <div className="flex flex-col items-center gap-1">
+        <p style={{ color: '#fff', fontFamily: '"Inter", sans-serif', fontSize: 16, fontWeight: 700, margin: 0, letterSpacing: '0.05em' }}>TaskPod</p>
+        <div style={{ width: 100, height: 2, background: 'rgba(255,255,255,0.1)', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
+          <div className="loading-bar-inner" />
+        </div>
+      </div>
+      <style>{`
+        @keyframes loadingBar {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .loading-bar-inner {
+          position: absolute; top: 0; left: 0; height: 100%; width: 50%;
+          background: #00D1B2;
+          animation: loadingBar 1s infinite linear;
+        }
+      `}</style>
     </div>
   )
 }
@@ -109,6 +127,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="*" element={<RequireAuth><AuthedApp /></RequireAuth>} />
         </Routes>

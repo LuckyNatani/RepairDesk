@@ -60,7 +60,7 @@ export default function AdminPanel() {
   const addStaff = async () => {
     if (!addForm.name || !addForm.email || !addForm.phone || !addForm.tempPassword) { show('All fields required', 'error'); return }
     setAddLoading(true)
-    const { error } = await supabase.functions.invoke('manage-staff', { body: { action: 'create', businessId, ...addForm } })
+    const { error } = await supabase.functions.invoke('manage-staff-fix', { body: { action: 'create', businessId, ...addForm } })
     setAddLoading(false)
     if (error) show('Failed to add staff: ' + error.message, 'error')
     else { show('Staff added!', 'success'); setAddForm({ name: '', email: '', phone: '', tempPassword: '' }); loadData() }

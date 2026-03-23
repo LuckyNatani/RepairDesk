@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
+import Logo from '../components/shared/Logo'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -29,7 +30,6 @@ export default function Login() {
         setTimeout(() => { setLocked(false); setFailCount(0) }, 30000)
       }
     }
-    // Success → App.jsx auth state change handles redirect
   }
 
   const handleForgot = async () => {
@@ -39,59 +39,95 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--navy)' }}>
-      {/* Hero */}
-      <div style={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 32 }}>
-        <div style={{ width: 64, height: 64, background: 'rgba(255,255,255,0.15)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-md">
+        {/* Logo and Header */}
+        <div className="flex flex-col items-center mb-10">
+          <Logo className="w-16 h-16 mb-4" textClassName="text-3xl font-extrabold tracking-tighter" />
+          <p className="text-slate-500 font-medium text-center">Enter your credentials to access your dashboard</p>
         </div>
-        <h1 style={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 28, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>TaskPod</h1>
-        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14, margin: 0 }}>Task management for field teams</p>
-      </div>
 
-      {/* Form Card */}
-      <div style={{ flex: '1', background: '#fff', borderRadius: '24px 24px 0 0', padding: '28px 24px', boxShadow: '0 -8px 32px rgba(0,0,0,0.15)' }}>
-        <h2 style={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 20, color: 'var(--grey-900)', marginBottom: 24 }}>Sign In</h2>
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 p-8 border border-slate-100">
+          <h2 className="text-2xl font-bold text-slate-900 mb-8">Welcome Back</h2>
 
-        {locked && (
-          <div style={{ background: 'var(--red-surface)', color: 'var(--red)', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 }}>
-            Too many failed attempts. Please wait 30 seconds.
-          </div>
-        )}
-        {error && !locked && (
-          <div style={{ background: 'var(--red-surface)', color: 'var(--red)', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 }}>
-            {error}
-          </div>
-        )}
-        {forgotSent && (
-          <div style={{ background: 'var(--green-surface)', color: 'var(--green)', borderRadius: 8, padding: '10px 14px', fontSize: 13, marginBottom: 16 }}>
-            Password reset link sent! Check your email.
-          </div>
-        )}
-
-        <form onSubmit={handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label className="input-label">Email</label>
-            <input className="input" type="email" autoComplete="email" inputMode="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
-          </div>
-          <div>
-            <label className="input-label">Password</label>
-            <div style={{ position: 'relative' }}>
-              <input className="input" type={showPw ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={{ paddingRight: 44 }} />
-              <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)', display: 'flex' }}>
-                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+          {locked && (
+            <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm font-medium mb-6 animate-shake">
+              Too many failed attempts. Please wait 30 seconds.
             </div>
-          </div>
-          <button type="submit" className="btn btn-primary btn-full" disabled={disabled} style={{ marginTop: 4, fontSize: 15 }}>
-            {loading ? 'Signing in…' : <><LogIn size={16} /> Sign In</>}
-          </button>
-        </form>
+          )}
+          {error && !locked && (
+            <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm font-medium mb-6">
+              {error}
+            </div>
+          )}
+          {forgotSent && (
+            <div className="bg-teal-50 text-teal-700 rounded-lg p-4 text-sm font-medium mb-6">
+              Password reset link sent! Check your email.
+            </div>
+          )}
 
-        <button onClick={handleForgot} style={{ display: 'block', margin: '20px auto 0', background: 'none', border: 'none', color: 'var(--grey-600)', cursor: 'pointer', fontSize: 13 }}>
-          Forgot your password?
-        </button>
-        <p style={{ textAlign: 'center', color: '#BDBDBD', fontSize: 12, marginTop: 32 }}>No account registration. Contact your admin.</p>
+          <form onSubmit={handleSignIn} className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <input 
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium" 
+                type="email" 
+                autoComplete="email" 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+                placeholder="name@company.com" 
+              />
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+                <button 
+                  type="button" 
+                  onClick={handleForgot}
+                  className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors"
+                >
+                  Forgot?
+                </button>
+              </div>
+              <div className="relative">
+                <input 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium pr-12" 
+                  type={showPw ? 'text' : 'password'} 
+                  autoComplete="current-password" 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  placeholder="••••••••" 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPw(v => !v)} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="w-full py-4 bg-[#002B36] text-white font-bold rounded-xl hover:bg-[#003d4d] transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 mt-2" 
+              disabled={disabled}
+            >
+              {loading ? 'Authenticating...' : <><LogIn size={20} /> Sign In</>}
+            </button>
+          </form>
+
+          <div className="mt-10 pt-8 border-t border-slate-50 flex flex-col items-center gap-4">
+            <p className="text-slate-400 text-sm font-medium">Don't have an account?</p>
+            <button 
+              onClick={() => window.location.href = 'mailto:admin@taskpod.com'} 
+              className="px-6 py-2.5 bg-white text-slate-700 font-bold rounded-lg border border-slate-200 hover:border-teal-500 hover:text-teal-600 transition-all text-sm shadow-sm"
+            >
+              Request Access
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

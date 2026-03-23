@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { LayoutDashboard, List, BarChart2, Users, CheckSquare, Bell, LogOut } from 'lucide-react'
+import Logo from '../shared/Logo'
 
 export default function SidebarNav() {
   const { role, logout } = useAuth()
@@ -27,13 +28,10 @@ export default function SidebarNav() {
   }
 
   return (
-    <div className="main-sidebar">
+    <div className="main-sidebar bg-[#002B36]">
       {/* Logo */}
-      <div style={{ padding: '20px 16px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        </div>
-        <span style={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 16, color: '#fff' }}>TaskPod</span>
+      <div style={{ padding: '24px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <Logo className="w-8 h-8" textClassName="text-xl font-bold tracking-tight text-white" />
       </div>
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '8px 0' }}>

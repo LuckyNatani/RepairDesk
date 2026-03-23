@@ -36,7 +36,7 @@ export default function SABusinessDetail() {
   const runAction = async (action) => {
     setActionLoading(true)
     const body = action === 'extend_trial' ? { action, businessId: id, days: extendDays } : { action, businessId: id }
-    const { error } = await supabase.functions.invoke('manage-account', { body })
+    const { error } = await supabase.functions.invoke('manage-account-fix', { body })
     setActionLoading(false); setConfirm(null)
     if (error) show('Action failed: ' + error.message, 'error')
     else { show('Done!', 'success'); load() }

@@ -15,7 +15,7 @@ export default function SACreateBusiness() {
     e.preventDefault()
     if (!form.businessName || !form.ownerName || !form.ownerEmail || !form.ownerPhone || !form.tempPassword) { showError('All fields required'); return }
     setLoading(true)
-    const { data, error } = await supabase.functions.invoke('create-business', { body: form })
+    const { data, error } = await supabase.functions.invoke('create-business-fix', { body: form })
     setLoading(false)
     if (error) showError('Failed: ' + error.message)
     else { setCreated(data); show('Business created!', 'success') }
