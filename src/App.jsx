@@ -36,12 +36,12 @@ function AuthedApp() {
   if (loading) return <LoadingScreen />
   
   if (!profile) return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--navy)', padding: 24, textAlign: 'center' }}>
-      <div style={{ color: '#fff', marginBottom: 20 }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--white)', padding: 24, textAlign: 'center' }}>
+      <div style={{ color: 'var(--black)', marginBottom: 20 }}>
         <h2 style={{ fontFamily: '"Inter", sans-serif' }}>Profile Not Found</h2>
         <p style={{ opacity: 0.7 }}>We couldn't find your user record. Please contact support.</p>
       </div>
-      <button onClick={logout} style={{ padding: '10px 20px', background: 'var(--orange)', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Sign Out</button>
+      <button onClick={logout} className="btn btn-primary">Sign Out</button>
     </div>
   )
 
@@ -99,7 +99,7 @@ function LoadingScreen() {
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--white)', flexDirection: 'column', gap: 20 }}>
       <div className="animate-pulse">
-        <Logo className="w-16 h-16" textClassName="hidden" textColor="white" />
+        <Logo className="w-16 h-16" textClassName="hidden" textColor="default" />
       </div>
       <div className="flex flex-col items-center gap-1">
         <p style={{ color: 'var(--black)', fontFamily: '"Inter", sans-serif', fontSize: 16, fontWeight: 700, margin: 0, letterSpacing: '0.05em' }}>TaskPod</p>

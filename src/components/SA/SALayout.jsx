@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useSABusinesses } from '../../hooks/useSABusinesses'
 import { LayoutDashboard, Building2, Settings, LogOut, ChevronLeft, ChevronRight } from 'lucide-react'
+import Logo from '../shared/Logo'
 
 function SANav({ collapsed, setCollapsed, activePath }) {
   const { logout } = useAuth()
