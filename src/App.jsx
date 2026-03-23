@@ -127,7 +127,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="*" element={<RequireAuth><AuthedApp /></RequireAuth>} />
         </Routes>
@@ -141,4 +141,17 @@ function PublicRoute({ children }) {
   if (loading) return null
   if (user) return <Navigate to="/" replace />
   return children
+}
+
+function HomeRoute() {
+  const { user, role, loading } = useAuth()
+  if (loading) return <LoadingScreen />
+  if (!user) return <Landing />
+  
+  // Dashboard routing
+  if (role === 'superadmin') return <Navigate to="/sa" replace />
+  if (role === 'staff') return <Navigate to="/my-tasks" replace />
+  
+  // Default for owner or anything else
+  return <AuthedApp />
 }

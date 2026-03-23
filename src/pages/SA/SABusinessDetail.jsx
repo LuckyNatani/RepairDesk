@@ -60,14 +60,14 @@ export default function SABusinessDetail() {
         <div className="card" style={{ padding: '14px 16px', marginBottom: 14 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--grey-600)', marginBottom: 6, textTransform: 'uppercase' }}>Owner</div>
           <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{biz.owner?.name}</div>
-          <a href={`mailto:${biz.owner?.email}`} style={{ fontSize: 13, color: 'var(--blue)', display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', marginBottom: 4 }}><Mail size={13} />{biz.owner?.email}</a>
-          <a href={toTelLink(biz.owner?.phone || '')} style={{ fontSize: 13, color: 'var(--blue)', display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}><Phone size={13} />{biz.owner?.phone}</a>
+          <a href={`mailto:${biz.owner?.email}`} style={{ fontSize: 13, color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none', marginBottom: 4 }}><Mail size={13} />{biz.owner?.email}</a>
+          <a href={toTelLink(biz.owner?.phone || '')} style={{ fontSize: 13, color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}><Phone size={13} />{biz.owner?.phone}</a>
         </div>
 
         {/* Trial Info */}
         {biz.trial_ends_at && (
-          <div className="card" style={{ padding: '12px 16px', marginBottom: 14, background: 'var(--amber-surface)' }}>
-            <span style={{ fontSize: 13, color: '#795548', fontWeight: 500 }}>
+          <div className="card" style={{ padding: '12px 16px', marginBottom: 14, background: 'var(--gray-50)', border: '1px solid var(--gray-100)' }}>
+            <span style={{ fontSize: 13, color: 'var(--gray-600)', fontWeight: 600 }}>
               Trial {status === 'trial_expired' ? 'expired' : 'ends'}: {format(new Date(biz.trial_ends_at), 'dd MMM yyyy, h:mm a')}
             </span>
           </div>
@@ -78,17 +78,17 @@ export default function SABusinessDetail() {
           <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, margin: '0 0 12px' }}>Actions</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
             {(status === 'trial_active' || status === 'trial_expired') && (
-              <button className="btn btn-green btn-sm" onClick={() => setConfirm({ action: 'activate', label: 'Activate Account', color: 'green' })}>Activate</button>
+              <button className="btn btn-teal btn-sm" onClick={() => setConfirm({ action: 'activate', label: 'Activate Account', color: 'teal' })}>Activate</button>
             )}
             {status === 'active' && (
               <button className="btn btn-danger btn-sm" onClick={() => setConfirm({ action: 'suspend', label: 'Suspend', color: 'red' })}>Suspend</button>
             )}
             {status === 'suspended' && (
-              <button className="btn btn-green btn-sm" onClick={() => setConfirm({ action: 'reactivate', label: 'Reactivate', color: 'green' })}>Reactivate</button>
+              <button className="btn btn-teal btn-sm" onClick={() => setConfirm({ action: 'reactivate', label: 'Reactivate', color: 'teal' })}>Reactivate</button>
             )}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input type="number" min={1} max={90} value={extendDays} onChange={e => setExtendDays(Number(e.target.value))} style={{ width: 56, padding: '6px 10px', border: '1.5px solid #E0E0E0', borderRadius: 6, fontSize: 13 }} />
-              <button className="btn btn-ghost btn-sm" onClick={() => setConfirm({ action: 'extend_trial', label: `Extend Trial ${extendDays}d`, color: 'navy' })}>Extend Trial</button>
+              <input type="number" min={1} max={90} value={extendDays} onChange={e => setExtendDays(Number(e.target.value))} style={{ width: 56, padding: '6px 10px', border: '1.5px solid var(--gray-200)', borderRadius: 6, fontSize: 13 }} />
+              <button className="btn btn-ghost btn-sm" onClick={() => setConfirm({ action: 'extend_trial', label: `Extend Trial ${extendDays}d`, color: 'black' })}>Extend Trial</button>
             </div>
           </div>
         </div>
@@ -99,8 +99,8 @@ export default function SABusinessDetail() {
           {staff.map(s => (
             <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F0F0F0' }}>
               <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{s.name}</span>
-              <span className="badge badge-sm" style={{ background: '#F5F5F5', color: 'var(--grey-600)' }}>{s.role}</span>
-              <span className="badge badge-sm" style={{ background: s.is_active ? 'var(--green-surface)' : '#F5F5F5', color: s.is_active ? 'var(--green)' : 'var(--grey-600)' }}>{s.is_active ? 'Active' : 'Inactive'}</span>
+              <span className="badge badge-sm" style={{ background: 'var(--gray-50)', color: 'var(--gray-500)' }}>{s.role}</span>
+              <span className="badge badge-sm" style={{ background: s.is_active ? 'var(--teal-surface)' : 'var(--gray-50)', color: s.is_active ? 'var(--teal)' : 'var(--gray-500)' }}>{s.is_active ? 'Active' : 'Inactive'}</span>
             </div>
           ))}
         </div>

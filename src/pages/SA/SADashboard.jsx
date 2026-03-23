@@ -27,7 +27,7 @@ export default function SADashboard() {
 
         {/* Stats */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 28, flexWrap: 'wrap' }}>
-          {[['Total', counts.total, 'var(--sa-purple)'], ['Trial', counts.trial, 'var(--amber)'], ['Active', counts.active, 'var(--green)'], ['Suspended', counts.suspended, 'var(--red)']].map(([label, val, color]) => (
+          {[['Total', counts.total, 'var(--black)'], ['Trial', counts.trial, 'var(--gray-500)'], ['Active', counts.active, 'var(--teal)'], ['Suspended', counts.suspended, 'var(--red)']].map(([label, val, color]) => (
             <div key={label} style={{ background: '#fff', borderRadius: 12, padding: '14px 18px', minWidth: 80, boxShadow: 'var(--shadow-md)', flex: 1 }}>
               <div style={{ fontFamily: '"Inter", sans-serif', fontSize: 24, fontWeight: 700, color }}>{val}</div>
               <div style={{ fontSize: 12, color: 'var(--grey-600)', fontWeight: 600, marginTop: 2 }}>{label}</div>

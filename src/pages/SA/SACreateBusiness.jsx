@@ -24,8 +24,8 @@ export default function SACreateBusiness() {
   if (created) return (
     <SALayout>
       <div style={{ padding: 32, maxWidth: 480 }}>
-        <div style={{ background: 'var(--green-surface)', borderRadius: 16, padding: 24, textAlign: 'center' }}>
-          <h2 style={{ fontFamily: '"Inter", sans-serif', color: 'var(--green)', marginBottom: 12 }}>Business Created!</h2>
+        <div style={{ background: 'var(--teal-surface)', borderRadius: 16, padding: 24, textAlign: 'center', border: '1px solid var(--teal)' }}>
+          <h2 style={{ fontFamily: '"Inter", sans-serif', color: 'var(--teal)', marginBottom: 12 }}>Business Created!</h2>
           <p style={{ fontSize: 14, color: 'var(--grey-900)', marginBottom: 4 }}><strong>{created.businessName}</strong></p>
           <p style={{ fontSize: 13, color: 'var(--grey-600)', margin: '4px 0' }}>Owner: {created.ownerEmail}</p>
           <p style={{ fontSize: 13, color: 'var(--grey-600)', margin: '4px 0' }}>Temp password: <strong>{created.tempPassword}</strong></p>
