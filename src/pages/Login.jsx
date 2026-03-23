@@ -51,7 +51,7 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] p-10 border border-slate-100">
-          <h2 className="text-2xl font-bold text-[#002B36] mb-8">Sign In</h2>
+          <h2 className="text-2xl font-bold text-black mb-8">Sign In</h2>
 
           {locked && (
             <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm font-bold mb-6">
@@ -115,7 +115,7 @@ export default function Login() {
 
             <button 
               type="submit" 
-              className="w-full py-4.5 bg-[#002B36] text-white font-bold rounded-2xl hover:bg-[#003d4d] transition-all shadow-xl shadow-navy/20 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 mt-4" 
+              className="w-full py-4.5 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 mt-4" 
               disabled={disabled}
             >
               {loading ? 'Verifying...' : <><LogIn size={20} /> Sign In</>}
@@ -126,7 +126,7 @@ export default function Login() {
             <p className="text-slate-400 text-sm font-medium">Don't have an account yet?</p>
             <button 
               onClick={() => window.location.href = 'mailto:admin@taskpod.com'} 
-              className="w-full py-3.5 bg-white text-[#002B36] font-bold rounded-2xl border-2 border-slate-50 hover:border-[#00D1B2] hover:bg-[#FAFAFA] transition-all text-sm shadow-sm"
+              className="w-full py-3.5 bg-white text-black font-bold rounded-2xl border-2 border-gray-100 hover:border-teal-500 hover:bg-white transition-all text-sm shadow-sm"
             >
               Request Access
             </button>

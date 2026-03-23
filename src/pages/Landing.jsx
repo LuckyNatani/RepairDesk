@@ -7,22 +7,22 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-[#0F172A] font-sans selection:bg-slate-200 w-full overflow-x-hidden">
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-teal-100 w-full overflow-x-hidden">
       {/* Nav */}
-      <div className="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
+      <div className="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
         <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto w-full" style={{ maxWidth: '1200px' }}>
           <Logo />
           <div className="flex items-center gap-4 md:gap-8">
-            <a href="#features" className="hidden md:block text-sm font-semibold text-slate-500 hover:text-[#002B36] transition-colors">Features</a>
+            <a href="#features" className="hidden md:block text-sm font-semibold text-gray-500 hover:text-black transition-colors">Features</a>
             <button 
               onClick={() => navigate('/login')} 
-              className="text-sm font-bold text-[#002B36] hover:text-[#00D1B2] transition-colors"
+              className="text-sm font-bold text-black hover:text-[#00D1B2] transition-colors"
             >
               Log in
             </button>
             <button 
               onClick={() => navigate('/login')} 
-              className="text-sm bg-[#002B36] text-white px-6 py-2.5 rounded-full font-bold hover:bg-[#003d4d] transition-all active:scale-95 shadow-lg shadow-black/5"
+              className="text-sm bg-black text-white px-6 py-2.5 rounded-full font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/5"
             >
               Get Started
             </button>

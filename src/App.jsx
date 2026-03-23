@@ -97,13 +97,13 @@ function AuthedApp() {
 
 function LoadingScreen() {
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#002B36', flexDirection: 'column', gap: 20 }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--white)', flexDirection: 'column', gap: 20 }}>
       <div className="animate-pulse">
-        <Logo className="w-16 h-16" textClassName="hidden" />
+        <Logo className="w-16 h-16" textClassName="hidden" textColor="white" />
       </div>
       <div className="flex flex-col items-center gap-1">
-        <p style={{ color: '#fff', fontFamily: '"Inter", sans-serif', fontSize: 16, fontWeight: 700, margin: 0, letterSpacing: '0.05em' }}>TaskPod</p>
-        <div style={{ width: 100, height: 2, background: 'rgba(255,255,255,0.1)', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
+        <p style={{ color: 'var(--black)', fontFamily: '"Inter", sans-serif', fontSize: 16, fontWeight: 700, margin: 0, letterSpacing: '0.05em' }}>TaskPod</p>
+        <div style={{ width: 100, height: 2, background: 'var(--gray-100)', borderRadius: 1, overflow: 'hidden', position: 'relative' }}>
           <div className="loading-bar-inner" />
         </div>
       </div>

@@ -28,10 +28,10 @@ export default function SidebarNav() {
   }
 
   return (
-    <div className="main-sidebar bg-[#002B36]">
+    <div className="main-sidebar bg-white border-r border-slate-100">
       {/* Logo */}
-      <div style={{ padding: '24px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <Logo className="w-8 h-8" textClassName="text-xl font-bold tracking-tight text-white" />
+      <div style={{ padding: '24px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--gray-100)' }}>
+        <Logo className="w-8 h-8" textClassName="text-xl font-bold" textColor="default" />
       </div>
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '8px 0' }}>
@@ -43,7 +43,7 @@ export default function SidebarNav() {
         ))}
       </nav>
       {/* Logout */}
-      <div style={{ padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div style={{ padding: '8px 0', borderTop: '1px solid var(--gray-100)' }}>
         <button onClick={logout} className="sa-nav-item">
           <LogOut size={18} />
           <span>Sign Out</span>
