@@ -36,47 +36,44 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    // Initial session check with timeout fallback
+    let mounted = true
+    
+    // Initial fallback timeout (pushed to 20s for slow DB cold starts)
     const timeout = setTimeout(() => {
-      console.log('Auth initialization timeout reached')
-      setLoading(false)
-    }, 10000)
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('Session fetched:', !!session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        try {
-          await fetchProfile(session.user.id)
-        } catch (e) {
-          console.error('Initial profile fetch failed:', e)
-        }
+      if (mounted) {
+        console.log('Auth initialization timeout reached')
+        setLoading(false)
       }
-      clearTimeout(timeout)
-      setLoading(false)
-    }).catch(err => {
-      console.error('getSession error:', err)
-      clearTimeout(timeout)
-      setLoading(false)
-    })
+    }, 20000)
 
+    // Single source of truth for auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event, !!session)
+      console.log('[onAuthStateChange] Event:', event, 'Session:', !!session)
+      
+      if (!mounted) return
+
       try {
         setUser(session?.user ?? null)
+        
         if (session?.user) {
+          // If we have a user, fetch the profile immediately
           await fetchProfile(session.user.id)
         } else {
+          // No user, clear profile
           setProfile(null)
         }
       } catch (e) {
-        console.error('onAuthStateChange callback error:', e)
+        console.error('[onAuthStateChange] Error in callback:', e)
       } finally {
-        setLoading(false)
+        if (mounted) {
+          clearTimeout(timeout)
+          setLoading(false)
+        }
       }
     })
 
     return () => {
+      mounted = false
       clearTimeout(timeout)
       subscription.unsubscribe()
     }
