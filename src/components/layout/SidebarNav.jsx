@@ -1,9 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { LayoutDashboard, List, BarChart2, Users, CheckSquare, Bell, LogOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutDashboard, List, BarChart2, Users, CheckSquare, Bell, LogOut } from 'lucide-react'
 import Logo from '../shared/Logo'
+import { useState } from 'react'
 
 export default function SidebarNav() {
+  const [collapsed, setCollapsed] = useState(false)
   const { role, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -28,25 +30,31 @@ export default function SidebarNav() {
   }
 
   return (
-    <div className="main-sidebar bg-white border-r border-slate-100">
-      {/* Logo */}
-      <div style={{ padding: '24px 16px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid var(--gray-100)' }}>
-        <Logo className="w-8 h-8" textClassName="text-xl font-bold" textColor="default" />
+    <div className={`main-sidebar${collapsed ? ' collapsed' : ''}`}>
+      {/* Header with Logo + Toggle */}
+      <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <Logo className="w-8 h-8" textClassName={collapsed ? "hidden" : "text-xl font-bold"} textColor="white" />
+        <button 
+          onClick={() => setCollapsed(c => !c)} 
+          style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', padding: 4, display: 'flex' }}
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '8px 0' }}>
         {items.map(({ path, label, Icon }) => (
           <button key={path} onClick={() => navigate(path)} className={`sa-nav-item ${(location.pathname === path || (path === '/tasks' && location.pathname.startsWith('/tasks/'))) ? ' active' : ''}`}>
             <Icon size={18} />
-            <span>{label}</span>
+            {!collapsed && <span>{label}</span>}
           </button>
         ))}
       </nav>
       {/* Logout */}
-      <div style={{ padding: '8px 0', borderTop: '1px solid var(--gray-100)' }}>
+      <div style={{ padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <button onClick={logout} className="sa-nav-item">
           <LogOut size={18} />
-          <span>Sign Out</span>
+          {!collapsed && <span>Sign Out</span>}
         </button>
       </div>
     </div>
