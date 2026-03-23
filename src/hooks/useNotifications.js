@@ -1,69 +1,48 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from './useAuth';
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
-export const useNotifications = () => {
-    const { user } = useAuth();
-    const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
+export function useNotifications(userId) {
+  const [notifications, setNotifications] = useState([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const channelRef = useRef(null)
 
-    const fetchNotifications = async () => {
-        if (!user) return;
-        const { data, error } = await supabase
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(50);
+  const fetchNotifications = useCallback(async () => {
+    if (!userId) return
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(50)
+    setNotifications(data || [])
+    setUnreadCount(data?.filter(n => !n.is_read).length || 0)
+    setLoading(false)
+  }, [userId])
 
-        if (!error && data) {
-            setNotifications(data);
-            setUnreadCount(data.filter(n => !n.is_read).length);
-        }
-    };
+  useEffect(() => { fetchNotifications() }, [fetchNotifications])
 
-    useEffect(() => {
-        fetchNotifications();
+  useEffect(() => {
+    if (!userId) return
+    if (channelRef.current) supabase.removeChannel(channelRef.current)
+    const channel = supabase
+      .channel(`notifications:user_id=eq.${userId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, () => fetchNotifications())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, () => fetchNotifications())
+      .subscribe()
+    channelRef.current = channel
+    return () => { if (channelRef.current) supabase.removeChannel(channelRef.current) }
+  }, [userId, fetchNotifications])
 
-        if (user) {
-            const subscription = supabase
-                .channel('notifications_changes')
-                .on(
-                    'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-                    (payload) => {
-                        setNotifications(prev => [payload.new, ...prev]);
-                        setUnreadCount(prev => prev + 1);
-                    }
-                )
-                .subscribe();
+  const markRead = useCallback(async (notificationId) => {
+    await supabase.from('notifications').update({ is_read: true }).eq('id', notificationId)
+  }, [])
 
-            return () => {
-                supabase.removeChannel(subscription);
-            };
-        }
-    }, [user]);
+  const markAllRead = useCallback(async () => {
+    await supabase.from('notifications').update({ is_read: true }).eq('user_id', userId).eq('is_read', false)
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+    setUnreadCount(0)
+  }, [userId])
 
-    const markAsRead = async (id) => {
-        try {
-            await supabase.from('notifications').update({ is_read: true }).eq('id', id);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-            setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (error) {
-            console.error('Failed to mark read', error);
-        }
-    };
-
-    const markAllAsRead = async () => {
-        if(!user) return;
-        try {
-            await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
-            setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-            setUnreadCount(0);
-        } catch (error) {
-            console.error('Failed to mark all read', error);
-        }
-    }
-
-    return { notifications, unreadCount, markAsRead, markAllAsRead, refresh: fetchNotifications };
-};
+  return { notifications, unreadCount, loading, markRead, markAllRead, refetch: fetchNotifications }
+}

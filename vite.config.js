@@ -6,39 +6,40 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    react(),
+    react({
+      // Allow JSX in .js files (needed for hooks that return JSX like useAuth.js)
+      include: /\.(jsx?|tsx?)$/,
+    }),
     VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'sw.js',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'TaskPod',
         short_name: 'TaskPod',
-        description: 'Task Management for Teams',
-        theme_color: '#4F46E5',
+        description: 'Lightweight task management for small businesses',
+        theme_color: '#1E3A5F',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
         icons: [
           {
-            src: 'icons/icon-192.png',
+            src: '/icons/icon-192.png',
             sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any maskable'
+            type: 'image/png'
           },
           {
-            src: 'icons/icon-512.png',
+            src: '/icons/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
         ]
-      },
-      devOptions: {
-        enabled: true
       }
     })
   ],
+  optimizeDeps: {
+    esbuildOptions: {
+      loader: { '.js': 'jsx' },
+    },
+  },
 })

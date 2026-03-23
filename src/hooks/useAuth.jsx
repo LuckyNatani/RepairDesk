@@ -1,127 +1,122 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { subscribeToPush } from '../lib/pushNotifications';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
-const AuthContext = createContext();
+const AuthContext = createContext(null)
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [role, setRole] = useState(null);
-    const [roleError, setRoleError] = useState(null);
-    const [loading, setLoading] = useState(true);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-    const fetchUserRole = async (userId, isMounted) => {
+  const fetchProfile = useCallback(async (uid) => {
+    console.log('[fetchProfile] Starting fetch for uid:', uid)
+    try {
+      const result = await supabase
+        .from('users')
+        .select('*, businesses!users_business_id_fkey(id, name, account_status, trial_ends_at, next_task_number)')
+        .eq('id', uid)
+        .single()
+      
+      console.log('[fetchProfile] Query completed. Error:', result.error, 'Data:', result.data)
+
+      if (!result.error && result.data) {
+        setProfile(result.data)
+        // Update last_seen_at silently without awaiting
+        supabase.from('users').update({ last_seen_at: new Date().toISOString() }).eq('id', uid).then(r => console.log('[fetchProfile] last_seen_at update done', r.error))
+      } else {
+        console.warn('[fetchProfile] Profile not found or error occurred. Setting profile to null.')
+        setProfile(null)
+      }
+      return result.data
+    } catch (e) {
+      console.error('[fetchProfile] Exception caught:', e)
+      setProfile(null)
+      return null
+    }
+  }, [])
+
+  useEffect(() => {
+    // Initial session check with timeout fallback
+    const timeout = setTimeout(() => {
+      console.log('Auth initialization timeout reached')
+      setLoading(false)
+    }, 10000)
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Session fetched:', !!session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
         try {
-            if (!isMounted()) return;
-            setRoleError(null);
-
-            const { data, error } = await supabase
-                .from('users')
-                .select('role, company_id')
-                .eq('id', userId)
-                .single();
-
-            if (error) throw error;
-            if (!data) throw new Error("User record not found");
-
-            if (data.role !== 'superadmin' && !data.company_id) {
-                throw new Error("Missing company assignment");
-            }
-
-            if (isMounted()) setRole(data.role);
-        } catch (err) {
-            console.error('Error fetching user role:', err);
-            if (isMounted()) {
-                setRoleError(err.message || "Failed to fetch role");
-                setRole(null);
-            }
-        } finally {
-            if (isMounted()) setLoading(false);
+          await fetchProfile(session.user.id)
+        } catch (e) {
+          console.error('Initial profile fetch failed:', e)
         }
-    };
+      }
+      clearTimeout(timeout)
+      setLoading(false)
+    }).catch(err => {
+      console.error('getSession error:', err)
+      clearTimeout(timeout)
+      setLoading(false)
+    })
 
-    useEffect(() => {
-        let mounted = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event, !!session)
+      try {
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          await fetchProfile(session.user.id)
+        } else {
+          setProfile(null)
+        }
+      } catch (e) {
+        console.error('onAuthStateChange callback error:', e)
+      } finally {
+        setLoading(false)
+      }
+    })
 
-        const initializeAuth = async () => {
-            try {
-                // Check active sessions and sets the user
-                const { data: { session }, error } = await supabase.auth.getSession();
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
+  }, [fetchProfile])
 
-                if (error) {
-                    console.error("Error getting session:", error);
-                    if (mounted) setLoading(false);
-                    return;
-                }
+  const logout = useCallback(async () => {
+    setUser(null)
+    setProfile(null)
+    // Force clear local storage to break out of gotrue locks in dev
+    for (let key in localStorage) {
+      if (key.startsWith('sb-')) localStorage.removeItem(key)
+    }
+    await supabase.auth.signOut().catch(err => console.error('Sign out error:', err))
+  }, [])
 
-                if (session?.user) {
-                    if (mounted) setUser(session.user);
-                    await fetchUserRole(session.user.id, () => mounted);
-                    if (mounted) subscribeToPush(session.user.id);
-                } else {
-                    // Important: Always set loading to false if no session
-                    if (mounted) {
-                        setUser(null);
-                        setRole(null);
-                        setLoading(false);
-                    }
-                }
-            } catch (err) {
-                console.error('Auth init error:', err);
-                if (mounted) setLoading(false);
-            }
-        };
+  const refreshProfile = useCallback(async () => {
+    if (user) await fetchProfile(user.id)
+  }, [user, fetchProfile])
 
-        initializeAuth();
+  const value = {
+    user,
+    profile,
+    loading,
+    role: profile?.role ?? null,
+    businessId: profile?.business_id ?? null,
+    business: profile?.businesses ?? null,
+    accountStatus: profile?.businesses?.account_status ?? null,
+    mustChangePassword: profile?.must_change_password ?? false,
+    logout,
+    refreshProfile,
+    isOwner: profile?.role === 'owner',
+    isStaff: profile?.role === 'staff',
+    isSuperadmin: profile?.role === 'superadmin',
+  }
 
-        // Listen for changes on auth state (in, out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (!mounted) return;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
 
-            if (session?.user) {
-                // Determine if we actually need to show a loading screen and fetch roles
-                // We only do this if it's a completely new user signing in.
-                setUser((prevUser) => {
-                    if (!prevUser || prevUser.id !== session.user.id) {
-                        // User changed or logged in
-                        setLoading(true);
-                        fetchUserRole(session.user.id, () => mounted).then(() => {
-                            if (mounted) subscribeToPush(session.user.id);
-                        });
-                    }
-                    return session.user;
-                });
-            } else if (event === 'SIGNED_OUT') {
-                // Logged out
-                setUser(null);
-                setRole(null);
-                setRoleError(null);
-                setLoading(false);
-            }
-        });
-
-        return () => {
-            mounted = false;
-            if (subscription) subscription.unsubscribe();
-        };
-    }, []); // Empty dependency array so this exact effect only runs once on mount.
-
-    const login = async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        return error; // The onAuthStateChange listener will handle the rest
-    };
-
-    const logout = async () => {
-        setLoading(true); // Show loading while logging out
-        await supabase.auth.signOut();
-        // The onAuthStateChange listener will handle the UI reset
-    };
-
-    return (
-        <AuthContext.Provider value={{ user, role, roleError, loading, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
-
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
+}

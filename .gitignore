@@ -9,3 +9,13 @@ prd_text.txt
 prd_docx_text.txt
 *.md
 build_output.txt
+.agent/
+.stitch/
+keys.json
+vapid.json
+vapid_keys.txt
+keys.txt
+dev-dist/
+*.log
+build_*.txt
+scan_results.json

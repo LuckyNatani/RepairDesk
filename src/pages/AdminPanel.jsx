@@ -1,213 +1,176 @@
-import React, { useState } from 'react';
-import { useStaff } from '../hooks/useStaff';
-import { UserPlus, Settings, Shield, User, Trash2, Users, Edit2 } from 'lucide-react';
-import EditUserModal from '../components/shared/EditUserModal';
+import { useState, useEffect } from 'react'
+import { useAuth } from '../hooks/useAuth'
+import { useNavigate, useLocation } from 'react-router-dom'
+import NotificationBell from '../components/Notifications/NotificationBell'
+import SkeletonCard from '../components/shared/SkeletonCard'
+import ConfirmModal from '../components/shared/ConfirmModal'
+import Snackbar from '../components/shared/Snackbar'
+import { useSnackbar } from '../hooks/useSnackbar'
+import { supabase } from '../lib/supabaseClient'
+import { LayoutDashboard, List, BarChart2, Users, Plus, User, Phone, Eye, EyeOff, Edit2, Trash2 } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import Avatar from '../components/shared/Avatar'
+import { toTelLink } from '../lib/phoneUtils'
 
-const AdminPanel = () => {
-    const { staff, loading, createStaffMember, removeStaffMember, updateStaffMember } = useStaff();
-    const [isCreating, setIsCreating] = useState(false);
-    const [editingStaff, setEditingStaff] = useState(null);
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [newStaff, setNewStaff] = useState({ name: '', username: '', password: '' });
-    const [error, setError] = useState(null);
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(null);
-        try {
-            await createStaffMember(newStaff.name, newStaff.username, newStaff.password);
-            setNewStaff({ name: '', username: '', password: '' });
-            setIsCreating(false);
-        } catch (err) {
-            setError(err.message);
-        }
-    };
-
-    const handleEditStaff = async (userId, updates) => {
-        try {
-            setIsUpdating(true);
-            setError(null);
-            await updateStaffMember(userId, updates);
-            setEditingStaff(null);
-        } catch (err) {
-            setError(err.message || 'Failed to update staff member');
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-40 text-slate-400 gap-2">
-                <Settings className="animate-spin text-indigo-400" size={16} />
-                <p className="text-[12px] font-medium">Loading staff directory...</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex flex-col gap-3">
-            {/* Compact Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-[15px] font-semibold text-slate-900 tracking-tight">Team Management</h1>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Manage staff members and access</p>
-                </div>
-                <button
-                    onClick={() => setIsCreating(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[12px] rounded-lg transition-all shadow-sm shadow-indigo-600/20"
-                >
-                    <UserPlus size={13} />
-                    <span className="hidden sm:inline">Add Member</span>
-                </button>
-            </div>
-
-            {/* Error banner */}
-            {error && (
-                <div className="p-3 bg-red-50 text-red-700 rounded-lg text-[12px] border border-red-100 font-medium flex items-center justify-between">
-                    <span>{error}</span>
-                    <button onClick={() => setError(null)} className="ml-2 font-bold hover:underline shrink-0">✕</button>
-                </div>
-            )}
-
-            {/* Create form */}
-            {isCreating && (
-                <div className="bg-white rounded-lg border border-slate-200 p-4 relative overflow-hidden">
-                    <h2 className="text-[13px] font-semibold text-slate-900 mb-3 flex items-center gap-1.5">
-                        <UserPlus size={13} className="text-indigo-600" />
-                        Create Staff Account
-                    </h2>
-                    <form onSubmit={handleSubmit} className="max-w-xl">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                            <div>
-                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Full Name</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={newStaff.name}
-                                    onChange={e => setNewStaff({ ...newStaff, name: e.target.value })}
-                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                    placeholder="Jane Doe"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Username</label>
-                                <input
-                                    required
-                                    type="text"
-                                    value={newStaff.username}
-                                    onChange={e => setNewStaff({ ...newStaff, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
-                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                    placeholder="jane_doe"
-                                />
-                                <p className="text-[10px] text-slate-400 mt-0.5">Lowercase, numbers, underscores only</p>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-[11px] font-medium text-slate-600 mb-1">Temporary Password</label>
-                                <input
-                                    required
-                                    type="password"
-                                    minLength={6}
-                                    value={newStaff.password}
-                                    onChange={e => setNewStaff({ ...newStaff, password: e.target.value })}
-                                    className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-[12px] focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
-                                    placeholder="Min. 6 characters"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-2 pt-3 border-t border-slate-100">
-                            <button
-                                type="submit"
-                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[12px] rounded-md transition-colors"
-                            >
-                                Create Account
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setIsCreating(false)}
-                                className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 font-medium text-[12px] rounded-md hover:bg-slate-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Staff list */}
-            <div className="bg-white rounded-lg border border-slate-100 overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-                {/* List header */}
-                <div className="px-3.5 py-2 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-                    <h3 className="text-[11px] font-semibold text-slate-700 uppercase tracking-wide">Active Directory</h3>
-                    <span className="text-[10px] font-medium text-slate-500 bg-white px-2 py-0.5 rounded-full border border-slate-100">
-                        {staff.length} member{staff.length !== 1 ? 's' : ''}
-                    </span>
-                </div>
-
-                {staff.length === 0 ? (
-                    <div className="py-12 text-center">
-                        <Users size={24} className="mx-auto mb-2 text-slate-200" />
-                        <p className="text-[12px] font-medium text-slate-500 mb-0.5">No staff members yet</p>
-                        <p className="text-[11px] text-slate-400">Add a team member to get started.</p>
-                    </div>
-                ) : (
-                    <ul className="divide-y divide-slate-50">
-                        {staff.map((member) => (
-                            <li
-                                key={member.id}
-                                className="px-3.5 py-2.5 hover:bg-slate-50/70 transition-colors flex items-center justify-between gap-3 group"
-                            >
-                                {/* Avatar + info */}
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-semibold text-[11px] shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
-                                        {member.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-[12px] font-semibold text-slate-900 truncate">{member.name}</p>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
-                                            <User size={9} className="opacity-60 shrink-0" />
-                                            <span>Staff</span>
-                                            <span className="text-slate-200">•</span>
-                                            <span className="font-mono truncate max-w-[140px]">@{member.username}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center gap-1.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={() => setEditingStaff(member)}
-                                        className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors border border-transparent hover:border-indigo-100"
-                                        title="Edit"
-                                    >
-                                        <Edit2 size={13} />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm(`Remove ${member.name}?`)) {
-                                                removeStaffMember(member.id);
-                                            }
-                                        }}
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors border border-transparent hover:border-red-100"
-                                        title="Remove"
-                                    >
-                                        <Trash2 size={13} />
-                                    </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            <EditUserModal
-                user={editingStaff}
-                onClose={() => setEditingStaff(null)}
-                onSave={handleEditStaff}
-                isUpdating={isUpdating}
-            />
+function StaffRow({ staff, onDeactivate, onReactivate, onReset }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: '1px solid #F0F0F0' }}>
+      <Avatar name={staff.name} color={staff.avatar_color || 'var(--navy)'} size="md" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>{staff.name}</span>
+          <span className="badge badge-sm" style={{ background: staff.is_active ? 'var(--green-surface)' : '#F5F5F5', color: staff.is_active ? 'var(--green)' : 'var(--grey-600)' }}>{staff.is_active ? 'Active' : 'Inactive'}</span>
         </div>
-    );
-};
+        <a href={toTelLink(staff.phone)} style={{ fontSize: 12, color: 'var(--blue)', textDecoration: 'none' }}>{staff.phone}</a>
+        {staff.last_seen_at && <div style={{ fontSize: 11, color: 'var(--grey-600)' }}>Last seen {formatDistanceToNow(new Date(staff.last_seen_at), { addSuffix: true })}</div>}
+      </div>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={onReset} style={{ fontSize: 12, padding: '5px 10px', background: '#F5F5F5', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--grey-900)' }}>Reset</button>
+        {staff.is_active
+          ? <button onClick={onDeactivate} style={{ fontSize: 12, padding: '5px 10px', background: 'var(--red-surface)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--red)' }}>Deactivate</button>
+          : <button onClick={onReactivate} style={{ fontSize: 12, padding: '5px 10px', background: 'var(--green-surface)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--green)' }}>Reactivate</button>
+        }
+      </div>
+    </div>
+  )
+}
 
-export default AdminPanel;
+export default function AdminPanel() {
+  const { user, businessId, profile } = useAuth()
+  const { snack, show } = useSnackbar()
+  const navigate = useNavigate(); const location = useLocation()
+  const [staffList, setStaffList] = useState([])
+  const [serviceTypes, setServiceTypes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [addForm, setAddForm] = useState({ name: '', email: '', phone: '', tempPassword: '' })
+  const [showPw, setShowPw] = useState(false)
+  const [addLoading, setAddLoading] = useState(false)
+  const [confirmDeactivate, setConfirmDeactivate] = useState(null)
+  const [newSTLabel, setNewSTLabel] = useState('')
+
+  const loadData = async () => {
+    setLoading(true)
+    const { data: staff } = await supabase.from('users').select('id,name,email,phone,avatar_color,is_active,last_seen_at').eq('business_id', businessId).eq('role', 'staff').order('created_at')
+    const { data: st } = await supabase.from('service_types').select('*').eq('business_id', businessId).order('sort_order')
+    setStaffList(staff || []); setServiceTypes(st || [])
+    setLoading(false)
+  }
+  useEffect(() => { if (businessId) loadData() }, [businessId])
+
+  const addStaff = async () => {
+    if (!addForm.name || !addForm.email || !addForm.phone || !addForm.tempPassword) { show('All fields required', 'error'); return }
+    setAddLoading(true)
+    const { error } = await supabase.functions.invoke('manage-staff', { body: { action: 'create', businessId, ...addForm } })
+    setAddLoading(false)
+    if (error) show('Failed to add staff: ' + error.message, 'error')
+    else { show('Staff added!', 'success'); setAddForm({ name: '', email: '', phone: '', tempPassword: '' }); loadData() }
+  }
+
+  const deactivateStaff = async (staffId) => {
+    await supabase.from('users').update({ is_active: false }).eq('id', staffId)
+    await supabase.from('tasks').update({ status: 'unassigned', assigned_to: null }).eq('assigned_to', staffId).eq('status', 'in_progress')
+    setConfirmDeactivate(null); loadData(); show('Staff deactivated', 'info')
+  }
+
+  const reactivateStaff = async (staffId) => {
+    await supabase.from('users').update({ is_active: true }).eq('id', staffId)
+    loadData(); show('Staff reactivated', 'success')
+  }
+
+  const addServiceType = async () => {
+    if (!newSTLabel.trim()) return
+    await supabase.from('service_types').insert({ business_id: businessId, label: newSTLabel.trim(), sort_order: serviceTypes.length })
+    setNewSTLabel(''); loadData()
+  }
+
+  const deleteServiceType = async (id) => {
+    const { error } = await supabase.from('service_types').delete().eq('id', id)
+    if (error) show('Cannot delete — tasks reference this type', 'error')
+    else loadData()
+  }
+
+  const tabs = [
+    { id: '/', label: 'Dashboard', Icon: LayoutDashboard },
+    { id: '/tasks', label: 'Tasks', Icon: List },
+    { id: '/analytics', label: 'Analytics', Icon: BarChart2 },
+    { id: '/admin', label: 'Admin', Icon: Users },
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+      <div className="app-bar">
+        <span className="app-bar-title">Admin</span>
+        <NotificationBell userId={user?.id} />
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 90 }}>
+        {/* Add Staff */}
+        <div style={{ padding: 16 }}>
+          <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Add Staff</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, background: '#fff', borderRadius: 12, padding: 16, boxShadow: 'var(--shadow-md)' }}>
+            {['name', 'email', 'phone'].map(field => (
+              <div key={field}>
+                <label className="input-label">{field === 'name' ? 'Full Name' : field === 'email' ? 'Email' : 'Phone'}</label>
+                <input className="input" type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'} value={addForm[field]} onChange={e => setAddForm(f => ({ ...f, [field]: e.target.value }))} />
+              </div>
+            ))}
+            <div>
+              <label className="input-label">Temp Password</label>
+              <div style={{ position: 'relative' }}>
+                <input className="input" type={showPw ? 'text' : 'password'} value={addForm.tempPassword} onChange={e => setAddForm(f => ({ ...f, tempPassword: e.target.value }))} minLength={8} style={{ paddingRight: 44 }} />
+                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)', display: 'flex' }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+            <button className="btn btn-primary btn-full" onClick={addStaff} disabled={addLoading || staffList.length >= 14}>
+              {addLoading ? 'Adding…' : <><Plus size={16} /> Add Staff</>}
+            </button>
+            {staffList.length >= 14 && <p style={{ fontSize: 12, color: 'var(--grey-600)', textAlign: 'center', margin: 0 }}>Maximum 15 users reached</p>}
+          </div>
+        </div>
+
+        {/* Staff List */}
+        <div style={{ paddingBottom: 8 }}>
+          <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 15, fontWeight: 700, padding: '0 16px 10px' }}>Staff ({staffList.length})</h3>
+          {loading ? [0,1,2].map(i => <SkeletonCard key={i} lines={2} />) :
+            staffList.map(s => (
+              <StaffRow key={s.id} staff={s}
+                onDeactivate={() => setConfirmDeactivate(s)}
+                onReactivate={() => reactivateStaff(s.id)}
+                onReset={() => show('Password reset via manage-staff Edge Function', 'info')}
+              />
+            ))
+          }
+        </div>
+
+        {/* Service Types */}
+        <div style={{ padding: 16 }}>
+          <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Service Types</h3>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+            <input className="input" value={newSTLabel} onChange={e => setNewSTLabel(e.target.value)} placeholder="New service type label…" style={{ flex: 1 }} />
+            <button className="btn btn-primary" onClick={addServiceType}><Plus size={16} /></button>
+          </div>
+          {serviceTypes.map(st => (
+            <div key={st.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fff', borderRadius: 8, marginBottom: 6, boxShadow: 'var(--shadow-sm)' }}>
+              <span style={{ flex: 1, fontSize: 14 }}>{st.label}</span>
+              <button onClick={() => deleteServiceType(st.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)' }}><Trash2 size={15} /></button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <ConfirmModal open={!!confirmDeactivate} title={`Deactivate ${confirmDeactivate?.name}?`} body="Their active tasks will be moved to Unassigned." confirmLabel="Deactivate" confirmColor="red" onConfirm={() => deactivateStaff(confirmDeactivate.id)} onCancel={() => setConfirmDeactivate(null)} />
+
+      <div className="bottom-tabs">
+        {tabs.map(({ id, label, Icon }) => (
+          <button key={id} className={`bottom-tab${location.pathname === id ? ' active' : ''}`} onClick={() => navigate(id)}>
+            <Icon size={20} /><span>{label}</span>
+          </button>
+        ))}
+      </div>
+
+      <Snackbar open={snack.open} message={snack.message} type={snack.type} />
+    </div>
+  )
+}

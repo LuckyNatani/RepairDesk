@@ -1,0 +1,55 @@
+import { serve } from "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from "npm:@supabase/supabase-js"
+
+const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+const SUPERADMIN_USER_ID = Deno.env.get('SUPERADMIN_USER_ID')!
+
+serve(async (req) => {
+  const { data: { user } } = await supabase.auth.getUser(req.headers.get('Authorization')?.split('Bearer ')[1] || '')
+  if (!user || user.id !== SUPERADMIN_USER_ID) return new Response('Forbidden', { status: 403 })
+
+  const { action, businessId, days } = await req.json()
+
+  const now = new Date().toISOString()
+  let update: Record<string, unknown> = {}
+  let eventType = action
+
+  switch (action) {
+    case 'activate':
+      update = { account_status: 'active', activated_at: now, activated_by: SUPERADMIN_USER_ID }
+      eventType = 'activated'
+      break
+    case 'suspend':
+      update = { account_status: 'suspended', suspended_at: now }
+      eventType = 'suspended'
+      break
+    case 'reactivate':
+      update = { account_status: 'active', suspended_at: null }
+      eventType = 'reactivated'
+      break
+    case 'extend_trial':
+      const extendDays = Math.min(Math.max(days || 7, 1), 90)
+      const { data: biz } = await supabase.from('businesses').select('trial_ends_at, account_status').eq('id', businessId).single()
+      const base = biz?.account_status === 'trial_active' && biz.trial_ends_at ? new Date(biz.trial_ends_at) : new Date()
+      base.setDate(base.getDate() + extendDays)
+      update = { account_status: 'trial_active', trial_ends_at: base.toISOString() }
+      eventType = 'trial_extended'
+      break
+    default:
+      return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 })
+  }
+
+  const { error } = await supabase.from('businesses').update(update).eq('id', businessId)
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+
+  await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, note: `${action} via SA panel` })
+
+  // Notify owner
+  const { data: biz2 } = await supabase.from('businesses').select('owner_id').eq('id', businessId).single()
+  if (biz2?.owner_id) {
+    const msg = action === 'activate' ? 'Your account is now active!' : action === 'suspend' ? 'Your account has been suspended. Contact support.' : action === 'reactivate' ? 'Your account has been reactivated!' : `Your trial has been extended by ${days || 7} days.`
+    await supabase.from('notifications').insert({ user_id: biz2.owner_id, business_id: businessId, task_id: null, event_type: action === 'activate' || action === 'reactivate' ? 'account_activated' : 'account_suspended', message: msg })
+  }
+
+  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } })
+})
