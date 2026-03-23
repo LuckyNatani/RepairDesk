@@ -39,95 +39,103 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-[440px]">
         {/* Logo and Header */}
-        <div className="flex flex-col items-center mb-10">
-          <Logo className="w-16 h-16 mb-4" textClassName="text-3xl font-extrabold tracking-tighter" />
-          <p className="text-slate-500 font-medium text-center">Enter your credentials to access your dashboard</p>
+        <div className="flex flex-col items-center mb-10 text-center">
+          <Logo className="w-14 h-14 mb-5" textClassName="text-3xl font-bold tracking-tight" />
+          <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-[300px]">
+            Welcome back to TaskPod. Enter your credentials to access your workspace.
+          </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 p-8 border border-slate-100">
-          <h2 className="text-2xl font-bold text-slate-900 mb-8">Welcome Back</h2>
+        <div className="bg-white rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] p-10 border border-slate-100">
+          <h2 className="text-2xl font-bold text-[#002B36] mb-8">Sign In</h2>
 
           {locked && (
-            <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm font-medium mb-6 animate-shake">
-              Too many failed attempts. Please wait 30 seconds.
+            <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm font-bold mb-6">
+              Security Lock: Too many attempts. Try again in 30s.
             </div>
           )}
           {error && !locked && (
-            <div className="bg-red-50 text-red-600 rounded-lg p-4 text-sm font-medium mb-6">
+            <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm font-bold mb-6">
               {error}
             </div>
           )}
           {forgotSent && (
-            <div className="bg-teal-50 text-teal-700 rounded-lg p-4 text-sm font-medium mb-6">
-              Password reset link sent! Check your email.
+            <div className="bg-[#E6FBFA] text-[#00D1B2] rounded-xl p-4 text-sm font-bold mb-6">
+              Reset link sent! Please check your inbox.
             </div>
           )}
 
-          <form onSubmit={handleSignIn} className="space-y-5">
+          <form onSubmit={handleSignIn} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.1em] mb-2.5">Email Address</label>
               <input 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium" 
+                className="w-full px-5 py-4 bg-[#FAFAFA] border border-slate-100 rounded-2xl focus:border-[#00D1B2] focus:ring-4 focus:ring-[#00D1B2]/5 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-300" 
                 type="email" 
                 autoComplete="email" 
                 value={email} 
                 onChange={e => setEmail(e.target.value)} 
                 placeholder="name@company.com" 
+                required
               />
             </div>
             <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+              <div className="flex justify-between items-center mb-2.5">
+                <label className="block text-[11px] font-black text-slate-400 uppercase tracking-[0.1em]">Password</label>
                 <button 
                   type="button" 
                   onClick={handleForgot}
-                  className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors"
+                  className="text-xs font-bold text-[#00D1B2] hover:text-[#00bda1] transition-colors"
                 >
-                  Forgot?
+                  Forgot Password?
                 </button>
               </div>
               <div className="relative">
                 <input 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none font-medium pr-12" 
+                  className="w-full px-5 py-4 bg-[#FAFAFA] border border-slate-100 rounded-2xl focus:border-[#00D1B2] focus:ring-4 focus:ring-[#00D1B2]/5 transition-all outline-none font-medium pr-14 text-slate-900 placeholder:text-slate-300" 
                   type={showPw ? 'text' : 'password'} 
                   autoComplete="current-password" 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
                   placeholder="••••••••" 
+                  required
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowPw(v => !v)} 
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
                 >
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="w-full py-4 bg-[#002B36] text-white font-bold rounded-xl hover:bg-[#003d4d] transition-all shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-2 mt-2" 
+              className="w-full py-4.5 bg-[#002B36] text-white font-bold rounded-2xl hover:bg-[#003d4d] transition-all shadow-xl shadow-navy/20 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 mt-4" 
               disabled={disabled}
             >
-              {loading ? 'Authenticating...' : <><LogIn size={20} /> Sign In</>}
+              {loading ? 'Verifying...' : <><LogIn size={20} /> Sign In</>}
             </button>
           </form>
 
-          <div className="mt-10 pt-8 border-t border-slate-50 flex flex-col items-center gap-4">
-            <p className="text-slate-400 text-sm font-medium">Don't have an account?</p>
+          <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col items-center gap-5">
+            <p className="text-slate-400 text-sm font-medium">Don't have an account yet?</p>
             <button 
               onClick={() => window.location.href = 'mailto:admin@taskpod.com'} 
-              className="px-6 py-2.5 bg-white text-slate-700 font-bold rounded-lg border border-slate-200 hover:border-teal-500 hover:text-teal-600 transition-all text-sm shadow-sm"
+              className="w-full py-3.5 bg-white text-[#002B36] font-bold rounded-2xl border-2 border-slate-50 hover:border-[#00D1B2] hover:bg-[#FAFAFA] transition-all text-sm shadow-sm"
             >
               Request Access
             </button>
           </div>
         </div>
+        
+        <p className="mt-12 text-center text-slate-300 text-xs font-medium uppercase tracking-[0.2em]">
+          © 2026 TaskPod Systems
+        </p>
       </div>
     </div>
   )

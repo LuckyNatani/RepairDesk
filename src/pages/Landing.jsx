@@ -1,252 +1,184 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight, Layers, Workflow, BarChart3 } from 'lucide-react';
+import Logo from '../components/shared/Logo';
 
 export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900 font-sans selection:bg-slate-200">
+    <div className="min-h-screen bg-[#FAFAFA] text-[#0F172A] font-sans selection:bg-slate-200 w-full overflow-x-hidden">
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2 font-semibold tracking-tight text-lg">
-          <div className="w-6 h-6 bg-slate-900 rounded-sm flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <div className="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100">
+        <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto w-full" style={{ maxWidth: '1200px' }}>
+          <Logo />
+          <div className="flex items-center gap-4 md:gap-8">
+            <a href="#features" className="hidden md:block text-sm font-semibold text-slate-500 hover:text-[#002B36] transition-colors">Features</a>
+            <button 
+              onClick={() => navigate('/login')} 
+              className="text-sm font-bold text-[#002B36] hover:text-[#00D1B2] transition-colors"
+            >
+              Log in
+            </button>
+            <button 
+              onClick={() => navigate('/login')} 
+              className="text-sm bg-[#002B36] text-white px-6 py-2.5 rounded-full font-bold hover:bg-[#003d4d] transition-all active:scale-95 shadow-lg shadow-black/5"
+            >
+              Get Started
+            </button>
           </div>
-          TaskPod
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="#features" className="hidden md:block text-sm text-slate-500 hover:text-slate-900 transition-colors">Features</a>
-          <a href="#pricing" className="hidden md:block text-sm text-slate-500 hover:text-slate-900 transition-colors">Pricing</a>
-          <button 
-            onClick={() => navigate('/login')} 
-            className="text-sm font-medium hover:text-slate-600 transition-colors"
-          >
-            Log in
-          </button>
-          <button 
-            onClick={() => navigate('/login')} 
-            className="text-sm bg-slate-900 text-white px-4 py-2 rounded-md font-medium hover:bg-slate-800 transition-all active:scale-95 shadow-sm"
-          >
-            Get Started
-          </button>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
       {/* Hero */}
-      <header className="pt-24 md:pt-32 pb-20 md:pb-24 px-6 text-center max-w-4xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-xs font-medium mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span> TaskPod 2.0 is live
+      <header className="pt-24 md:pt-36 pb-20 md:pb-28 px-6 text-center w-full mx-auto" style={{ maxWidth: '900px' }}>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] font-bold mb-10 shadow-sm uppercase tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-[#00D1B2] animate-pulse"></span> TaskPod 2.0 is live
         </div>
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tighter text-slate-900 mb-6 leading-[1.05]">
-          Task management for<br className="hidden md:block" /> the focused team.
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#002B36] mb-8 leading-[1.05]">
+          Work management<br className="hidden md:block" /> for focused teams.
         </h1>
-        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed font-light">
-          A minimalist platform designed to eliminate clutter and noise. Assign, track, and complete work with absolute clarity.
+        <p className="text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto mb-14 leading-relaxed font-medium">
+          The minimalist platform designed to eliminate clutter. Assign, track, and complete work with absolute clarity.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
           <button 
             onClick={() => navigate('/login')} 
-            className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 text-white rounded-md font-medium flex items-center justify-center gap-2 hover:bg-slate-800 transition-all active:scale-95 shadow-[0_4px_14px_0_rgba(0,0,0,0.1)]"
+            className="w-full sm:w-auto px-10 py-4.5 bg-[#002B36] text-white rounded-full font-bold text-lg flex items-center justify-center gap-2 hover:bg-[#003d4d] transition-all active:scale-95 shadow-2xl shadow-navy/20"
           >
-            Start your workspace <ArrowRight size={18} />
+            Start your workspace <ArrowRight size={20} />
           </button>
           <button 
             onClick={() => window.location.href = 'mailto:admin@taskpod.com'} 
-            className="w-full sm:w-auto px-8 py-3.5 bg-white text-slate-700 rounded-md font-medium border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all active:scale-95"
+            className="w-full sm:w-auto px-10 py-4.5 bg-white text-[#002B36] rounded-full font-bold text-lg border-2 border-slate-100 hover:border-[#00D1B2] hover:bg-[#FAFAFA] transition-all active:scale-95 shadow-sm"
           >
             Request a demo
           </button>
         </div>
       </header>
 
-      {/* Product Image / Mockup placeholder */}
-      <section className="px-6 pb-24 md:pb-32 max-w-5xl mx-auto">
-        <div className="w-full aspect-[16/10] md:aspect-video bg-white rounded-xl border border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden flex flex-col">
-          <div className="h-10 border-b border-slate-100 flex items-center gap-1.5 px-4 bg-slate-50/50">
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+      {/* App Preview Section */}
+      <section className="px-6 pb-24 md:pb-40 w-full mx-auto" style={{ maxWidth: '1100px' }}>
+        <div className="w-full aspect-[16/10] bg-white rounded-3xl border border-slate-200 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col group transition-transform duration-700 hover:translate-y-[-8px]">
+          <div className="h-14 border-b border-slate-100 flex items-center gap-2 px-8 bg-slate-50/50">
+            <div className="flex gap-2">
+              <div className="w-3.5 h-3.5 rounded-full bg-slate-200"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-slate-200"></div>
+              <div className="w-3.5 h-3.5 rounded-full bg-slate-200"></div>
+            </div>
           </div>
-          <div className="flex-1 bg-white p-8 flex items-center justify-center">
-            <div className="text-slate-300 flex flex-col items-center gap-4">
-              <Layers size={48} strokeWidth={1} />
-              <p className="font-medium tracking-wide text-sm uppercase">App Interface</p>
+          <div className="flex-1 bg-white p-12 flex flex-col items-center justify-center relative overflow-hidden">
+             {/* Abstract grid background */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#002B36 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+            
+            <div className="text-slate-200 flex flex-col items-center gap-8 relative z-10">
+              <div className="w-24 h-24 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner">
+                <Layers size={48} strokeWidth={1.5} className="text-[#00D1B2]" />
+              </div>
+              <p className="font-bold tracking-[0.3em] text-xs uppercase text-slate-400">Collaborative Workspace</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-24 px-6 bg-white border-y border-slate-100">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 mb-4">Everything you need.<br/>Nothing you don't.</h2>
-              <p className="text-slate-500 text-lg max-w-xl font-light">We stripped away the complexity of traditional project management tools, leaving only what drives results.</p>
-            </div>
+      {/* Features Grid */}
+      <section id="features" className="py-24 md:py-32 px-6 bg-white border-y border-slate-100">
+        <div className="max-w-6xl mx-auto w-full" style={{ maxWidth: '1200px' }}>
+          <div className="mb-20 text-center md:text-left">
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-[#002B36] mb-8">Performance-first core.</h2>
+            <p className="text-slate-500 text-xl font-medium max-w-2xl leading-relaxed">We stripped away the noise of legacy management tools, leaving only the essential features that drive real-world results.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
-              { icon: Layers, title: 'Clean Architecture', desc: 'Organize work into logical pods without confusing hierarchies.' },
-              { icon: Workflow, title: 'Intuitive Workflows', desc: 'Move tasks from idea to completion with frictionless state management.' },
-              { icon: BarChart3, title: 'Actionable Insights', desc: 'Real-time analytics that focus on actual velocity, not vanity metrics.' }
+              { icon: Layers, title: 'Clean Architecture', desc: 'Organize work into logical pods without the confusing nesting of old enterprise tools.', color: 'text-blue-500', bg: 'bg-blue-50' },
+              { icon: Workflow, title: 'Intuitive Workflows', desc: 'Move tasks through states with frictionless precision and automatic field dispatch.', color: 'text-teal-500', bg: 'bg-teal-50' },
+              { icon: BarChart3, title: 'Actionable Insights', desc: 'Real-time velocity tracking that focuses on completion quality, not just vanity metrics.', color: 'text-indigo-500', bg: 'bg-indigo-50' }
             ].map((f, i) => (
-              <div key={i} className="p-8 rounded-xl bg-[#FAFAFA] border border-slate-100 hover:border-slate-200 transition-colors">
-                <f.icon className="w-6 h-6 text-slate-700 mb-6" strokeWidth={1.5} />
-                <h3 className="text-lg font-medium text-slate-900 mb-2">{f.title}</h3>
-                <p className="text-slate-500 font-light leading-relaxed">{f.desc}</p>
+              <div key={i} className="p-12 rounded-[2.5rem] bg-[#FAFAFA] border border-slate-100 hover:border-[#00D1B2] transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 group">
+                <div className={`w-14 h-14 ${f.bg} rounded-2xl flex items-center justify-center mb-10 transition-transform group-hover:scale-110`}>
+                  <f.icon className={`w-7 h-7 ${f.color}`} strokeWidth={2.5} />
+                </div>
+                <h3 className="text-2xl font-bold text-[#002B36] mb-5">{f.title}</h3>
+                <p className="text-slate-500 font-medium leading-relaxed text-lg">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 mb-4">How TaskPod works</h2>
-            <p className="text-slate-500 text-lg font-light">A workflow designed for human beings.</p>
+      {/* Steps / Process */}
+      <section className="py-24 md:py-40 px-6">
+        <div className="max-w-6xl mx-auto w-full" style={{ maxWidth: '1200px' }}>
+          <div className="text-center mb-28">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-[#002B36] mb-6">Designed for real work.</h2>
+            <p className="text-slate-500 text-xl font-medium">Capture, assign, and track in three simple actions.</p>
           </div>
           
-          <div className="space-y-12 relative before:absolute before:inset-0 before:ml-4 md:before:mx-auto before:-translate-x-px md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-20">
             {[
-              { step: '01', title: 'Create your pod', desc: 'Set up a dedicated space for your team or project in seconds.' },
-              { step: '02', title: 'Capture tasks immediately', desc: 'Use our quick-capture shortcut to log work before you forget.' },
-              { step: '03', title: 'Focus and execute', desc: 'Our minimalist board view keeps everyone aligned without distractions.' }
+              { step: '01', title: 'Define your pod', desc: 'Create a dedicated workspace for your project in under 10 seconds.' },
+              { step: '02', title: 'Dispatch instantly', desc: 'Capture tasks and route them to field teams with GPS-precision.' },
+              { step: '03', title: 'Measure impact', desc: 'Analyze completion rates and optimize your team velocity in real-time.' }
             ].map((s, i) => (
-              <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-500 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 mx-auto relative z-10">
+              <div key={i} className="flex flex-col items-center text-center group">
+                <div className="w-16 h-16 rounded-3xl bg-white border-2 border-slate-100 flex items-center justify-center font-black text-2xl text-[#002B36] mb-10 shadow-sm group-hover:border-[#00D1B2] transition-colors duration-300">
                   {s.step}
                 </div>
-                <div className="w-[calc(100%-48px)] md:w-[calc(50%-2.5rem)] p-6 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-medium text-slate-900 mb-2">{s.title}</h3>
-                  <p className="text-slate-500 font-light">{s.desc}</p>
-                </div>
+                <h3 className="text-2xl font-bold text-[#002B36] mb-5">{s.title}</h3>
+                <p className="text-slate-600 font-medium leading-relaxed text-lg">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 px-6 bg-slate-900 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight leading-snug mb-10 text-slate-100">
-            "TaskPod finally brought calm to our chaotic workflow. We spend less time managing tasks and more time actually doing the work."
+      {/* Social Proof */}
+      <section className="py-32 md:py-48 px-6 bg-[#002B36] text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#00D1B2]/10 blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/10 blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+        
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <p className="text-3xl md:text-6xl font-bold tracking-tight leading-[1.15] mb-20 text-white">
+            "TaskPod brought sanity to our fleet operation. It's the only tool that actually understands the speed of field work."
           </p>
-          <div className="flex items-center justify-center gap-4">
-            <div className="w-10 h-10 bg-slate-800 rounded-full flex shrink-0"></div>
-            <div className="text-left">
-              <div className="font-medium text-sm">Elena Rodriguez</div>
-              <div className="text-slate-400 text-xs font-light">Operations Director, Studio Nord</div>
+          <div className="flex flex-col items-center gap-6">
+            <div className="w-20 h-20 bg-[#00D1B2] rounded-[2rem] flex items-center justify-center shadow-xl shadow-teal-500/20">
+              <span className="text-2xl font-black text-[#002B36]">ER</span>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-xl mb-1">Elena Rodriguez</div>
+              <div className="text-[#00D1B2] text-xs font-bold tracking-[0.2em] uppercase">Operations Director, Studio Nord</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-24 md:py-32 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-semibold tracking-tight text-slate-900 mb-4">Simple, transparent pricing</h2>
-            <p className="text-slate-500 text-lg font-light">No hidden fees. No artificial limits.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-            {/* Free */}
-            <div className="p-8 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col">
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Starter</h3>
-              <div className="mb-6"><span className="text-4xl font-bold tracking-tight text-slate-900">$0</span> <span className="text-slate-500 text-sm">/ forever</span></div>
-              <p className="text-slate-500 text-sm mb-8 font-light leading-relaxed">Perfect for individuals and small teams just getting started.</p>
-              <ul className="space-y-4 mb-8 flex-1">
-                {['Up to 5 team members', 'Unlimited tasks', 'Basic analytics', 'Community support'].map((feat, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
-                    <Check size={16} className="text-slate-400 shrink-0" /> {feat}
-                  </li>
-                ))}
-              </ul>
-              <button 
-                onClick={() => navigate('/login')} 
-                className="w-full mt-auto py-2.5 bg-[#FAFAFA] text-slate-900 rounded-md font-medium border border-slate-200 hover:bg-slate-50 transition-colors"
-              >
-                Start for free
-              </button>
-            </div>
-            
-            {/* Pro */}
-            <div className="p-8 rounded-2xl bg-slate-900 text-white shadow-xl relative overflow-hidden flex flex-col">
-              <div className="absolute top-0 right-8 px-3 py-1 bg-slate-800 text-slate-300 text-xs font-medium rounded-b-md">Popular</div>
-              <h3 className="text-lg font-medium text-white mb-2">Professional</h3>
-              <div className="mb-6"><span className="text-4xl font-bold tracking-tight text-white">$12</span> <span className="text-slate-400 text-sm">/ user / month</span></div>
-              <p className="text-slate-400 text-sm mb-8 font-light leading-relaxed">For growing teams that need advanced capabilities and control.</p>
-              <ul className="space-y-4 mb-8 flex-1">
-                {['Unlimited team members', 'Advanced permissions', 'Custom workflows', 'Priority 24/7 support'].map((feat, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm text-slate-300">
-                    <Check size={16} className="text-slate-500 shrink-0" /> {feat}
-                  </li>
-                ))}
-              </ul>
-              <button 
-                className="w-full mt-auto py-2.5 bg-white text-slate-900 rounded-md font-medium hover:bg-slate-50 transition-colors shadow-sm"
-              >
-                Upgrade to Pro
-              </button>
-            </div>
-          </div>
+      {/* Final CTA */}
+      <section className="py-32 md:py-48 px-6 text-center bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-5xl md:text-7xl font-bold mb-10 text-[#002B36] tracking-tighter">Ready to gain total clarity?</h2>
+          <p className="text-slate-500 text-xl font-medium mb-12">Join 400+ field teams focused on results.</p>
+          <button 
+            onClick={() => navigate('/login')} 
+            className="px-14 py-5.5 bg-[#002B36] text-white rounded-full font-bold text-xl hover:bg-[#003d4d] transition-all hover:scale-105 shadow-[0_20px_40px_-10px_rgba(0,43,54,0.3)]"
+          >
+            Start your workspace free
+          </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white pt-16 pb-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
-          <div>
-            <div className="flex items-center gap-2 font-semibold tracking-tight text-lg mb-4 text-slate-900">
-              <div className="w-5 h-5 bg-slate-900 rounded-sm flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-              </div>
-              TaskPod
-            </div>
-            <p className="text-slate-500 text-sm max-w-xs font-light">
-              Designed with precision. Built for focus.<br />
-              Task management for high-performance teams.
-            </p>
+      <footer className="border-t border-slate-100 bg-white py-20 px-6">
+        <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-12">
+          <Logo textClassName="text-2xl font-bold" />
+          <div className="flex flex-wrap justify-center gap-10 md:gap-16 text-sm font-bold text-slate-400 uppercase tracking-widest">
+            <a href="#" className="hover:text-[#002B36] transition-colors">Twitter</a>
+            <a href="#" className="hover:text-[#002B36] transition-colors">GitHub</a>
+            <a href="mailto:admin@taskpod.com" className="hover:text-[#002B36] transition-colors">Contact</a>
           </div>
-          
-          <div className="flex gap-12 md:gap-16 flex-wrap">
-            <div>
-              <h4 className="font-medium text-slate-900 mb-4 text-sm">Product</h4>
-              <ul className="space-y-3 text-sm text-slate-500 font-light">
-                <li><a href="#features" className="hover:text-slate-900 transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Changelog</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-900 mb-4 text-sm">Company</h4>
-              <ul className="space-y-3 text-sm text-slate-500 font-light">
-                <li><a href="#" className="hover:text-slate-900 transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Blog</a></li>
-                <li><a href="mailto:admin@taskpod.com" className="hover:text-slate-900 transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium text-slate-900 mb-4 text-sm">Legal</h4>
-              <ul className="space-y-3 text-sm text-slate-500 font-light">
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-slate-900 transition-colors">Terms</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-6xl mx-auto pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400 font-light">
-          <p>© 2026 TaskPod. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-slate-600">Twitter</a>
-            <a href="#" className="hover:text-slate-600">GitHub</a>
-            <a href="#" className="hover:text-slate-600">Dribbble</a>
+          <div className="text-slate-400 text-sm font-medium">
+            © 2026 TaskPod. Built for focus.
           </div>
         </div>
       </footer>
