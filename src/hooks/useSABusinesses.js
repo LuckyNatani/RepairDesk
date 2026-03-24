@@ -9,6 +9,7 @@ export function useSABusinesses() {
 
   const fetchBusinesses = useCallback(async () => {
     setLoading(true)
+    console.log('[useSABusinesses] Fetching businesses...')
     const { data, error } = await supabase
       .from('businesses')
       .select(`
@@ -18,8 +19,14 @@ export function useSABusinesses() {
         users:users(count)
       `)
       .order('created_at', { ascending: false })
-    if (error) setError(error.message)
-    else setBusinesses(data || [])
+    
+    if (error) {
+      console.error('[useSABusinesses] Fetch error:', error)
+      setError(error.message)
+    } else {
+      console.log('[useSABusinesses] Fetched data:', data)
+      setBusinesses(data || [])
+    }
     setLoading(false)
   }, [])
 

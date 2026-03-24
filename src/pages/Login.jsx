@@ -39,19 +39,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-[440px]">
-        {/* Logo and Header */}
-        <div className="flex flex-col items-center mb-10 text-center">
-          <Logo className="w-14 h-14 mb-5" textClassName="text-3xl font-bold tracking-tight" />
-          <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-[300px]">
-            Welcome back to TaskPod. Enter your credentials to access your workspace.
-          </p>
-        </div>
-
+    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-[420px]">
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] p-10 border border-slate-100">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign In</h2>
+        <div className="bg-white rounded-[2rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] p-8 md:p-10 border border-slate-100">
+          <div className="flex flex-col items-center mb-8">
+            <Logo className="w-12 h-12 mb-3" textClassName="text-2xl font-bold tracking-tight" />
+            <h2 className="text-xl font-bold text-black">Sign In</h2>
+          </div>
 
           {locked && (
             <div className="bg-red-50 text-red-600 rounded-xl p-4 text-sm font-bold mb-6">
@@ -115,25 +110,25 @@ export default function Login() {
 
             <button 
               type="submit" 
-              className="w-full py-4.5 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 mt-4" 
+              className="w-full py-4 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 flex items-center justify-center gap-3 mt-4" 
               disabled={disabled}
             >
               {loading ? 'Verifying...' : <><LogIn size={20} /> Sign In</>}
             </button>
           </form>
 
-          <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col items-center gap-5">
-            <p className="text-slate-400 text-sm font-medium">Don't have an account yet?</p>
+          <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col items-center gap-4">
+            <p className="text-slate-400 text-xs font-medium">Don't have an account yet?</p>
             <button 
               onClick={() => window.location.href = 'mailto:admin@taskpod.com'} 
-              className="w-full py-3.5 bg-white text-black font-bold rounded-2xl border-2 border-gray-100 hover:border-teal-500 hover:bg-white transition-all text-sm shadow-sm"
+              className="w-full py-3 bg-white text-black font-bold rounded-xl border-2 border-gray-100 hover:border-teal-500 hover:bg-white transition-all text-xs shadow-sm"
             >
               Request Access
             </button>
           </div>
         </div>
         
-        <p className="mt-12 text-center text-slate-300 text-xs font-medium uppercase tracking-[0.2em]">
+        <p className="mt-8 text-center text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">
           © 2026 TaskPod Systems
         </p>
       </div>
