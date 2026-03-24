@@ -37,44 +37,58 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true
+    let authTimeout = null
     
-    // Initial fallback timeout (pushed to 20s for slow DB cold starts)
-    const timeout = setTimeout(() => {
+    // Fallback timeout in case initialization hangs completely
+    authTimeout = setTimeout(() => {
       if (mounted) {
-        console.log('Auth initialization timeout reached')
+        console.warn('[useAuth] Auth initialization timeout reached')
         setLoading(false)
       }
-    }, 20000)
+    }, 15000)
 
-    // Single source of truth for auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[onAuthStateChange] Event:', event, 'Session:', !!session)
-      
+    // Helper to safely load user + profile
+    const loadSessionAndProfile = async (session) => {
       if (!mounted) return
-
       try {
         setUser(session?.user ?? null)
-        
         if (session?.user) {
-          // If we have a user, fetch the profile immediately
           await fetchProfile(session.user.id)
         } else {
-          // No user, clear profile
           setProfile(null)
         }
       } catch (e) {
-        console.error('[onAuthStateChange] Error in callback:', e)
+        console.error('[loadSessionAndProfile] Error:', e)
       } finally {
         if (mounted) {
-          clearTimeout(timeout)
+          clearTimeout(authTimeout)
           setLoading(false)
         }
       }
+    }
+
+    // Explicitly grab the session on mount (robust against page refresh)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('[getSession] error:', error)
+      }
+      loadSessionAndProfile(session)
+    })
+
+    // Listen to changes (e.g. multi-tab sign out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[onAuthStateChange] Event:', event)
+      if (!mounted) return
+      // We ignore INITIAL_SESSION since getSession handles it, 
+      // preventing duplicate fetchProfile calls.
+      if (event === 'INITIAL_SESSION') return
+      
+      loadSessionAndProfile(session)
     })
 
     return () => {
       mounted = false
-      clearTimeout(timeout)
+      clearTimeout(authTimeout)
       subscription.unsubscribe()
     }
   }, [fetchProfile])
