@@ -9,13 +9,13 @@ import EmptyState from '../components/shared/EmptyState'
 import Snackbar from '../components/shared/Snackbar'
 import { useSnackbar } from '../hooks/useSnackbar'
 import { isPushSupported, subscribeToPush, getNotificationPermission } from '../lib/pushNotifications'
-import { ClipboardList, List, Bell } from 'lucide-react'
+import { ClipboardList, List, Bell, LogOut } from 'lucide-react'
 
 const TABS = ['in_progress', 'unassigned', 'completed']
 const TAB_LABELS = { in_progress: 'In Progress', unassigned: 'Unassigned', completed: 'Done' }
 
 export default function StaffMyTasks() {
-  const { user, businessId, profile } = useAuth()
+  const { user, businessId, profile, logout } = useAuth()
   const { snack, show } = useSnackbar()
   const navigate = useNavigate(); const location = useLocation()
   const [activeTab, setActiveTab] = useState('in_progress')
@@ -45,7 +45,12 @@ export default function StaffMyTasks() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <div className="app-bar">
         <span className="app-bar-title">My Tasks</span>
-        <NotificationBell userId={user?.id} />
+        <div className="flex items-center gap-2">
+          <NotificationBell userId={user?.id} />
+          <button onClick={logout} className="mobile-logout" title="Sign Out">
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Push CTA */}

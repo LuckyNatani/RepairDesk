@@ -477,11 +477,27 @@ h1, h2, h3, h4, h5, h6 {
 .fw-600 { font-weight: 600; }
 .fw-700 { font-weight: 700; }
 .page-content { padding-bottom: calc(80px + var(--safe-bottom)); }
+
+.mobile-logout {
+  background: transparent;
+  border: none;
+  color: var(--black);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 200ms ease;
+}
+.mobile-logout:hover { background: var(--gray-100); }
+
 @media (min-width: 768px) {
   .page-content { padding-bottom: 32px; }
   .bottom-tabs  { display: none; }
   .fab { bottom: 24px; }
   .snackbar { bottom: 24px; }
+  .mobile-logout { display: none; }
 }
 
 /* ── Main Sidebar Layout ─────────────────────────────────── */

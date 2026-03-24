@@ -3,10 +3,10 @@ import TaskSearch from '../components/Tasks/TaskSearch'
 import NotificationBell from '../components/Notifications/NotificationBell'
 import OfflineBanner from '../components/shared/OfflineBanner'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, List, BarChart2, Users, ClipboardList } from 'lucide-react'
+import { LayoutDashboard, List, BarChart2, Users, ClipboardList, LogOut } from 'lucide-react'
 
 export default function TasksListView() {
-  const { user, businessId,Role, profile } = useAuth()
+  const { user, businessId, Role, profile, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const isOwner = profile?.role === 'owner'
@@ -27,7 +27,12 @@ export default function TasksListView() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <div className="app-bar">
         <span className="app-bar-title">Tasks</span>
-        <NotificationBell userId={user?.id} />
+        <div className="flex items-center gap-2">
+          <NotificationBell userId={user?.id} />
+          <button onClick={logout} className="mobile-logout" title="Sign Out">
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
       <OfflineBanner />
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>

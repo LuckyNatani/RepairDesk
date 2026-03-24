@@ -11,11 +11,11 @@ import OfflineBanner from '../components/shared/OfflineBanner'
 import Snackbar from '../components/shared/Snackbar'
 import { useScrollDirection } from '../hooks/useScrollDirection'
 import { useSnackbar } from '../hooks/useSnackbar'
-import { LayoutDashboard, List, BarChart2, Users } from 'lucide-react'
+import { LayoutDashboard, List, BarChart2, Users, LogOut } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 export default function OwnerDashboard() {
-  const { profile, user, businessId, business } = useAuth()
+  const { profile, user, businessId, business, logout } = useAuth()
   const { snack, show } = useSnackbar()
   const scrollingDown = useScrollDirection()
   const [fabOpen, setFabOpen] = useState(false)
@@ -42,7 +42,12 @@ export default function OwnerDashboard() {
       {/* App Bar */}
       <div className="app-bar">
         <span className="app-bar-title">TaskPod</span>
-        <NotificationBell userId={user?.id} />
+        <div className="flex items-center gap-2">
+          <NotificationBell userId={user?.id} />
+          <button onClick={logout} className="mobile-logout" title="Sign Out">
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       <OfflineBanner />

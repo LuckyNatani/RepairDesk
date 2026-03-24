@@ -4,7 +4,7 @@ import { useAnalytics } from '../hooks/useAnalytics'
 import { useNavigate, useLocation } from 'react-router-dom'
 import NotificationBell from '../components/Notifications/NotificationBell'
 import SkeletonCard from '../components/shared/SkeletonCard'
-import { LayoutDashboard, List, BarChart2, Users, Clock } from 'lucide-react'
+import { LayoutDashboard, List, BarChart2, Users, Clock, LogOut } from 'lucide-react'
 
 function MetricCard({ label, value, sub, color = 'var(--navy)' }) {
   return (
@@ -17,7 +17,7 @@ function MetricCard({ label, value, sub, color = 'var(--navy)' }) {
 }
 
 export default function AnalyticsDashboard() {
-  const { user, businessId } = useAuth()
+  const { user, businessId, logout } = useAuth()
   const { data, loading, fetchAnalytics } = useAnalytics(businessId)
   const [range, setRange] = useState('week')
   const navigate = useNavigate(); const location = useLocation()
@@ -35,7 +35,12 @@ export default function AnalyticsDashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <div className="app-bar">
         <span className="app-bar-title">Analytics</span>
-        <NotificationBell userId={user?.id} />
+        <div className="flex items-center gap-2">
+          <NotificationBell userId={user?.id} />
+          <button onClick={logout} className="mobile-logout" title="Sign Out">
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', paddingBottom: '90px' }}>

@@ -80,13 +80,23 @@ export function AuthProvider({ children }) {
   }, [fetchProfile])
 
   const logout = useCallback(async () => {
+    // 1. Immediate UI state clear
     setUser(null)
     setProfile(null)
-    // Force clear local storage to break out of gotrue locks in dev
-    for (let key in localStorage) {
-      if (key.startsWith('sb-')) localStorage.removeItem(key)
+    
+    // 2. Clear all storage (local and session) to ensure no stale metadata remains
+    try {
+      localStorage.clear()
+      sessionStorage.clear()
+    } catch (e) {
+      console.error('Storage clear error:', e)
     }
+
+    // 3. Inform Supabase and await sign out completion
     await supabase.auth.signOut().catch(err => console.error('Sign out error:', err))
+    
+    // 4. Clean exit: full redirect to ensure all memory state is wiped
+    window.location.href = '/login'
   }, [])
 
   const refreshProfile = useCallback(async () => {

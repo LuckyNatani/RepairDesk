@@ -7,7 +7,7 @@ import ConfirmModal from '../components/shared/ConfirmModal'
 import Snackbar from '../components/shared/Snackbar'
 import { useSnackbar } from '../hooks/useSnackbar'
 import { supabase } from '../lib/supabaseClient'
-import { LayoutDashboard, List, BarChart2, Users, Plus, User, Phone, Eye, EyeOff, Edit2, Trash2 } from 'lucide-react'
+import { LayoutDashboard, List, BarChart2, Users, Plus, User, Phone, Eye, EyeOff, Edit2, Trash2, LogOut } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import Avatar from '../components/shared/Avatar'
 import { toTelLink } from '../lib/phoneUtils'
@@ -36,7 +36,7 @@ function StaffRow({ staff, onDeactivate, onReactivate, onReset }) {
 }
 
 export default function AdminPanel() {
-  const { user, businessId, profile } = useAuth()
+  const { user, businessId, profile, logout } = useAuth()
   const { snack, show } = useSnackbar()
   const navigate = useNavigate(); const location = useLocation()
   const [staffList, setStaffList] = useState([])
@@ -100,7 +100,12 @@ export default function AdminPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
       <div className="app-bar">
         <span className="app-bar-title">Admin</span>
-        <NotificationBell userId={user?.id} />
+        <div className="flex items-center gap-2">
+          <NotificationBell userId={user?.id} />
+          <button onClick={logout} className="mobile-logout" title="Sign Out">
+            <LogOut size={20} />
+          </button>
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 90 }}>
