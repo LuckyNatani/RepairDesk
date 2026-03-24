@@ -16,7 +16,7 @@ export function useSABusinesses() {
         *,
         owner:owner_id(id, name, email, phone),
         tasks:tasks(count),
-        users:users(count)
+        users:users!users_business_id_fkey(count)
       `)
       .order('created_at', { ascending: false })
     

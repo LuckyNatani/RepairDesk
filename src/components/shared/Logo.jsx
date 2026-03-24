@@ -3,26 +3,11 @@ import React from 'react';
 const Logo = ({ className = "w-10 h-10", textClassName = "text-xl font-bold tracking-tight", textColor = "default" }) => (
     <div className="flex items-center gap-3 select-none group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded-md">
         <div className={`${className} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <defs>
-                    <mask id="logo-p-mask">
-                        <rect width="100" height="100" fill="white" />
-                        <path d="M54 38 H74 C78 38 79 48 77 55 C75 62 69 62 65 62 H50 L54 38 Z" fill="black" />
-                    </mask>
-                </defs>
-                {/* Slanted T */}
-                <path 
-                    d="M15 25 H65 L61 38 H48 L37 85 H22 L33 38 H15 Z" 
-                    fill={textColor === 'white' ? 'white' : '#0F172A'} 
-                />
-                
-                {/* Slanted P (Teal) */}
-                <path 
-                    d="M48 25 H82 C94 25 98 40 95 52 C92 65 82 72 68 72 H53 L50 85 H35 L48 25 Z" 
-                    fill="#00D1B2" 
-                    mask="url(#logo-p-mask)"
-                />
-            </svg>
+            <img 
+                src="/taskpod_logo.png" 
+                alt="TaskPod Logo" 
+                className="w-full h-full object-contain"
+            />
         </div>
         {textClassName && (
             <span className={`${textClassName} tracking-tight`}>
