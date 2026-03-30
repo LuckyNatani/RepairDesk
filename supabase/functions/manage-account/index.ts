@@ -16,9 +16,8 @@ Deno.serve(async (req) => {
 
   const { data: { user } } = await supabase.auth.getUser(req.headers.get('Authorization')?.split('Bearer ')[1] || '')
   if (!user || user.id !== SUPERADMIN_USER_ID) return new Response('Forbidden', { status: 403, headers: corsHeaders })
-
-  const { action, businessId, days } = await req.json()
-
+  const body = await req.json()
+  const { action, businessId, days, userId, isActive } = body
   const now = new Date().toISOString()
   let update: Record<string, unknown> = {}
   let eventType = action
@@ -47,10 +46,8 @@ Deno.serve(async (req) => {
       eventType = 'trial_extended'
       break
     case 'toggle_user':
-      const { userId, isActive } = await req.json()
       const { error: userErr } = await supabase.from('users').update({ is_active: isActive }).eq('id', userId)
       if (userErr) return new Response(JSON.stringify({ error: userErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-      await supabase.from('account_events').insert({ business_id: businessId, event_type: 'user_toggled', actor_id: SUPERADMIN_USER_ID, notes: `User ${userId} set to ${isActive ? 'active' : 'inactive'}` })
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     default:
 
@@ -59,9 +56,7 @@ Deno.serve(async (req) => {
 
   const { error } = await supabase.from('businesses').update(update).eq('id', businessId)
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-
-  await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, note: `${action} via SA panel` })
-
+  await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, notes: `${action} via SA panel` })
   // Notify owner
   const { data: biz2 } = await supabase.from('businesses').select('owner_id').eq('id', businessId).single()
   if (biz2?.owner_id) {
