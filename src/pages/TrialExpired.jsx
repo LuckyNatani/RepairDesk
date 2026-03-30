@@ -12,8 +12,8 @@ export default function TrialExpired() {
         <div style={{ width: 64, height: 64, background: 'var(--amber-surface)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
-        <h1 style={{ fontFamily: '"Inter", sans-serif', fontSize: 22, fontWeight: 700, margin: '0 0 10px', color: 'var(--grey-900)' }}>Trial Expired</h1>
-        <p style={{ color: 'var(--grey-600)', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>Your trial period has ended. Contact TaskPod support to activate your account.</p>
+        <h1 style={{ fontFamily: '"Inter", sans-serif', fontSize: 22, fontWeight: 700, margin: '0 0 10px', color: 'var(--gray-900)' }}>Trial Expired</h1>
+        <p style={{ color: 'var(--gray-600)', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>Your trial period has ended. Contact TaskPod support to activate your account.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {SUPPORT_PHONE && (
             <a href={`tel:${SUPPORT_PHONE}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'var(--green-surface)', borderRadius: 10, textDecoration: 'none', color: 'var(--green)', fontWeight: 600 }}>
@@ -26,7 +26,7 @@ export default function TrialExpired() {
             </a>
           )}
         </div>
-        <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--grey-600)', cursor: 'pointer', fontSize: 13, marginTop: 20 }}>Sign Out</button>
+        <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--gray-600)', cursor: 'pointer', fontSize: 13, marginTop: 20 }}>Sign Out</button>
       </div>
     </div>
   )

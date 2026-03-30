@@ -35,14 +35,14 @@ export default function ChangePassword() {
               <label className="input-label">{label}</label>
               <div style={{ position: 'relative' }}>
                 <input className="input" type={show ? 'text' : 'password'} value={val} onChange={e => set(e.target.value)} minLength={8} style={{ paddingRight: 44 }} />
-                <button type="button" onClick={() => setShow(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)', display: 'flex' }}>
+                <button type="button" onClick={() => setShow(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-600)', display: 'flex' }}>
                   {show ? <EyeOff size={18}/> : <Eye size={18}/>}
                 </button>
               </div>
             </div>
           ))}
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>{loading ? 'Updating…' : 'Set Password & Continue'}</button>
-          <button type="button" onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--grey-600)', cursor: 'pointer', fontSize: 13, marginTop: 4 }}>Cancel & Log Out</button>
+          <button type="button" onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--gray-600)', cursor: 'pointer', fontSize: 13, marginTop: 4 }}>Cancel & Log Out</button>
         </form>
       </div>
     </div>

@@ -48,21 +48,13 @@ export default function SALayout({ children }) {
   const { logout } = useAuth()
   const location = useLocation()
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-      {/* Mobile Header (SA) */}
-      <div className="app-bar border-b md:hidden" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', background: '#fff' }}>
-        <Logo className="w-8 h-8" textClassName="text-lg font-bold" />
-        <button onClick={logout} className="mobile-logout">
-          <LogOut size={20} />
-        </button>
-      </div>
-      
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <SANav collapsed={collapsed} setCollapsed={setCollapsed} activePath={location.pathname} />
-        <div style={{ flex: 1, background: 'var(--white)', overflowY: 'auto', minWidth: 0, borderLeft: '1px solid var(--gray-100)' }}>
-          {children}
-        </div>
+
+    <div style={{ display: 'flex', minHeight: '100dvh' }}>
+      <SANav collapsed={collapsed} setCollapsed={setCollapsed} activePath={location.pathname} />
+      <div style={{ flex: 1, background: 'var(--white)', overflowY: 'auto', minWidth: 0 }}>
+        {children}
       </div>
     </div>
   )
 }
+

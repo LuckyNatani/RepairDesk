@@ -12,7 +12,7 @@ const EVENT_ICONS = {
 }
 
 export function NotificationRow({ notification, onClick }) {
-  const cfg = EVENT_ICONS[notification.event_type] || { Icon: Bell, color: 'var(--grey-600)' }
+  const cfg = EVENT_ICONS[notification.event_type] || { Icon: Bell, color: 'var(--gray-600)' }
   const { Icon } = cfg
   return (
     <div onClick={onClick} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', background: notification.is_read ? '#fff' : 'var(--amber-surface)', borderBottom: '1px solid #F0F0F0', cursor: 'pointer', transition: 'background 150ms ease' }}>
@@ -20,8 +20,8 @@ export function NotificationRow({ notification, onClick }) {
         <Icon size={16} color={cfg.color} />
       </div>
       <div style={{ flex: 1 }}>
-        <p style={{ margin: '0 0 2px', fontSize: 13, color: 'var(--grey-900)', lineHeight: 1.5 }}>{notification.message}</p>
-        <span style={{ fontSize: 11, color: 'var(--grey-600)' }}>{new Date(notification.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+        <p style={{ margin: '0 0 2px', fontSize: 13, color: 'var(--gray-900)', lineHeight: 1.5 }}>{notification.message}</p>
+        <span style={{ fontSize: 11, color: 'var(--gray-600)' }}>{new Date(notification.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
       </div>
       {!notification.is_read && <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)', flexShrink: 0, marginTop: 4 }} />}
     </div>

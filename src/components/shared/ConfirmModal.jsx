@@ -5,7 +5,7 @@ export default function ConfirmModal({ open, title, body, confirmLabel = 'Confir
   return (
     <BottomSheet open={open} onClose={onCancel} title={title}>
       {typeof body === 'string'
-        ? <p style={{ color: 'var(--grey-600)', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>{body}</p>
+        ? <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>{body}</p>
         : <div style={{ marginBottom: 20 }}>{body}</div>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <button className={btnClass} onClick={onConfirm} disabled={loading}>

@@ -9,17 +9,17 @@ export default function TaskListItem({ task, currentUserRole, onViewDetail }) {
       onMouseEnter={e => e.currentTarget.style.background = '#F9F9F9'} onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--grey-600)' }}>#{task.task_number}</span>
+          <span style={{ fontFamily: '"Inter", sans-serif', fontSize: 11, fontWeight: 600, color: 'var(--gray-600)' }}>#{task.task_number}</span>
           <StatusBadge status={task.status} size="sm" />
           {task.is_urgent && <span className="badge badge-sm badge-urgent">!</span>}
           {isOverdue && <AlertCircle size={12} color="var(--red)" />}
         </div>
         <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: 14, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{task.customer_name}</p>
-        <p style={{ margin: 0, fontSize: 12, color: 'var(--grey-600)' }}>
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--gray-600)' }}>
           {task.assigned_user?.name ? `→ ${task.assigned_user.name}` : 'Unassigned'} · {formatDistanceToNow(new Date(task.created_at), { addSuffix: true })}
         </p>
       </div>
-      <ChevronRight size={16} color="var(--grey-600)" />
+      <ChevronRight size={16} color="var(--gray-600)" />
     </div>
   )
 }

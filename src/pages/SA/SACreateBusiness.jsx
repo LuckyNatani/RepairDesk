@@ -26,9 +26,9 @@ export default function SACreateBusiness() {
       <div style={{ padding: 32, maxWidth: 480 }}>
         <div style={{ background: 'var(--teal-surface)', borderRadius: 16, padding: 24, textAlign: 'center', border: '1px solid var(--teal)' }}>
           <h2 style={{ fontFamily: '"Inter", sans-serif', color: 'var(--teal)', marginBottom: 12 }}>Business Created!</h2>
-          <p style={{ fontSize: 14, color: 'var(--grey-900)', marginBottom: 4 }}><strong>{created.businessName}</strong></p>
-          <p style={{ fontSize: 13, color: 'var(--grey-600)', margin: '4px 0' }}>Owner: {created.ownerEmail}</p>
-          <p style={{ fontSize: 13, color: 'var(--grey-600)', margin: '4px 0' }}>Temp password: <strong>{created.tempPassword}</strong></p>
+          <p style={{ fontSize: 14, color: 'var(--gray-900)', marginBottom: 4 }}><strong>{created.businessName}</strong></p>
+          <p style={{ fontSize: 13, color: 'var(--gray-600)', margin: '4px 0' }}>Owner: {created.ownerEmail}</p>
+          <p style={{ fontSize: 13, color: 'var(--gray-600)', margin: '4px 0' }}>Temp password: <strong>{created.tempPassword}</strong></p>
         </div>
         <button className="btn btn-ghost btn-full" onClick={() => setCreated(null)} style={{ marginTop: 16 }}>Create Another</button>
       </div>

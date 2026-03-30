@@ -65,7 +65,7 @@ export default function StaffMyTasks() {
       {/* Filter Tabs */}
       <div style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #E0E0E0' }}>
         {TABS.map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '12px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: activeTab === tab ? 'var(--navy)' : 'var(--grey-600)', borderBottom: activeTab === tab ? '2px solid var(--navy)' : '2px solid transparent', transition: 'all 150ms ease' }}>
+          <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '12px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: activeTab === tab ? 'var(--navy)' : 'var(--gray-600)', borderBottom: activeTab === tab ? '2px solid var(--navy)' : '2px solid transparent', transition: 'all 150ms ease' }}>
             {TAB_LABELS[tab]}
           </button>
         ))}

@@ -16,7 +16,7 @@ export default function BottomSheet({ open, onClose, children, title = null }) {
         <div className="bottom-sheet-handle" />
         {title && (
           <div style={{ padding: '4px 20px 12px', borderBottom: '1px solid #F0F0F0' }}>
-            <p style={{ margin: 0, fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--grey-900)' }}>{title}</p>
+            <p style={{ margin: 0, fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--gray-900)' }}>{title}</p>
           </div>
         )}
         <div style={{ padding: '16px 20px' }}>

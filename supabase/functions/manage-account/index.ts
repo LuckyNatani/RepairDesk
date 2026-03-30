@@ -25,7 +25,9 @@ Deno.serve(async (req) => {
 
   switch (action) {
     case 'activate':
-      update = { account_status: 'active', activated_at: now, activated_by: SUPERADMIN_USER_ID }
+      const oneYearFromNow = new Date()
+      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+      update = { account_status: 'active', activated_at: now, activated_by: SUPERADMIN_USER_ID, trial_ends_at: oneYearFromNow.toISOString() }
       eventType = 'activated'
       break
     case 'suspend':
@@ -37,14 +39,21 @@ Deno.serve(async (req) => {
       eventType = 'reactivated'
       break
     case 'extend_trial':
-      const extendDays = Math.min(Math.max(days || 7, 1), 90)
+      const extendDays = Math.min(Math.max(days || 7, 1), 365)
       const { data: biz } = await supabase.from('businesses').select('trial_ends_at, account_status').eq('id', businessId).single()
-      const base = biz?.account_status === 'trial_active' && biz.trial_ends_at ? new Date(biz.trial_ends_at) : new Date()
+      const base = (biz?.account_status === 'trial_active' || biz?.account_status === 'active') && biz.trial_ends_at ? new Date(biz.trial_ends_at) : new Date()
       base.setDate(base.getDate() + extendDays)
-      update = { account_status: 'trial_active', trial_ends_at: base.toISOString() }
+      update = { account_status: biz?.account_status === 'active' ? 'active' : 'trial_active', trial_ends_at: base.toISOString() }
       eventType = 'trial_extended'
       break
+    case 'toggle_user':
+      const { userId, isActive } = await req.json()
+      const { error: userErr } = await supabase.from('users').update({ is_active: isActive }).eq('id', userId)
+      if (userErr) return new Response(JSON.stringify({ error: userErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      await supabase.from('account_events').insert({ business_id: businessId, event_type: 'user_toggled', actor_id: SUPERADMIN_USER_ID, notes: `User ${userId} set to ${isActive ? 'active' : 'inactive'}` })
+      return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     default:
+
       return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 

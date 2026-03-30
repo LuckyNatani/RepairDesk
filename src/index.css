@@ -29,21 +29,21 @@
   --white:          #FFFFFF;
   --teal:           #00D1B2;
   --teal-hover:     #00bda1;
-  --teal-surface:   #F0FDFA;
-  
-  --gray-50:        #F8FAFC;
-  --gray-100:       #F1F5F9;
-  --gray-200:       #E2E8F0;
-  --gray-300:       #CBD5E1;
-  --gray-400:       #94A3B8;
-  --gray-500:       #64748B;
-  --gray-600:       #475569;
-  --gray-700:       #334155;
-  --gray-800:       #1E293B;
   --gray-900:       #0F172A;
 
   /* Semantic Tones (Harmonized) */
+  --teal-surface:   #F0FDFA;
+  --red:            #EF4444;
+  --red-surface:    #FEF2F2;
+  --amber:          #F59E0B;
+  --amber-surface:  #FFFBEB;
+  --green:          #10B981;
+  --green-surface:  #ECFDF5;
+  --blue:           #3B82F6;
+  --blue-surface:   #EFF6FF;
+
   --sa-accent:      var(--teal);
+
   --sa-surface:     var(--gray-50);
 
   /* Spacing */

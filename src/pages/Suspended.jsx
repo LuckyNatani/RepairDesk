@@ -13,7 +13,7 @@ export default function Suspended() {
           <ShieldOff size={28} color="var(--red)" />
         </div>
         <h1 style={{ fontFamily: '"Inter", sans-serif', fontSize: 22, fontWeight: 700, margin: '0 0 10px' }}>Account Suspended</h1>
-        <p style={{ color: 'var(--grey-600)', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>
+        <p style={{ color: 'var(--gray-600)', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>
           {role === 'staff'
             ? 'Your account has been deactivated. Please contact your manager.'
             : 'Your business account has been suspended. Contact TaskPod support.'}
@@ -23,7 +23,7 @@ export default function Suspended() {
             <Phone size={16} /> Contact Support
           </a>
         )}
-        <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--grey-600)', cursor: 'pointer', fontSize: 13 }}>Sign Out</button>
+        <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--gray-600)', cursor: 'pointer', fontSize: 13 }}>Sign Out</button>
       </div>
     </div>
   )

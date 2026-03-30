@@ -19,13 +19,13 @@ function StaffRow({ staff, onDeactivate, onReactivate, onReset }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontWeight: 600, fontSize: 14 }}>{staff.name}</span>
-          <span className="badge badge-sm" style={{ background: staff.is_active ? 'var(--green-surface)' : '#F5F5F5', color: staff.is_active ? 'var(--green)' : 'var(--grey-600)' }}>{staff.is_active ? 'Active' : 'Inactive'}</span>
+          <span className="badge badge-sm" style={{ background: staff.is_active ? 'var(--green-surface)' : '#F5F5F5', color: staff.is_active ? 'var(--green)' : 'var(--gray-600)' }}>{staff.is_active ? 'Active' : 'Inactive'}</span>
         </div>
         <a href={toTelLink(staff.phone)} style={{ fontSize: 12, color: 'var(--blue)', textDecoration: 'none' }}>{staff.phone}</a>
-        {staff.last_seen_at && <div style={{ fontSize: 11, color: 'var(--grey-600)' }}>Last seen {formatDistanceToNow(new Date(staff.last_seen_at), { addSuffix: true })}</div>}
+        {staff.last_seen_at && <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>Last seen {formatDistanceToNow(new Date(staff.last_seen_at), { addSuffix: true })}</div>}
       </div>
       <div style={{ display: 'flex', gap: 6 }}>
-        <button onClick={onReset} style={{ fontSize: 12, padding: '5px 10px', background: '#F5F5F5', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--grey-900)' }}>Reset</button>
+        <button onClick={onReset} style={{ fontSize: 12, padding: '5px 10px', background: '#F5F5F5', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--gray-900)' }}>Reset</button>
         {staff.is_active
           ? <button onClick={onDeactivate} style={{ fontSize: 12, padding: '5px 10px', background: 'var(--red-surface)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--red)' }}>Deactivate</button>
           : <button onClick={onReactivate} style={{ fontSize: 12, padding: '5px 10px', background: 'var(--green-surface)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--green)' }}>Reactivate</button>
@@ -123,7 +123,7 @@ export default function AdminPanel() {
               <label className="input-label">Temp Password</label>
               <div style={{ position: 'relative' }}>
                 <input className="input" type={showPw ? 'text' : 'password'} value={addForm.tempPassword} onChange={e => setAddForm(f => ({ ...f, tempPassword: e.target.value }))} minLength={8} style={{ paddingRight: 44 }} />
-                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)', display: 'flex' }}>
+                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-600)', display: 'flex' }}>
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -131,7 +131,7 @@ export default function AdminPanel() {
             <button className="btn btn-primary btn-full" onClick={addStaff} disabled={addLoading || staffList.length >= 14}>
               {addLoading ? 'Adding…' : <><Plus size={16} /> Add Staff</>}
             </button>
-            {staffList.length >= 14 && <p style={{ fontSize: 12, color: 'var(--grey-600)', textAlign: 'center', margin: 0 }}>Maximum 15 users reached</p>}
+            {staffList.length >= 14 && <p style={{ fontSize: 12, color: 'var(--gray-600)', textAlign: 'center', margin: 0 }}>Maximum 15 users reached</p>}
           </div>
         </div>
 
@@ -159,7 +159,7 @@ export default function AdminPanel() {
           {serviceTypes.map(st => (
             <div key={st.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fff', borderRadius: 8, marginBottom: 6, boxShadow: 'var(--shadow-sm)' }}>
               <span style={{ flex: 1, fontSize: 14 }}>{st.label}</span>
-              <button onClick={() => deleteServiceType(st.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--grey-600)' }}><Trash2 size={15} /></button>
+              <button onClick={() => deleteServiceType(st.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-600)' }}><Trash2 size={15} /></button>
             </div>
           ))}
         </div>

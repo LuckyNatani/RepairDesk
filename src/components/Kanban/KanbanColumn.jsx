@@ -20,9 +20,9 @@ export default function KanbanColumn({ status, tasks, loading, staffList, onView
       {/* Column header */}
       <div className="kanban-col-header" onClick={() => setCollapsed(c => !c)}>
         <div className="kanban-col-dot" style={{ background: cfg.dotColor }} />
-        <span style={{ fontFamily: '"Inter", sans-serif', fontWeight: 600, fontSize: 13, color: 'var(--grey-900)' }}>{cfg.label}</span>
+        <span style={{ fontFamily: '"Inter", sans-serif', fontWeight: 600, fontSize: 13, color: 'var(--gray-900)' }}>{cfg.label}</span>
         <span className="kanban-col-count">{tasks.length}</span>
-        {collapsed ? <ChevronDown size={14} color="var(--grey-600)" /> : <ChevronUp size={14} color="var(--grey-600)" />}
+        {collapsed ? <ChevronDown size={14} color="var(--gray-600)" /> : <ChevronUp size={14} color="var(--gray-600)" />}
       </div>
 
       {/* Tasks */}

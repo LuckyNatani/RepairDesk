@@ -80,10 +80,10 @@ export default function NewTaskForm({ businessId, createdBy, staffList = [], ser
           <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #E0E0E0', borderRadius: 8, boxShadow: 'var(--shadow-lg)', zIndex: 20, overflow: 'hidden' }}>
             {suggestions.map(s => (
               <button key={s.id} onMouseDown={() => selectSuggestion(s)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 14px', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid #F5F5F5' }}>
-                <User size={14} color="var(--grey-600)" />
+                <User size={14} color="var(--gray-600)" />
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--grey-600)' }}>{s.phone}</div>
+                  <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>{s.phone}</div>
                 </div>
               </button>
             ))}
@@ -99,7 +99,7 @@ export default function NewTaskForm({ businessId, createdBy, staffList = [], ser
       )}
       {mode === 'full' && (
         <>
-          <button onClick={() => setMode('quick')} style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--grey-600)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, alignSelf: 'flex-start', padding: 0 }}>
+          <button onClick={() => setMode('quick')} style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--gray-600)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, alignSelf: 'flex-start', padding: 0 }}>
             Collapse <ChevronUp size={14} />
           </button>
 
@@ -139,7 +139,7 @@ export default function NewTaskForm({ businessId, createdBy, staffList = [], ser
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 14 }}>
               <input type="checkbox" checked={form.isUrgent} onChange={e => setForm(f => ({ ...f, isUrgent: e.target.checked }))} />
-              <span style={{ color: form.isUrgent ? 'var(--red)' : 'var(--grey-900)', fontWeight: form.isUrgent ? 600 : 400 }}>Mark as Urgent</span>
+              <span style={{ color: form.isUrgent ? 'var(--red)' : 'var(--gray-900)', fontWeight: form.isUrgent ? 600 : 400 }}>Mark as Urgent</span>
             </label>
           </div>
 

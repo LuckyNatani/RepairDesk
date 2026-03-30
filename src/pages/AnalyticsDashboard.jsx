@@ -10,8 +10,8 @@ function MetricCard({ label, value, sub, color = 'var(--navy)' }) {
   return (
     <div className="card" style={{ padding: '14px 16px', flex: 1, minWidth: '44%' }}>
       <div style={{ fontSize: 26, fontFamily: '"Inter", sans-serif', fontWeight: 700, color }}>{value ?? '—'}</div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--grey-600)', marginTop: 2 }}>{label}</div>
-      {sub && <div style={{ fontSize: 11, color: 'var(--grey-600)', marginTop: 1 }}>{sub}</div>}
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-600)', marginTop: 2 }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 1 }}>{sub}</div>}
     </div>
   )
 }
@@ -47,7 +47,7 @@ export default function AnalyticsDashboard() {
         {/* Range chips */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
           {[['week', 'This Week'], ['month', 'This Month']].map(([id, label]) => (
-            <button key={id} onClick={() => setRange(id)} style={{ padding: '6px 16px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: range === id ? 'var(--navy)' : '#F0F0F0', color: range === id ? '#fff' : 'var(--grey-600)', transition: 'all 150ms ease' }}>
+            <button key={id} onClick={() => setRange(id)} style={{ padding: '6px 16px', borderRadius: 100, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: range === id ? 'var(--navy)' : '#F0F0F0', color: range === id ? '#fff' : 'var(--gray-600)', transition: 'all 150ms ease' }}>
               {label}
             </button>
           ))}
@@ -66,15 +66,15 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Per-staff table */}
-            <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--grey-900)', marginBottom: 10 }}>Staff Performance</h3>
+            <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--gray-900)', marginBottom: 10 }}>Staff Performance</h3>
             {data.staffStats.length === 0
-              ? <p style={{ color: 'var(--grey-600)', fontSize: 13 }}>No staff data for this period.</p>
+              ? <p style={{ color: 'var(--gray-600)', fontSize: 13 }}>No staff data for this period.</p>
               : <div className="card" style={{ overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                     <thead>
                       <tr style={{ background: '#F5F5F5' }}>
                         {['Name', 'Assigned', 'Done', '%', 'Avg Time'].map(h => (
-                          <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--grey-600)', whiteSpace: 'nowrap' }}>{h}</th>
+                          <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -85,7 +85,7 @@ export default function AnalyticsDashboard() {
                           <td style={{ padding: '10px 12px' }}>{s.assigned}</td>
                           <td style={{ padding: '10px 12px', color: 'var(--green)', fontWeight: 600 }}>{s.completed}</td>
                           <td style={{ padding: '10px 12px' }}>{s.completionRate}%</td>
-                          <td style={{ padding: '10px 12px', color: 'var(--grey-600)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <td style={{ padding: '10px 12px', color: 'var(--gray-600)', display: 'flex', alignItems: 'center', gap: 4 }}>
                             {s.avgMinutes ? <><Clock size={11} />{s.avgMinutes >= 60 ? `${Math.round(s.avgMinutes/60)}h` : `${s.avgMinutes}m`}</> : '—'}
                           </td>
                         </tr>

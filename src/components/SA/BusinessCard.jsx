@@ -6,7 +6,7 @@ import { formatDistanceToNow } from 'date-fns'
 const STATUS_CONFIG = {
   trial_active:   { label: 'Trial',     bg: 'var(--amber-surface)', color: 'var(--amber)',   Icon: Clock },
   active:         { label: 'Active',    bg: 'var(--green-surface)', color: 'var(--green)',   Icon: CheckCircle },
-  trial_expired:  { label: 'Expired',   bg: '#F5F5F5',              color: 'var(--grey-600)', Icon: AlertCircle },
+  trial_expired:  { label: 'Expired',   bg: '#F5F5F5',              color: 'var(--gray-600)', Icon: AlertCircle },
   suspended:      { label: 'Suspended', bg: 'var(--red-surface)',   color: 'var(--red)',     Icon: AlertCircle },
 }
 
@@ -32,13 +32,13 @@ export function BusinessCard({ biz, onSelect }) {
             <span style={{ fontFamily: '"Inter", sans-serif', fontWeight: 700, fontSize: 15 }}>{biz.name}</span>
             <BusinessStatusChip status={biz.account_status} />
           </div>
-          <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--grey-600)' }}>Owner: {biz.owner?.name}</p>
+          <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--gray-600)' }}>Owner: {biz.owner?.name}</p>
           <div style={{ display: 'flex', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--grey-600)' }}><Users size={10} /> {biz.users?.[0]?.count ?? 0} users</div>
-            <div style={{ fontSize: 11, color: 'var(--grey-600)' }}>Created {formatDistanceToNow(new Date(biz.created_at), { addSuffix: true })}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--gray-600)' }}><Users size={10} /> {biz.users?.[0]?.count ?? 0} users</div>
+            <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>Created {formatDistanceToNow(new Date(biz.created_at), { addSuffix: true })}</div>
           </div>
         </div>
-        <ChevronRight size={16} color="var(--grey-600)" />
+        <ChevronRight size={16} color="var(--gray-600)" />
       </div>
     </div>
   )
