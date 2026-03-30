@@ -143,7 +143,23 @@ export default function AdminPanel() {
               <StaffRow key={s.id} staff={s}
                 onDeactivate={() => setConfirmDeactivate(s)}
                 onReactivate={() => reactivateStaff(s.id)}
-                onReset={() => show('Password reset via manage-staff Edge Function', 'info')}
+                onReset={async () => {
+                  const newPw = prompt(`Enter new temporary password for ${s.name}:`)
+                  if (!newPw) return
+                  if (newPw.length < 8) {
+                    show('Password must be at least 8 characters', 'error')
+                    return
+                  }
+                  try {
+                    const { error: resetErr } = await supabase.functions.invoke('manage-staff-fix', {
+                      body: { action: 'reset_password', businessId, staffId: s.id, tempPassword: newPw }
+                    })
+                    if (resetErr) throw resetErr
+                    show('Password reset successfully! Staff must change it on next login.', 'success')
+                  } catch (err) {
+                    show('Failed to reset password: ' + err.message, 'error')
+                  }
+                }}
               />
             ))
           }
