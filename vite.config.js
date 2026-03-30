@@ -12,7 +12,7 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['taskpod_logo.png'],
+      includeAssets: ['tp_app_icon.png'],
       manifest: {
         name: 'TaskPod',
         short_name: 'TaskPod',
@@ -23,12 +23,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/taskpod_logo.png',
+            src: '/tp_app_icon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/taskpod_logo.png',
+            src: '/tp_app_icon.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
