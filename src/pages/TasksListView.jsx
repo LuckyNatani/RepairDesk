@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LayoutDashboard, List, BarChart2, Users, ClipboardList, LogOut } from 'lucide-react'
 
 export default function TasksListView() {
-  const { user, businessId, Role, profile, logout } = useAuth()
+  const { user, businessId, profile, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const isOwner = profile?.role === 'owner'
