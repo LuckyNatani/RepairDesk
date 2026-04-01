@@ -59,14 +59,14 @@ export default function TaskDetail({ taskId, currentUser }) {
   const [confirmReopen, setConfirmReopen] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const remarksRef = useRef(null)
-  const lastUpdatedRef = useRef(null)
+  const lastVersionRef = useRef(null)
 
   const isOwner = currentUser?.role === 'owner'
   const isMyTask = task?.assigned_to === currentUser?.id
 
   const fetchTask = async () => {
     const { data } = await supabase.from('tasks').select(`*, assigned_user:assigned_to(id,name,phone,avatar_color), creator:created_by(id,name)`).eq('id', taskId).single()
-    if (data) { setTask(data); lastUpdatedRef.current = data.updated_at }
+    if (data) { setTask(data); lastVersionRef.current = data.version }
     setLoading(false)
   }
 
@@ -90,7 +90,7 @@ export default function TaskDetail({ taskId, currentUser }) {
     fetchTask(); fetchRemarks(); fetchStaff()
     const ch = supabase.channel(`task-detail:${taskId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tasks', filter: `id=eq.${taskId}` }, (payload) => {
-        if (lastUpdatedRef.current && payload.new.updated_at !== lastUpdatedRef.current) setConflict(true)
+        if (lastVersionRef.current && payload.new.version !== lastVersionRef.current) setConflict(true)
         fetchTask()
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'remarks', filter: `task_id=eq.${taskId}` }, fetchRemarks)
@@ -99,21 +99,37 @@ export default function TaskDetail({ taskId, currentUser }) {
   }, [taskId])
 
   const assignStaff = async (staffId) => {
-    const { count } = await supabase.from('tasks').update({ assigned_to: staffId, status: 'in_progress', assigned_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', taskId).eq('updated_at', lastUpdatedRef.current)
-    if (count === 0) setConflict(true)
+    const { status, error } = await supabase.from('tasks')
+      .update({ assigned_to: staffId, status: 'in_progress', assigned_at: new Date().toISOString() })
+      .eq('id', taskId)
+      .eq('version', lastVersionRef.current)
+
+    if (error || status === 406 || status === 409) setConflict(true)
     else fetchTask()
   }
 
   const markComplete = async () => {
     setActionLoading(true)
-    await supabase.from('tasks').update({ status: 'completed', completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', taskId)
-    setActionLoading(false); setConfirmComplete(false); fetchTask()
+    const { status, error } = await supabase.from('tasks')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .eq('id', taskId)
+      .eq('version', lastVersionRef.current)
+    
+    setActionLoading(false)
+    if (error || status === 406 || status === 409) setConflict(true)
+    else { setConfirmComplete(false); fetchTask() }
   }
 
   const reopenTask = async () => {
     setActionLoading(true)
-    await supabase.from('tasks').update({ status: 'unassigned', completed_at: null, assigned_to: null, updated_at: new Date().toISOString() }).eq('id', taskId)
-    setActionLoading(false); setConfirmReopen(false); fetchTask()
+    const { status, error } = await supabase.from('tasks')
+      .update({ status: 'unassigned', completed_at: null, assigned_to: null })
+      .eq('id', taskId)
+      .eq('version', lastVersionRef.current)
+
+    setActionLoading(false)
+    if (error || status === 406 || status === 409) setConflict(true)
+    else { setConfirmReopen(false); fetchTask() }
   }
 
   if (loading) return <div style={{ padding: 20 }}>{[0,1,2].map(i => <div key={i} className="skeleton" style={{ height: 40, borderRadius: 8, marginBottom: 12 }} />)}</div>

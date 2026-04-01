@@ -17,10 +17,20 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    // Auth: only superadmin
+    // Auth: only superadmin (Verified against users table)
     const token = req.headers.get('Authorization')?.split('Bearer ')[1] || ''
-    const { data: { user } } = await supabase.auth.getUser(token)
-    if (!user || user.id !== SUPERADMIN_USER_ID) return json({ error: 'Forbidden' }, 403)
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) return json({ error: 'Unauthorized' }, 401)
+
+    const { data: caller, error: callerError } = await supabase
+      .from('users')
+      .select('id, role')
+      .eq('id', user.id)
+      .single()
+
+    if (callerError || !caller || caller.role !== 'superadmin') {
+      return json({ error: 'Forbidden: Superadmin access required' }, 403)
+    }
 
     const { businessName, ownerName, ownerEmail, ownerPhone, tempPassword, startAs } = await req.json()
 

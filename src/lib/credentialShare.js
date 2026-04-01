@@ -10,8 +10,9 @@ export function generateOwnerCredentials({ businessName, ownerName, email, tempP
     `Password: ${tempPassword}`,
     `App: ${APP_URL}`,
     '',
-    '⚠ Please change your password after first login.',
-    '_Sent from TaskPod Admin_',
+    '❗ *Security Warning:* Please delete this message after you have logged in to maintain account security.',
+    '⚠ Please change your password after your first login.',
+    '_Sent from TaskPod Systems_',
   ].join('\n')
 }
 
@@ -25,7 +26,8 @@ export function generateStaffCredentials({ staffName, email, tempPassword, busin
     `Password: ${tempPassword}`,
     `App: ${APP_URL}`,
     '',
-    '⚠ Please change your password after first login.',
-    '_Sent from TaskPod_',
+    '❗ *Security Warning:* Please delete this message after you have logged in to protect your account.',
+    '⚠ Please change your password after your first login.',
+    '_Sent from TaskPod Systems_',
   ].join('\n')
 }

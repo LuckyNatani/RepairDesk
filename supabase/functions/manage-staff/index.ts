@@ -16,14 +16,21 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    // Auth: caller must be an active owner
+    // Auth: caller must be an active owner (Verified from users table using JWT)
     const token = req.headers.get('Authorization')?.split('Bearer ')[1] || ''
-    const { data: { user } } = await supabase.auth.getUser(token)
-    if (!user) return json({ error: 'Unauthorized' }, 401)
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+    if (authError || !user) return json({ error: 'Unauthorized' }, 401)
 
-    // Verify caller is an owner
-    const { data: caller } = await supabase.from('users').select('id, role, business_id').eq('id', user.id).single()
-    if (!caller || caller.role !== 'owner') return json({ error: 'Only business owners can manage staff' }, 403)
+    // Verify caller is an active owner in the users table
+    const { data: caller, error: callerError } = await supabase
+      .from('users')
+      .select('id, role, business_id, is_active')
+      .eq('id', user.id)
+      .single()
+    
+    if (callerError || !caller) return json({ error: 'User profile not found' }, 404)
+    if (!caller.is_active) return json({ error: 'Your account is deactivated' }, 403)
+    if (caller.role !== 'owner') return json({ error: 'Forbidden: Only business owners can manage staff' }, 403)
 
     const body = await req.json()
     const { action, businessId } = body
@@ -47,17 +54,18 @@ Deno.serve(async (req) => {
           return json({ error: 'Maximum 15 users per business reached' }, 400)
         }
 
-        // Check duplicate email
+        // Check duplicate email (Global across TaskPod)
         const { data: existing } = await supabase.from('users').select('id').eq('email', email.trim().toLowerCase()).maybeSingle()
         if (existing) {
           return json({ error: 'A user with this email already exists' }, 400)
         }
 
-        // Check duplicate phone within business
+        // Note: Phone uniqueness within business is now enforced by DB constraint 'unique_business_phone'.
+        // We still check here for a better UX, but the DB constraint is the source of truth for race conditions.
         const { data: phoneDup } = await supabase.from('users')
           .select('id').eq('business_id', businessId).eq('phone', phone.trim()).maybeSingle()
         if (phoneDup) {
-          return json({ error: 'A staff member with this phone number already exists in your business' }, 400)
+          return json({ error: 'This phone number is already registered to a staff member in your business' }, 400)
         }
 
         // Create auth user
@@ -86,6 +94,9 @@ Deno.serve(async (req) => {
         })
         if (userErr) {
           await supabase.auth.admin.deleteUser(userId)
+          if (userErr.code === '23505') { // Unique violation
+             return json({ error: 'A staff member with this phone number already exists in your business (Database Sync)' }, 400)
+          }
           return json({ error: 'Failed to create user record: ' + userErr.message }, 500)
         }
 

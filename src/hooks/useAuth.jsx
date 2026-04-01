@@ -93,6 +93,35 @@ export function AuthProvider({ children }) {
     }
   }, [fetchProfile])
 
+  // ── Realtime Account Status Monitor ─────────────────────
+  useEffect(() => {
+    if (!profile?.business_id) return
+    
+    console.log('[useAuth] Subscribing to business status for:', profile.business_id)
+    const channel = supabase
+      .channel(`business_status_${profile.business_id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'businesses',
+        filter: `id=eq.${profile.business_id}`,
+      }, (payload) => {
+        console.log('[useAuth] Business status update received:', payload.new.account_status)
+        if (payload.new.account_status === 'suspended') {
+          console.warn('[useAuth] Account suspended! Logging out...')
+          logout()
+        } else {
+          // Refresh profile to reflect active/trial_expired etc.
+          refreshProfile()
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile?.business_id, logout, refreshProfile])
+
   const logout = useCallback(async () => {
     // 1. Immediate UI state clear
     setUser(null)

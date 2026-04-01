@@ -1,0 +1,12 @@
+# TaskPod SaaS Robots
+User-agent: *
+Allow: /
+# Prevent indexing of private SaaS routes
+Disallow: /tasks/
+Disallow: /admin/
+Disallow: /analytics/
+Disallow: /settings/
+Disallow: /superadmin/
+Disallow: /auth/
+
+Sitemap: https://taskpod.app/sitemap.xml

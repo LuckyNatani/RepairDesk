@@ -22,6 +22,7 @@ CREATE TABLE businesses (
   suspended_reason  TEXT,
   superadmin_note   TEXT,
   next_task_number  INTEGER      NOT NULL DEFAULT 1001,
+  last_draft_reminder_at TIMESTAMPTZ,
   created_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
   updated_at        TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
@@ -37,7 +38,8 @@ CREATE TABLE users (
   must_change_password BOOLEAN      NOT NULL DEFAULT true,
   avatar_color         TEXT         NOT NULL DEFAULT '#1E3A5F',
   created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
-  last_seen_at         TIMESTAMPTZ
+  last_seen_at         TIMESTAMPTZ,
+  CONSTRAINT unique_business_phone UNIQUE(business_id, phone)
 );
 
 ALTER TABLE businesses
@@ -95,6 +97,7 @@ CREATE TABLE tasks (
   created_by           UUID         NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   created_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
   updated_at           TIMESTAMPTZ  NOT NULL DEFAULT now(),
+  version              INTEGER      NOT NULL DEFAULT 1,
   UNIQUE (business_id, task_number)
 );
 
@@ -192,6 +195,14 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 CREATE TRIGGER trg_businesses_updated_at BEFORE UPDATE ON businesses FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- Task versioning for optimistic concurrency
+CREATE OR REPLACE FUNCTION increment_task_version()
+RETURNS TRIGGER AS $$
+BEGIN NEW.version := OLD.version + 1; RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_tasks_version BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION increment_task_version();
+
 -- Task created event
 CREATE OR REPLACE FUNCTION log_task_created()
 RETURNS TRIGGER AS $$
@@ -245,13 +256,19 @@ ALTER TABLE remarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
-CREATE OR REPLACE FUNCTION auth_user_is_active() RETURNS BOOLEAN AS $$ SELECT EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_active = true); $$ LANGUAGE sql SECURITY DEFINER;
-CREATE OR REPLACE FUNCTION auth_user_business_id() RETURNS UUID AS $$ SELECT business_id FROM users WHERE id = auth.uid(); $$ LANGUAGE sql SECURITY DEFINER;
-CREATE OR REPLACE FUNCTION auth_user_role() RETURNS TEXT AS $$ SELECT role FROM users WHERE id = auth.uid(); $$ LANGUAGE sql SECURITY DEFINER;
+CREATE OR REPLACE FUNCTION auth_user_is_active() RETURNS BOOLEAN AS $$ SELECT EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_active = true); $$ LANGUAGE sql STABLE SECURITY DEFINER;
+CREATE OR REPLACE FUNCTION auth_user_business_id() RETURNS UUID AS $$ SELECT business_id FROM users WHERE id = auth.uid(); $$ LANGUAGE sql STABLE SECURITY DEFINER;
+CREATE OR REPLACE FUNCTION auth_user_role() RETURNS TEXT AS $$ SELECT role FROM users WHERE id = auth.uid(); $$ LANGUAGE sql STABLE SECURITY DEFINER;
+CREATE OR REPLACE FUNCTION get_my_business_id() RETURNS UUID AS $$ SELECT business_id FROM users WHERE id = auth.uid(); $$ LANGUAGE sql STABLE SECURITY DEFINER;
 
 -- businesses
 CREATE POLICY "businesses_select_owner" ON businesses FOR SELECT USING (auth_user_is_active() AND auth_user_role() = 'owner' AND owner_id = auth.uid());
 CREATE POLICY "businesses_select_superadmin" ON businesses FOR SELECT USING (auth_user_role() = 'superadmin');
+
+-- Optimized RLS Example with initPlan (Postgres Planner hint)
+-- PostgreSQL doesn't explicitly have an 'initPlan' syntax in SQL, 
+-- but using stable functions in the USING clause achieve the same effect.
+ALTER TABLE tasks FORCE ROW LEVEL SECURITY;
 
 -- users
 CREATE POLICY "users_select_self" ON users FOR SELECT USING (id = auth.uid());

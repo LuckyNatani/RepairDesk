@@ -14,8 +14,19 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  const { data: { user } } = await supabase.auth.getUser(req.headers.get('Authorization')?.split('Bearer ')[1] || '')
-  if (!user || user.id !== SUPERADMIN_USER_ID) return new Response('Forbidden', { status: 403, headers: corsHeaders })
+  const token = req.headers.get('Authorization')?.split('Bearer ')[1] || ''
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+  if (authError || !user) return new Response('Unauthorized', { status: 401, headers: corsHeaders })
+
+  const { data: caller, error: callerError } = await supabase
+    .from('users')
+    .select('id, role')
+    .eq('id', user.id)
+    .single()
+
+  if (callerError || !caller || caller.role !== 'superadmin') {
+    return new Response('Forbidden: Superadmin access required', { status: 403, headers: corsHeaders })
+  }
   const body = await req.json()
   const { action, businessId, days, userId, isActive } = body
   const now = new Date().toISOString()

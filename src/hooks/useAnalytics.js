@@ -31,45 +31,35 @@ export function useAnalytics(businessId) {
       end = customEnd || now
     }
 
-    const { data: tasks, error: err } = await supabase
-      .from('tasks')
-      .select('id, status, assigned_to, assigned_at, completed_at, is_urgent, assigned_user:assigned_to(id, name)')
-      .eq('business_id', businessId)
-      .gte('created_at', start.toISOString())
-      .lte('created_at', end.toISOString())
-      .eq('is_draft', false)
-
-    if (err) { setError(err.message); setLoading(false); return }
-
-    const total = tasks.length
-    const completed = tasks.filter(t => t.status === 'completed').length
-    const inProgress = tasks.filter(t => t.status === 'in_progress').length
-    const unassigned = tasks.filter(t => t.status === 'unassigned').length
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
-
-    // Per-staff breakdown
-    const staffMap = {}
-    tasks.forEach(t => {
-      if (!t.assigned_to) return
-      const key = t.assigned_to
-      if (!staffMap[key]) {
-        staffMap[key] = { id: key, name: t.assigned_user?.name || 'Unknown', assigned: 0, completed: 0, totalTime: 0, timeCount: 0 }
-      }
-      staffMap[key].assigned++
-      if (t.status === 'completed') {
-        staffMap[key].completed++
-        if (t.assigned_at && t.completed_at) {
-          const minutes = (new Date(t.completed_at) - new Date(t.assigned_at)) / 60000
-          staffMap[key].totalTime += minutes
-          staffMap[key].timeCount++
-        }
-      }
+    // Call the optimized Postgres RPC for high-performance aggregation
+    const { data: analytics, error: err } = await supabase.rpc('get_analytics', {
+      p_business_id: businessId,
+      p_start: start.toISOString(),
+      p_end: end.toISOString()
     })
-    const staffStats = Object.values(staffMap)
-      .map(s => ({ ...s, completionRate: s.assigned > 0 ? Math.round((s.completed / s.assigned) * 100) : 0, avgMinutes: s.timeCount > 0 ? Math.round(s.totalTime / s.timeCount) : null }))
-      .sort((a, b) => b.completed - a.completed)
 
-    setData({ total, completed, inProgress, unassigned, completionRate, staffStats, dateRange: { start, end } })
+    if (err) {
+      console.error('[useAnalytics] RPC error:', err)
+      setError(err.message)
+      setLoading(false)
+      return
+    }
+
+    // The RPC returns a set of rows, but we only expect one row with all aggregated stats
+    const stats = analytics?.[0]
+    if (stats) {
+      setData({
+        total: parseInt(stats.total) || 0,
+        completed: parseInt(stats.completed) || 0,
+        in_progress: parseInt(stats.in_progress) || 0,
+        unassigned: parseInt(stats.unassigned) || 0,
+        completionRate: stats.completion_rate || 0,
+        staffStats: (stats.staff_stats || []).sort((a, b) => b.completed - a.completed),
+        dateRange: { start, end }
+      })
+    } else {
+      setData({ total: 0, completed: 0, in_progress: 0, unassigned: 0, completionRate: 0, staffStats: [], dateRange: { start, end } })
+    }
     setLoading(false)
   }, [businessId])
 

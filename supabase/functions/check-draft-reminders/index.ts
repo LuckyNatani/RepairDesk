@@ -15,7 +15,7 @@ Deno.serve(async () => {
     // Get all active businesses
     const { data: businesses } = await supabase
       .from('businesses')
-      .select('id, owner_id')
+      .select('id, owner_id, last_draft_reminder_at')
       .in('account_status', ['trial_active', 'active'])
 
     if (!businesses?.length) return new Response(JSON.stringify({ checked: 0 }))
@@ -35,17 +35,9 @@ Deno.serve(async () => {
       if (!draftCount || draftCount === 0) continue
 
       // Check for recent draft reminder (8-hour debounce per PRD §10.3)
-      const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
-      const { data: recentReminder } = await supabase
-        .from('notifications')
-        .select('id')
-        .eq('business_id', biz.id)
-        .eq('event_type', 'draft_reminder')
-        .not('push_sent_at', 'is', null)
-        .gte('push_sent_at', eightHoursAgo)
-        .limit(1)
-
-      if (recentReminder && recentReminder.length > 0) continue
+      // Now using businesses.last_draft_reminder_at for reliability
+      const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000)
+      if (biz.last_draft_reminder_at && new Date(biz.last_draft_reminder_at) > eightHoursAgo) continue;
 
       // Insert notification
       const message = `You have ${draftCount} incomplete draft task${draftCount > 1 ? 's' : ''}.`
@@ -78,6 +70,8 @@ Deno.serve(async () => {
             if (notification) {
               await supabase.from('notifications').update({ push_sent_at: new Date().toISOString(), push_success: true }).eq('id', notification.id)
             }
+            // Update business debounce timestamp
+            await supabase.from('businesses').update({ last_draft_reminder_at: new Date().toISOString() }).eq('id', biz.id)
           } catch (err: unknown) {
             const pushErr = err as { statusCode?: number }
             if (pushErr.statusCode === 410 || pushErr.statusCode === 404) {
