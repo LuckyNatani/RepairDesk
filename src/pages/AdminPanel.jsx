@@ -46,7 +46,9 @@ export default function AdminPanel() {
   const [showPw, setShowPw] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
   const [confirmDeactivate, setConfirmDeactivate] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
   const [newSTLabel, setNewSTLabel] = useState('')
+
 
   const loadData = async () => {
     setLoading(true)
@@ -67,21 +69,27 @@ export default function AdminPanel() {
   }
 
   const deactivateStaff = async (staffId) => {
-    // 1. Deactivate user
-    await supabase.from('users').update({ is_active: false }).eq('id', staffId)
-    // 2. Unassign their in_progress tasks
-    const { data: affected } = await supabase.from('tasks').update({ status: 'unassigned', assigned_to: null }).eq('assigned_to', staffId).eq('status', 'in_progress').select('id')
-    const unassignedCount = affected?.length || 0
-    // 3. Delete push subscriptions
-    await supabase.from('push_subscriptions').delete().eq('user_id', staffId)
-    setConfirmDeactivate(null); loadData()
-    show(`Staff deactivated.${unassignedCount > 0 ? ` ${unassignedCount} task${unassignedCount > 1 ? 's' : ''} moved to Unassigned.` : ''}`, 'info')
+    setActionLoading(true)
+    const { error } = await supabase.functions.invoke('manage-staff', { 
+      body: { action: 'toggle_active', businessId, staffId, isActive: false } 
+    })
+    setActionLoading(false)
+    if (error) show('Failed: ' + error.message, 'error')
+    else {
+      setConfirmDeactivate(null); 
+      loadData(); 
+      show('Staff deactivated and sessions invalidated', 'info')
+    }
   }
 
   const reactivateStaff = async (staffId) => {
-    await supabase.from('users').update({ is_active: true }).eq('id', staffId)
-    loadData(); show('Staff reactivated', 'success')
+    const { error } = await supabase.functions.invoke('manage-staff', { 
+      body: { action: 'toggle_active', businessId, staffId, isActive: true } 
+    })
+    if (error) show('Failed: ' + error.message, 'error')
+    else { loadData(); show('Staff reactivated', 'success') }
   }
+
 
   const addServiceType = async () => {
     if (!newSTLabel.trim()) return
@@ -187,7 +195,8 @@ export default function AdminPanel() {
         </div>
       </div>
 
-      <ConfirmModal open={!!confirmDeactivate} title={`Deactivate ${confirmDeactivate?.name}?`} body="Their active tasks will be moved to Unassigned." confirmLabel="Deactivate" confirmColor="red" onConfirm={() => deactivateStaff(confirmDeactivate.id)} onCancel={() => setConfirmDeactivate(null)} />
+      <ConfirmModal open={!!confirmDeactivate} title={`Deactivate ${confirmDeactivate?.name}?`} body="Their active tasks will be moved to Unassigned and they will be signed out." confirmLabel="Deactivate" confirmColor="red" loading={actionLoading} onConfirm={() => deactivateStaff(confirmDeactivate.id)} onCancel={() => setConfirmDeactivate(null)} />
+
 
       <div className="bottom-tabs">
         {tabs.map(({ id, label, Icon }) => (

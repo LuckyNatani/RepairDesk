@@ -123,6 +123,53 @@ Deno.serve(async (req) => {
         return json({ success: true })
       }
 
+      case 'toggle_active': {
+        const { staffId, isActive } = body
+        if (staffId === undefined || isActive === undefined) return json({ error: 'Staff ID and isActive required' }, 400)
+
+        // Verify staff belongs to this business
+        const { data: staff } = await supabase.from('users')
+          .select('id, business_id, name').eq('id', staffId).eq('business_id', businessId).eq('role', 'staff').single()
+        if (!staff) return json({ error: 'Staff member not found in your business' }, 404)
+
+        // Update user
+        const { error: userErr } = await supabase.from('users').update({ is_active: isActive }).eq('id', staffId)
+        if (userErr) return json({ error: userErr.message }, 500)
+
+        if (!isActive) {
+          // CASCADE (PRD §11.2)
+          // A. Unassign open tasks
+          await supabase.from('tasks')
+            .update({ assigned_to: null, status: 'unassigned' })
+            .eq('assigned_to', staffId)
+            .eq('status', 'in_progress')
+          
+          // B. Invalidate sessions
+          try { await supabase.auth.admin.signOut(staffId, 'global') } catch (_) { /* ignore */ }
+          
+          // C. Delete push subscriptions
+          await supabase.from('push_subscriptions').delete().eq('user_id', staffId)
+          
+          // D. Internal system log (Audit)
+          await supabase.from('account_events').insert({
+            business_id: businessId,
+            event_type: 'suspended',
+            actor_id: caller.id,
+            note: `Staff ${staff.name} deactivated by Owner ${caller.id}`
+          })
+        } else {
+           await supabase.from('account_events').insert({
+            business_id: businessId,
+            event_type: 'reactivated',
+            actor_id: caller.id,
+            note: `Staff ${staff.name} reactivated by Owner ${caller.id}`
+          })
+        }
+
+        return json({ success: true })
+      }
+
+
       default:
         return json({ error: 'Unknown action: ' + action }, 400)
     }

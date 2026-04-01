@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = useCallback(async (uid) => {
-    console.log('[fetchProfile] Starting fetch for uid:', uid)
+    if (import.meta.env.DEV) console.log('[fetchProfile] Starting fetch for uid:', uid)
     try {
       const result = await supabase
         .from('users')
@@ -17,23 +17,26 @@ export function AuthProvider({ children }) {
         .eq('id', uid)
         .single()
       
-      console.log('[fetchProfile] Query completed. Error:', result.error, 'Data:', result.data)
+      if (import.meta.env.DEV) console.log('[fetchProfile] Query completed. Error:', result.error, 'Data:', result.data)
 
       if (!result.error && result.data) {
         setProfile(result.data)
-        // Update last_seen_at silently without awaiting
-        supabase.from('users').update({ last_seen_at: new Date().toISOString() }).eq('id', uid).then(r => console.log('[fetchProfile] last_seen_at update done', r.error))
+        // Update last_seen_at silently
+        supabase.from('users').update({ last_seen_at: new Date().toISOString() }).eq('id', uid).then(r => {
+          if (import.meta.env.DEV && r.error) console.log('[fetchProfile] last_seen_at update error', r.error)
+        })
       } else {
-        console.warn('[fetchProfile] Profile not found or error occurred. Setting profile to null.')
+        if (import.meta.env.DEV) console.warn('[fetchProfile] Profile not found or error occurred.')
         setProfile(null)
       }
       return result.data
     } catch (e) {
-      console.error('[fetchProfile] Exception caught:', e)
+      if (import.meta.env.DEV) console.error('[fetchProfile] Exception caught:', e)
       setProfile(null)
       return null
     }
   }, [])
+
 
   useEffect(() => {
     let mounted = true
@@ -42,10 +45,11 @@ export function AuthProvider({ children }) {
     // Fallback timeout in case initialization hangs completely
     authTimeout = setTimeout(() => {
       if (mounted) {
-        console.warn('[useAuth] Auth initialization timeout reached')
+        if (import.meta.env.DEV) console.warn('[useAuth] Auth initialization timeout reached')
         setLoading(false)
       }
     }, 15000)
+
 
     // Helper to safely load user + profile
     const loadSessionAndProfile = async (session) => {
@@ -58,7 +62,7 @@ export function AuthProvider({ children }) {
           setProfile(null)
         }
       } catch (e) {
-        console.error('[loadSessionAndProfile] Error:', e)
+        if (import.meta.env.DEV) console.error('[loadSessionAndProfile] Error:', e)
       } finally {
         if (mounted) {
           clearTimeout(authTimeout)
@@ -67,17 +71,19 @@ export function AuthProvider({ children }) {
       }
     }
 
+
     // Explicitly grab the session on mount (robust against page refresh)
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
+      if (error && import.meta.env.DEV) {
         console.error('[getSession] error:', error)
       }
       loadSessionAndProfile(session)
     })
 
+
     // Listen to changes (e.g. multi-tab sign out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[onAuthStateChange] Event:', event)
+      if (import.meta.env.DEV) console.log('[onAuthStateChange] Event:', event)
       if (!mounted) return
       // We ignore INITIAL_SESSION since getSession handles it, 
       // preventing duplicate fetchProfile calls.
@@ -86,6 +92,7 @@ export function AuthProvider({ children }) {
       loadSessionAndProfile(session)
     })
 
+
     return () => {
       mounted = false
       clearTimeout(authTimeout)
@@ -93,11 +100,32 @@ export function AuthProvider({ children }) {
     }
   }, [fetchProfile])
 
+  // ── Auth Actions (Defined before usage in Effects to avoid TDZ) ──
+
+  const logout = useCallback(async () => {
+    // 1. Immediate UI state clear
+    setUser(null)
+    setProfile(null)
+    
+    // 2. Inform Supabase and await sign out completion
+    // This will clear Supabase-specific storage keys automatically
+    await supabase.auth.signOut().catch(err => {
+      if (import.meta.env.DEV) console.error('Sign out error:', err)
+    })
+    
+    // 3. Clean exit: full redirect to ensure all memory state is wiped
+    window.location.href = '/login'
+  }, [])
+
+  const refreshProfile = useCallback(async () => {
+    if (user) await fetchProfile(user.id)
+  }, [user, fetchProfile])
+
   // ── Realtime Account Status Monitor ─────────────────────
   useEffect(() => {
     if (!profile?.business_id) return
     
-    console.log('[useAuth] Subscribing to business status for:', profile.business_id)
+    if (import.meta.env.DEV) console.log('[useAuth] Subscribing to business status for:', profile.business_id)
     const channel = supabase
       .channel(`business_status_${profile.business_id}`)
       .on('postgres_changes', {
@@ -106,9 +134,9 @@ export function AuthProvider({ children }) {
         table: 'businesses',
         filter: `id=eq.${profile.business_id}`,
       }, (payload) => {
-        console.log('[useAuth] Business status update received:', payload.new.account_status)
+        if (import.meta.env.DEV) console.log('[useAuth] Business status update received:', payload.new.account_status)
         if (payload.new.account_status === 'suspended') {
-          console.warn('[useAuth] Account suspended! Logging out...')
+          if (import.meta.env.DEV) console.warn('[useAuth] Account suspended! Logging out...')
           logout()
         } else {
           // Refresh profile to reflect active/trial_expired etc.
@@ -122,29 +150,6 @@ export function AuthProvider({ children }) {
     }
   }, [profile?.business_id, logout, refreshProfile])
 
-  const logout = useCallback(async () => {
-    // 1. Immediate UI state clear
-    setUser(null)
-    setProfile(null)
-    
-    // 2. Clear all storage (local and session) to ensure no stale metadata remains
-    try {
-      localStorage.clear()
-      sessionStorage.clear()
-    } catch (e) {
-      console.error('Storage clear error:', e)
-    }
-
-    // 3. Inform Supabase and await sign out completion
-    await supabase.auth.signOut().catch(err => console.error('Sign out error:', err))
-    
-    // 4. Clean exit: full redirect to ensure all memory state is wiped
-    window.location.href = '/login'
-  }, [])
-
-  const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id)
-  }, [user, fetchProfile])
 
   const value = {
     user,

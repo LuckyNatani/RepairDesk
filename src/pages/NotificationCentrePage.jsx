@@ -1,14 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useNotifications } from '../hooks/useNotifications'
-import { NotificationRow } from '../components/Notifications/NotificationCentre'
+import { NotificationRow } from '../components/Notifications/NotificationCenter'
+
 import { ArrowLeft, CheckCheck } from 'lucide-react'
 import EmptyState from '../components/shared/EmptyState'
 import { Bell } from 'lucide-react'
 
 export default function NotificationCentrePage() {
   const { user } = useAuth()
-  const { notifications, unreadCount, markRead, markAllRead } = useNotifications(user?.id)
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications()
+
   const navigate = useNavigate()
 
   return (

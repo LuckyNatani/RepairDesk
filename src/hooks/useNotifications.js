@@ -24,15 +24,27 @@ export function useNotifications(userId) {
 
   useEffect(() => {
     if (!userId) return
-    if (channelRef.current) supabase.removeChannel(channelRef.current)
     const channel = supabase
       .channel(`notifications:user_id=eq.${userId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, () => fetchNotifications())
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, () => fetchNotifications())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => {
+        setNotifications(prev => [payload.new, ...prev].slice(0, 50))
+        setUnreadCount(c => c + 1)
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (payload) => {
+        setNotifications(prev => prev.map(n => n.id === payload.new.id ? payload.new : n))
+        // Recalculate unread count if is_read changed
+        setUnreadCount(prev => {
+          const { old: { is_read: wasRead }, new: { is_read: nowRead } } = payload;
+          if (wasRead && !nowRead) return prev + 1;
+          if (!wasRead && nowRead) return Math.max(0, prev - 1);
+          return prev;
+        })
+      })
       .subscribe()
-    channelRef.current = channel
-    return () => { if (channelRef.current) supabase.removeChannel(channelRef.current) }
-  }, [userId, fetchNotifications])
+    
+    return () => { supabase.removeChannel(channel) }
+  }, [userId])
+
 
   const markRead = useCallback(async (notificationId) => {
     await supabase.from('notifications').update({ is_read: true }).eq('id', notificationId)

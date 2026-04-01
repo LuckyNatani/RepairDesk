@@ -57,9 +57,47 @@ Deno.serve(async (req) => {
       eventType = 'trial_extended'
       break
     case 'toggle_user':
+      // 1. Get user details before update
+      const { data: targetUser, error: findError } = await supabase.from('users').select('id, business_id, role, name').eq('id', userId).single()
+      if (findError || !targetUser) return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+      // 2. Perform update
       const { error: userErr } = await supabase.from('users').update({ is_active: isActive }).eq('id', userId)
       if (userErr) return new Response(JSON.stringify({ error: userErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
+      // 3. If deactivating, trigger cascade (PRD §11.2)
+      if (!isActive) {
+        // A. Unassign open tasks
+        await supabase.from('tasks').update({ assigned_to: null, status: 'unassigned' }).eq('assigned_to', userId).eq('status', 'in_progress')
+        
+        // B. Invalidate sessions
+        try { await supabase.auth.admin.signOut(userId, 'global') } catch (_) { /* best effort */ }
+        
+        // C. Delete push subscriptions
+        await supabase.from('push_subscriptions').delete().eq('user_id', userId)
+        
+        // D. Notify Owner
+        const { data: owner } = await supabase.from('users').select('id').eq('business_id', targetUser.business_id).eq('role', 'owner').single()
+        if (owner) {
+          await supabase.from('notifications').insert({
+            user_id: owner.id, business_id: targetUser.business_id, task_id: null,
+            event_type: 'staff_deactivated',
+            message: `Staff member ${targetUser.name} has been deactivated and their tasks unassigned.`,
+          })
+        }
+      }
+
+      // 4. Audit Log
+      const { error: auditErr } = await supabase.from('account_events').insert({
+        business_id: targetUser.business_id,
+        event_type: isActive ? 'activated' : 'suspended', // reusing existing types for audit
+        actor_id: SUPERADMIN_USER_ID,
+        note: `Staff user ${targetUser.name} (${userId}) toggled to is_active=${isActive}`,
+      })
+      if (auditErr) return new Response(JSON.stringify({ error: 'Audit log failed: ' + auditErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
     default:
 
       return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -67,7 +105,9 @@ Deno.serve(async (req) => {
 
   const { error } = await supabase.from('businesses').update(update).eq('id', businessId)
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, notes: `${action} via SA panel` })
+  const { error: auditErr } = await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, note: `${action} via SA panel` })
+  if (auditErr) return new Response(JSON.stringify({ error: 'Audit log failed: ' + auditErr.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+
 
   // Get all users in this business
   const { data: bizUsers } = await supabase.from('users').select('id, role').eq('business_id', businessId)

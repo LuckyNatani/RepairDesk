@@ -3,7 +3,8 @@ import { Bell, Check, CheckCheck, X, Sparkles } from 'lucide-react';
 import { useNotifications } from '../../hooks/useNotifications';
 
 const NotificationCenter = () => {
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+    const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
+
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -36,7 +37,7 @@ const NotificationCenter = () => {
                             <div className="flex items-center gap-2">
                                 {unreadCount > 0 && (
                                     <button 
-                                        onClick={markAllAsRead}
+                                        onClick={markAllRead}
                                         className="p-2 text-primary-600 hover:bg-primary-50 rounded-xl transition-all tap-highlight"
                                         title="Mark all as read"
                                     >
@@ -69,7 +70,8 @@ const NotificationCenter = () => {
                                                 ? 'bg-primary-50/40 hover:bg-primary-50/60' 
                                                 : 'hover:bg-slate-50'
                                             }`}
-                                            onClick={() => !notif.is_read && markAsRead(notif.id)}
+                                            onClick={() => !notif.is_read && markRead(notif.id)}
+
                                         >
                                             <div className="shrink-0 pt-1">
                                                 {!notif.is_read ? (
@@ -124,4 +126,34 @@ const NotificationCenter = () => {
     );
 };
 
+export { NotificationCenter };
+
+export function NotificationRow({ notification, onClick }) {
+    return (
+        <div 
+            onClick={onClick} 
+            className={`flex items-start gap-3 p-3 transition-colors cursor-pointer border-b border-slate-50 ${
+                !notification.is_read ? 'bg-primary-50/30' : 'bg-white'
+            }`}
+        >
+            <div className="mt-1 flex-shrink-0">
+                {!notification.is_read ? (
+                    <div className="w-2 h-2 rounded-full bg-primary-500" />
+                ) : (
+                    <div className="w-2 h-2 rounded-full bg-slate-200" />
+                )}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className={`text-sm leading-snug ${!notification.is_read ? 'font-bold text-slate-900' : 'text-slate-500'}`}>
+                    {notification.message}
+                </p>
+                <span className="text-[10px] text-slate-400 font-medium">
+                    {new Date(notification.created_at).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 export default NotificationCenter;
+
