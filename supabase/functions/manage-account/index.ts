@@ -57,11 +57,36 @@ Deno.serve(async (req) => {
   const { error } = await supabase.from('businesses').update(update).eq('id', businessId)
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   await supabase.from('account_events').insert({ business_id: businessId, event_type: eventType, actor_id: SUPERADMIN_USER_ID, notes: `${action} via SA panel` })
-  // Notify owner
-  const { data: biz2 } = await supabase.from('businesses').select('owner_id').eq('id', businessId).single()
-  if (biz2?.owner_id) {
-    const msg = action === 'activate' ? 'Your account is now active!' : action === 'suspend' ? 'Your account has been suspended. Contact support.' : action === 'reactivate' ? 'Your account has been reactivated!' : `Your trial has been extended by ${days || 7} days.`
-    await supabase.from('notifications').insert({ user_id: biz2.owner_id, business_id: businessId, task_id: null, event_type: action === 'activate' || action === 'reactivate' ? 'account_activated' : 'account_suspended', message: msg })
+
+  // Get all users in this business
+  const { data: bizUsers } = await supabase.from('users').select('id, role').eq('business_id', businessId)
+  const ownerId = bizUsers?.find(u => u.role === 'owner')?.id
+  const allUserIds = bizUsers?.map(u => u.id) || []
+
+  // Suspension security cascade (PRD §11.2)
+  if (action === 'suspend') {
+    // 1. Invalidate sessions for ALL users in the business
+    for (const uid of allUserIds) {
+      try { await supabase.auth.admin.signOut(uid, 'global' as any) } catch (_) { /* best effort */ }
+    }
+    // 2. Delete all push subscriptions for the business
+    for (const uid of allUserIds) {
+      await supabase.from('push_subscriptions').delete().eq('user_id', uid)
+    }
+    // 3. Notify ALL users (owner + staff)
+    for (const uid of allUserIds) {
+      await supabase.from('notifications').insert({
+        user_id: uid, business_id: businessId, task_id: null,
+        event_type: 'account_suspended',
+        message: 'Your account has been suspended. Contact support.',
+      })
+    }
+  } else {
+    // For non-suspend actions, just notify the owner
+    if (ownerId) {
+      const msg = action === 'activate' ? 'Your account is now active!' : action === 'reactivate' ? 'Your account has been reactivated!' : `Your trial has been extended by ${body.days || 7} days.`
+      await supabase.from('notifications').insert({ user_id: ownerId, business_id: businessId, task_id: null, event_type: 'account_activated', message: msg })
+    }
   }
 
   return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

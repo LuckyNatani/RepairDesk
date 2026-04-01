@@ -132,7 +132,7 @@ export default function NewTaskForm({ businessId, createdBy, staffList = [], ser
             <label className="input-label">Assign Staff</label>
             <select className="input" value={form.assignedTo} onChange={e => setForm(f => ({ ...f, assignedTo: e.target.value }))}>
               <option value="">Unassigned</option>
-              {staffList.filter(s => s.is_active).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              {staffList.filter(s => s.is_active).map(s => <option key={s.id} value={s.id}>{s.name}{s.activeTasks !== undefined ? ` (${s.activeTasks} active)` : ''}</option>)}
             </select>
           </div>
 

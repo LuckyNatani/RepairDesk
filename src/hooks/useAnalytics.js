@@ -14,12 +14,18 @@ export function useAnalytics(businessId) {
 
     let start, end
     const now = new Date()
-    if (range === 'week') {
+    if (range === 'today') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
+    } else if (range === 'week') {
       start = startOfWeek(now, { weekStartsOn: 1 })
       end = endOfWeek(now, { weekStartsOn: 1 })
     } else if (range === 'month') {
       start = startOfMonth(now)
       end = endOfMonth(now)
+    } else if (range === 'custom' && customStart && customEnd) {
+      start = new Date(customStart)
+      end = new Date(customEnd + 'T23:59:59')
     } else {
       start = customStart || subDays(now, 30)
       end = customEnd || now

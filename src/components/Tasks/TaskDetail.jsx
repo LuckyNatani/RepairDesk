@@ -77,8 +77,13 @@ export default function TaskDetail({ taskId, currentUser }) {
 
   const fetchStaff = async () => {
     if (!currentUser?.business_id) return
-    const { data } = await supabase.from('users').select('id,name,phone,avatar_color').eq('business_id', currentUser.business_id).eq('role', 'staff').eq('is_active', true)
-    setStaffList(data || [])
+    const { data } = await supabase.from('users').select('id,name,phone,avatar_color,last_seen_at').eq('business_id', currentUser.business_id).eq('role', 'staff').eq('is_active', true)
+    if (!data) { setStaffList([]); return }
+    // Fetch workload counts (PRD §1.2: "Amit (2 active) · 5m ago")
+    const { data: taskCounts } = await supabase.from('tasks').select('assigned_to').eq('business_id', currentUser.business_id).eq('status', 'in_progress')
+    const countMap = {}
+    taskCounts?.forEach(t => { if (t.assigned_to) countMap[t.assigned_to] = (countMap[t.assigned_to] || 0) + 1 })
+    setStaffList(data.map(s => ({ ...s, activeTasks: countMap[s.id] || 0 })))
   }
 
   useEffect(() => {
@@ -173,7 +178,7 @@ export default function TaskDetail({ taskId, currentUser }) {
               <label className="input-label">Assign / Reassign</label>
               <select className="input" value={task.assigned_to || ''} onChange={e => assignStaff(e.target.value || null)}>
                 <option value="">Unassigned</option>
-                {staffList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {staffList.map(s => <option key={s.id} value={s.id}>{s.name} ({s.activeTasks} active)</option>)}
               </select>
             </div>
             {task.assigned_user && (

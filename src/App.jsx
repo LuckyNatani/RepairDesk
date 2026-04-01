@@ -14,12 +14,16 @@ import AnalyticsDashboard from './pages/AnalyticsDashboard'
 import AdminPanel from './pages/AdminPanel'
 import StaffMyTasks from './pages/StaffMyTasks'
 import NotificationCentrePage from './pages/NotificationCentrePage'
+import ResetPassword from './pages/ResetPassword'
 import SADashboard from './pages/SA/SADashboard'
 import SABusinessDetail from './pages/SA/SABusinessDetail'
 import SACreateBusiness from './pages/SA/SACreateBusiness'
+import SASettings from './pages/SA/SASettings'
+import AccountStatus from './pages/AccountStatus'
 
 // Components
-import SidebarNav from './components/layout/SidebarNav'
+import BottomTabBar from './components/layout/BottomTabBar'
+import NotificationBell from './components/Notifications/NotificationBell'
 import Logo from './components/shared/Logo'
 
 // ── Auth Guard ──────────────────────────────────────────
@@ -58,8 +62,18 @@ function AuthedApp() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100dvh' }}>
-      {role !== 'superadmin' && <SidebarNav />}
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+      {/* App Bar for Owner/Staff */}
+      {role !== 'superadmin' && (
+        <header className="app-bar">
+          <Logo className="w-7 h-7" textClassName="hidden" textColor="default" />
+          <span className="app-bar-title">TaskPod</span>
+          <NotificationBell />
+          <button className="mobile-logout" onClick={logout} aria-label="Sign Out">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </header>
+      )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <Routes>
           {/* Superadmin routes */}
@@ -67,6 +81,7 @@ function AuthedApp() {
             <Route path="/sa" element={<SADashboard />} />
             <Route path="/sa/businesses/:id" element={<SABusinessDetail />} />
             <Route path="/sa/businesses/new" element={<SACreateBusiness />} />
+            <Route path="/sa/settings" element={<SASettings />} />
             <Route path="*" element={<Navigate to="/sa" replace />} />
           </>}
 
@@ -77,6 +92,7 @@ function AuthedApp() {
             <Route path="/analytics" element={<AnalyticsDashboard />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/notifications" element={<NotificationCentrePage />} />
+            <Route path="/account" element={<AccountStatus />} />
             <Route path="/:taskId" element={<TaskDetailPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>}
@@ -91,6 +107,8 @@ function AuthedApp() {
           </>}
         </Routes>
       </div>
+      {/* Bottom Tab Bar for Owner/Staff (mobile-first) */}
+      {role !== 'superadmin' && <BottomTabBar />}
     </div>
   )
 }
@@ -129,6 +147,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<RequireAuth><AuthedApp /></RequireAuth>} />
         </Routes>
       </BrowserRouter>

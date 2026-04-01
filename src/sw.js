@@ -39,15 +39,14 @@ self.addEventListener('notificationclick', function (e) {
 
     e.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
-            if (clientList.length > 0) {
-                let client = clientList[0];
-                for (let i = 0; i < clientList.length; i++) {
-                    if (clientList[i].focused) {
-                        client = clientList[i];
-                    }
+            // Try to find an existing window and navigate it
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if ('navigate' in client) {
+                    return client.navigate(urlToOpen).then(function (c) { return c.focus(); });
                 }
-                return client.focus();
             }
+            // No existing window — open a new one
             return clients.openWindow(urlToOpen);
         })
     );

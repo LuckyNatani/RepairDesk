@@ -10,6 +10,7 @@ function SANav({ collapsed, setCollapsed, activePath }) {
   const navigate = useNavigate()
   const items = [
     { path: '/sa', label: 'Dashboard', Icon: LayoutDashboard },
+    { path: '/sa/settings', label: 'Settings', Icon: Settings },
   ]
   return (
     <div className={`sa-sidebar${collapsed ? ' collapsed' : ''}`}>

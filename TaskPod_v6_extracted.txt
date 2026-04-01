@@ -1,0 +1,2128 @@
+TaskPod — Product Requirements Document
+Version 6.0 | June 2026 | Status: Final
+Lightweight PWA · Android-First · Material You · 3-Role System · 2-Business Platform
+Field
+Detail
+Product Name
+TaskPod
+Version
+6.0
+Date
+June 2026
+Status
+Final — Supersedes v5.0
+Roles
+Superadmin · Owner · Staff
+Platform Limit
+2 businesses maximum (enforced in DB)
+Users per Business
+1 Owner + up to 14 Staff (max 15 users per business)
+Total Platform Users
+31 max (1 Superadmin + 2 × 15)
+Platform
+Progressive Web App (PWA) — Android Primary
+Design Language
+Google Material You — Light Mode Only
+Superadmin Navigation
+Sidebar navigation (desktop-first, collapsible on mobile)
+Owner / Staff Navigation
+Bottom Tab Bar (WhatsApp style)
+Kanban Time Scope
+Unassigned & In Progress: all tasks; Completed: last 30 days
+Annual Infrastructure
+₹0 (Vercel + Supabase free tiers)
+Monetisation
+Offline payment collected by Superadmin → manual activation in dashboard
+Trial Period
+7 days — full access — then requires Superadmin activation
+Business Onboarding
+Superadmin creates business + owner account — no self-registration
+1. Product Overview
+TaskPod is a lightweight Progressive Web App for small computer repair and service businesses. Version 6.0 is purpose-built for a 2-business deployment — the TaskPod operator (Superadmin) personally knows both business owners, collects payment offline, and activates accounts from the dashboard.
+The Superadmin creates business accounts, sets up owner credentials, and can activate or suspend any account. Each business has one Owner who creates tasks and manages field Staff. Staff receive push notifications, update task status, and add remarks.
+1.1 Three-Role Architecture
+Role
+Who
+Access Scope
+Navigation
+Superadmin
+TaskPod operator (single account)
+All businesses on platform — full read/write control
+Sidebar nav — desktop-first, collapsible on mobile
+Owner
+Small business owner (1 per business, max 2 on platform)
+Own business only — tasks, staff, analytics, admin panel
+Bottom Tab Bar — 4 tabs
+Staff
+Field technicians (up to 14 per business)
+Own assigned tasks only; read-only on others
+Bottom Tab Bar — 2 tabs
+1.2 Core Value Proposition
+Pain Point
+TaskPod Solution
+Owner retypes customer details every call
+Customer phonebook — autocomplete name/phone from past jobs
+No idea who is free before assigning
+"Amit (2 active) · 5m ago" in assign dropdown
+Staff miss assignments via WhatsApp
+Android push notification even with browser fully closed
+Owner flooded with remark notifications
+Debounced: max 1 push per task per 10 minutes
+No audit trail on reassignment
+task_events table via Postgres triggers — immutable log
+TaskPod operator cannot manage accounts
+Superadmin dashboard — activate, suspend, reactivate any business
+Owner forgets draft tasks
+Daily draft reminder push notification
+Staff credentials lost after creation
+WhatsApp share button — share login URL + credentials instantly
+Owner cannot reset staff password
+"Reset Password" action in Admin Panel staff list
+1.3 What Changed from v5.0
+Major simplification: v6.0 removes the entire payment submission/approval system. Since the Superadmin personally collects offline payment from 2 known clients, the only actions needed are Activate and Suspend. No payment forms, no payment proof, no approval queue.
+Business creation is Superadmin-only: No self-registration (/setup removed). Superadmin creates business + owner account and shares credentials via WhatsApp.
+Per-business task numbering: Task #1001, #1002... is now scoped per business, not globally shared.
+Kanban scope fix: Unassigned and In Progress columns show ALL tasks regardless of age. Only Completed is scoped to last 30 days.
+2. Goals & Success Metrics
+2.1 Primary Goals
+Owner can create a task within 20 seconds of ending a customer call (quick capture mode)
+Field staff receive Android push even with browser fully closed
+Owner sees staff workload before assigning — no guessing who is free
+Owner is not spammed by remark notifications — max 1 per task per 10 minutes
+Staff complete the task workflow (open → remark → complete) in 3 taps
+Superadmin can create a new business + owner account within 3 minutes
+Superadmin can activate or suspend any business account in 2 clicks
+Owner receives draft reminder if tasks remain incomplete after 4 hours
+Total infrastructure cost ₹0 — Vercel + Supabase free tiers
+Platform enforces maximum of 2 businesses
+2.2 Success Metrics
+Metric
+Target
+How Measured
+Task creation → push delivered to staff
+< 5 seconds
+Manual test on Android Chrome
+Staff task complete flow
+≤ 3 taps
+Usability walkthrough
+Kanban status change reflection
+< 3 seconds
+Supabase Realtime latency
+Analytics page load
+< 2 seconds
+Chrome DevTools 4G throttle
+Returning customer autocomplete
+< 1 second
+Search response time
+Superadmin business creation
+< 3 minutes
+Timed walkthrough
+Superadmin activation flow
+≤ 2 clicks
+Walkthrough count
+Push delivery success rate
+> 95%
+notifications table analysis
+Draft tasks resolved within 24h
+> 80%
+is_draft count over time
+2.3 Account Lifecycle Model
+Every new business is created by the Superadmin with a 7-day free trial (or immediate activation). The owner pays the Superadmin offline (cash, UPI, bank transfer — outside the app). The Superadmin clicks "Activate" on the dashboard to unlock permanent access.
+Account Status
+Condition
+Owner Experience
+Staff Experience
+Superadmin Action
+trial_active
+trial_ends_at > now() AND not activated
+Full access. Amber trial banner with countdown.
+Full access — no trial messaging shown.
+Business shows "Trial" badge with countdown. [Activate] button visible.
+active
+Activated by Superadmin
+Full access. No banners. Green "Active" chip in profile.
+Full access.
+Business shows "Active" badge. [Suspend] button visible.
+trial_expired
+trial_ends_at < now() AND not activated
+Dashboard locked. "Contact [Superadmin] to activate" message. Read-only task view.
+Read-only — can view tasks, cannot update status or add remarks.
+Business shows "Expired" badge. [Activate] button visible.
+suspended
+Suspended by Superadmin
+Locked screen: "Account suspended — contact support." No feature access.
+Locked screen: "Account suspended — contact your manager."
+Business shows "Suspended" badge. [Reactivate] button visible.
+3. Tech Stack
+Layer
+Technology
+Purpose
+Cost
+Frontend
+React 18 + Vite 5
+UI, routing, component rendering
+Free
+Styling
+Tailwind CSS v3
+Utility-first mobile-first CSS
+Free
+PWA
+vite-plugin-pwa (Workbox)
+Service Worker + manifest
+Free
+Backend / DB
+Supabase (PostgreSQL 15)
+DB, Auth, Realtime, Edge Functions
+Free tier
+Authentication
+Supabase Auth (JWT)
+Email/password, 3-role redirect, password reset
+Included
+Real-time
+Supabase Realtime (WebSocket)
+Live Kanban, live account status updates
+Included
+Push Notifications
+Web Push API + VAPID
+Background push on Android Chrome
+Free
+Notification Trigger
+Supabase Edge Functions (Deno)
+DB webhook → Web Push + debounce
+Included
+Routing
+React Router v6
+SPA routing + deep links + role guards
+Free
+Icons
+Lucide React
+Material-style icon set
+Free
+Date Handling
+date-fns
+Timestamp formatting, analytics, trial countdown
+Free
+Deployment
+Vercel + GitHub
+Auto-deploy on push to main
+Free tier
+Keep-Alive (Primary)
+GitHub Actions (cron)
+Ping Supabase every 5 days — prevents project auto-pause
+Free
+Keep-Alive (Secondary)
+UptimeRobot (free tier)
+Ping Supabase health endpoint every 5 minutes — backup failsafe
+Free
+Error Tracking
+Sentry (free tier)
+5K events/month; frontend + Edge Function error reporting; 20% sampling for non-critical errors
+Free
+4. User Roles & Permissions
+4.1 Role Overview
+Role
+Role Value in DB
+Created By
+Nav Pattern
+Scope
+Superadmin
+'superadmin'
+Env-seeded (single account, manual DB insert)
+Sidebar — /sa/*
+All businesses on platform
+Owner
+'owner'
+Superadmin via /sa/businesses/new
+Bottom Tab Bar — 4 tabs
+Own business only
+Staff
+'staff'
+Owner via Admin Panel
+Bottom Tab Bar — 2 tabs
+Own assigned tasks only
+4.2 Permission Matrix
+Permission
+Superadmin
+Owner
+Staff
+Platform Administration
+View all businesses on platform
+YES
+NO
+NO
+Create new business + owner account
+YES (max 2)
+NO
+NO
+Activate a business account
+YES
+NO
+NO
+Suspend a business account
+YES
+NO
+NO
+Reactivate a suspended account
+YES
+NO
+NO
+Extend trial period
+YES
+NO
+NO
+Add note/memo to a business account
+YES
+NO
+NO
+Force logout all users in a business
+YES
+NO
+NO
+Task Management
+Create Task
+NO
+YES
+NO
+Quick capture (name + phone only)
+NO
+YES
+NO
+Assign / Reassign Task
+NO
+YES
+NO
+View All Tasks (own business)
+NO
+YES
+YES (read-only others)
+Add Remarks to any task
+NO
+YES — any task
+YES — own tasks only
+Mark Task Completed
+NO
+NO
+Own assigned tasks only
+Reopen a Completed Task
+NO
+YES
+NO
+Set task Urgent / Due Date
+NO
+YES
+NO
+Staff & Business Admin
+Manage Staff Accounts
+NO
+YES
+NO
+Reset Staff Password
+NO
+YES
+NO
+Access Customer Phonebook
+NO
+YES
+YES (read-only)
+View Analytics Dashboard
+NO
+YES
+NO
+View Own Account Status
+NO
+YES
+NO
+Communication
+WhatsApp Share Task
+NO
+YES
+YES
+Search / Filter Tasks
+NO
+YES
+YES
+Notifications
+Receive Push: Task Assigned
+NO
+NO
+YES
+Receive Push: Task Completed
+NO
+YES
+NO
+Receive Push: Remark Added
+NO
+YES (debounced 10 min)
+NO
+Receive Push: Task Reassigned
+NO
+NO
+YES (old + new)
+Receive Push: Account Activated
+NO
+YES
+NO
+Receive Push: Draft Reminder
+NO
+YES
+NO
+Update Own Push Subscription
+NO
+YES
+YES
+5. Task Lifecycle & Status Flow
+5.1 Status States
+Status
+Color
+Triggered By
+Description
+unassigned
+Amber #F9A825
+Owner creates task
+Created; staff not yet assigned. Amber tint after 1 hour.
+in_progress
+Blue #1565C0
+Owner assigns staff
+Auto-set on assignment; assigned_at recorded in task_events
+completed
+Green #2E7D32
+Assigned staff marks done
+Task closed; completed_at recorded in task_events
+5.2 End-to-End Flows
+Owner Flow
+Owner receives customer call → opens TaskPod → taps FAB (+)
+Quick capture: enters Customer Name + Phone → taps "Save Draft"
+Optionally fills Address, Service Type, assigns staff, marks Urgent, sets Due Date
+Task saved with per-business auto-incremented number, appears on Kanban via Realtime
+Owner assigns from card or detail → status = in_progress → push fires to staff
+Staff Flow
+Receives push: "New task assigned — Task #1005" (no customer PII in push body)
+Taps notification → Task Detail opens directly → sees full customer details
+Reads details, calls customer (tap-to-call)
+Adds remark → taps "Mark as Completed" → confirmation → confirms
+Owner receives push; task moves to Completed column via Realtime
+Reassignment Flow
+Owner reassigns from A to B → task_events row (Postgres trigger) → push to both A and B
+Deactivating a staff member auto-moves all their tasks to status = unassigned; owner receives summary notification: "X tasks unassigned — [Staff Name] was deactivated"
+Task Reopening Flow
+Owner taps "Reopen Task" on completed task → confirmation bottom sheet
+status → unassigned, completed_at → NULL, assigned_to → NULL
+task_events row inserted; system remark auto-added
+Task reappears in Unassigned column on Kanban
+Draft Reminder Flow
+Edge Function runs every 4 hours
+For each business: count tasks WHERE is_draft = true AND created_at < now() - interval '4 hours'
+If count > 0: push notification to owner — "You have X incomplete drafts"
+Max 1 draft reminder per business per 8 hours (debounced)
+Optimistic Concurrency Flow
+Every task UPDATE includes WHERE updated_at = [last_known_updated_at]
+If 0 rows affected: the task was modified by another user since it was loaded
+Frontend shows conflict snackbar: "This task was updated by someone else. Refresh to see changes."
+User taps refresh → re-fetches task → can retry their action
+6. Database Schema
+6.1 businesses
+One row per registered business. Maximum 2 rows enforced by Postgres trigger.
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+Business ID
+name
+TEXT
+NOT NULL
+Business display name (e.g. "Sharma Computer Repair")
+owner_id
+UUID
+FK → users.id, UNIQUE
+The owner account
+account_status
+TEXT
+CHECK ('trial_active','active','trial_expired','suspended')
+Current account state
+trial_ends_at
+TIMESTAMPTZ
+NOT NULL
+now() + INTERVAL 7 days at creation (or now() if immediately activated)
+activated_at
+TIMESTAMPTZ
+NULLABLE
+When Superadmin activated the account
+activated_by
+UUID
+FK → users.id, NULLABLE
+Superadmin who activated
+suspended_at
+TIMESTAMPTZ
+NULLABLE
+When Superadmin suspended
+suspended_reason
+TEXT
+NULLABLE
+Reason for suspension
+superadmin_note
+TEXT
+NULLABLE
+Internal memo added by Superadmin
+next_task_number
+INTEGER
+DEFAULT 1001
+Per-business task counter — atomically incremented by trigger
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+Business creation timestamp
+updated_at
+TIMESTAMPTZ
+DEFAULT now()
+Auto-updated on every change
+Enforcement trigger:
+SQL
+CREATE OR REPLACE FUNCTION enforce_max_businesses()
+RETURNS TRIGGER AS $$
+BEGIN
+IF (SELECT COUNT(*) FROM businesses) >= 2 THEN
+RAISE EXCEPTION 'Maximum of 2 businesses allowed on this platform';
+END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER trg_max_businesses
+BEFORE INSERT ON businesses
+FOR EACH ROW EXECUTE FUNCTION enforce_max_businesses();
+Account status management:
+account_status is managed by: (1) a scheduled Edge Function that runs every hour and flips trial_active → trial_expired when trial_ends_at < now() AND account_status = trial_active, and (2) Superadmin manual actions (activate → active, suspend → suspended, reactivate → active).
+6.2 account_events
+Immutable audit log of every account status transition. Inserted via Edge Function on Superadmin actions and by the trial-expiry cron.
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+business_id
+UUID
+FK → businesses.id, NOT NULL
+event_type
+TEXT
+CHECK ('created','activated','suspended','reactivated','trial_expired','trial_extended')
+What changed
+actor_id
+UUID
+FK → users.id, NOT NULL
+Who triggered the event (Superadmin or system)
+note
+TEXT
+NULLABLE
+Suspension reason, memo, or note
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+6.3 users
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+Supabase Auth user ID
+email
+TEXT
+UNIQUE, NOT NULL
+Login email (denormalized from auth.users for query convenience)
+name
+TEXT
+NOT NULL
+Full name
+phone
+TEXT
+NOT NULL
++91XXXXXXXXXX format
+role
+TEXT
+CHECK ('superadmin','owner','staff')
+Determines routing and permissions
+business_id
+UUID
+FK → businesses.id, NULLABLE
+NULL for Superadmin. Set for Owner and all Staff.
+is_active
+BOOLEAN
+DEFAULT true
+Soft disable — deactivating staff also reassigns tasks and invalidates session
+must_change_password
+BOOLEAN
+DEFAULT true
+Both Owner and Staff forced password change on first login
+avatar_color
+TEXT
+DEFAULT '#1E3A5F'
+Hex color for initials avatar
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+last_seen_at
+TIMESTAMPTZ
+NULLABLE
+Updated on each login — visible to Owner in assign dropdown
+Superadmin seeding: The Superadmin user is seeded via a one-time SQL script run against the Supabase dashboard (INSERT into auth.users + users table with role = superadmin, must_change_password = false). There is no self-registration for Superadmin.
+Owner creation: Superadmin creates the Owner via /sa/businesses/new. Edge Function creates auth.users entry + users row + businesses row atomically.
+Phone uniqueness: Phone is NOT globally unique — same person could be owner of one business and have their phone appear as customer in another. However, within a business, staff phone numbers must be unique. This is enforced at the application level during staff creation, not via a DB constraint on users.phone.
+6.4 tasks
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+task_number
+INTEGER
+NOT NULL
+Per-business display ID #1001... Assigned by trigger from businesses.next_task_number.
+business_id
+UUID
+FK → businesses.id, NOT NULL
+Tasks are business-scoped
+customer_id
+UUID
+FK → customers.id, NULLABLE
+Linked customer record
+customer_name
+TEXT
+NOT NULL
+Snapshot at task creation
+customer_phone
+TEXT
+NOT NULL
++91XXXXXXXXXX
+customer_address
+TEXT
+NULLABLE
+Task-scoped snapshot — not linked to customers table
+service_type_id
+UUID
+FK → service_types.id, NULLABLE
+FK for referential integrity
+service_type_label
+TEXT
+NULLABLE
+Snapshot of label at creation — preserved if type deleted
+service_description
+TEXT
+NULLABLE
+Free-text or auto-filled from service type
+status
+TEXT
+CHECK ('unassigned','in_progress','completed')
+Current task state
+assigned_to
+UUID
+FK → users.id, NULLABLE
+Currently assigned staff
+is_urgent
+BOOLEAN
+DEFAULT false
+Red badge, sorts to top of column
+is_draft
+BOOLEAN
+DEFAULT true
+Quick capture saves partial tasks as draft
+due_at
+TIMESTAMPTZ
+NULLABLE
+Optional deadline
+assigned_at
+TIMESTAMPTZ
+NULLABLE
+Most recent assignment timestamp
+completed_at
+TIMESTAMPTZ
+NULLABLE
+NULL if reopened
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+updated_at
+TIMESTAMPTZ
+DEFAULT now()
+Auto-updated by Postgres BEFORE UPDATE trigger
+created_by
+UUID
+FK → users.id
+Owner who created the task
+UNIQUE constraint: UNIQUE(business_id, task_number) — task numbers are unique within a business.
+Per-business task number trigger:
+SQL
+CREATE OR REPLACE FUNCTION assign_task_number()
+RETURNS TRIGGER AS $$
+DECLARE
+next_num INTEGER;
+BEGIN
+UPDATE businesses
+SET next_task_number = next_task_number + 1
+WHERE id = NEW.business_id
+RETURNING next_task_number - 1 INTO next_num;
+NEW.task_number := next_num;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER trg_assign_task_number
+BEFORE INSERT ON tasks
+FOR EACH ROW EXECUTE FUNCTION assign_task_number();
+6.5 customers
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+business_id
+UUID
+FK → businesses.id, NOT NULL
+Customer records are business-scoped
+name
+TEXT
+NOT NULL
+phone
+TEXT
+NOT NULL
+Unique per business (composite constraint)
+created_by
+UUID
+FK → users.id
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+last_task_at
+TIMESTAMPTZ
+NULLABLE
+Updated on each new task
+UNIQUE constraint: UNIQUE(business_id, phone)
+Address: Stored on tasks.customer_address only — not on the customers table. Autocomplete suggests the address from the most recent task for that customer as an optional chip (user must choose to use it).
+6.6 push_subscriptions
+Multi-device support. One row per device per user.
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+user_id
+UUID
+FK → users.id, NOT NULL
+endpoint
+TEXT
+UNIQUE, NOT NULL
+Web Push endpoint URL
+subscription_json
+JSONB
+NOT NULL
+Full subscription object (endpoint + keys)
+device_hint
+TEXT
+NULLABLE
+User-agent snippet for debugging
+last_used_at
+TIMESTAMPTZ
+DEFAULT now()
+Updated on each successful push
+is_denied
+BOOLEAN
+DEFAULT false
+True if user denied permission on this device
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+6.7 task_events (Audit Log)
+Immutable. Populated exclusively by Postgres AFTER INSERT/UPDATE triggers on the tasks table.
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+task_id
+UUID
+FK → tasks.id
+event_type
+TEXT
+CHECK ('created','assigned','reassigned','completed','reopened','status_changed')
+actor_id
+UUID
+FK → users.id
+Who triggered the event
+to_user_id
+UUID
+FK → users.id, NULLABLE
+Target staff for assigned/reassigned events
+from_user_id
+UUID
+FK → users.id, NULLABLE
+Previous assignee for reassigned events
+note
+TEXT
+NULLABLE
+Auto-generated system note
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+6.8 remarks
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+task_id
+UUID
+FK → tasks.id
+author_id
+UUID
+FK → users.id
+text
+TEXT
+NOT NULL, CHECK(length(text) <= 500)
+Enforced at DB level
+is_system
+BOOLEAN
+DEFAULT false
+Auto-generated system remarks (reassignment, reopen)
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+6.9 notifications
+Single source of truth for in-app and push notification records.
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+user_id
+UUID
+FK → users.id
+Recipient
+business_id
+UUID
+FK → businesses.id
+Business context
+task_id
+UUID
+FK → tasks.id, NULLABLE
+Related task
+event_type
+TEXT
+NOT NULL
+assigned, completed, remarked, reassigned, account_activated, account_suspended, draft_reminder
+message
+TEXT
+NOT NULL
+is_read
+BOOLEAN
+DEFAULT false
+push_sent_at
+TIMESTAMPTZ
+NULLABLE
+NULL if debounced or push_denied
+push_success
+BOOLEAN
+NULLABLE
+push_error
+TEXT
+NULLABLE
+e.g. "410 Gone"
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+90-day TTL: A scheduled Edge Function runs weekly and deletes notifications older than 90 days: DELETE FROM notifications WHERE created_at < now() - interval '90 days'.
+6.10 service_types
+Column
+Type
+Constraints
+Description
+id
+UUID
+PK
+business_id
+UUID
+FK → businesses.id
+Service types are business-scoped
+label
+TEXT
+NOT NULL
+e.g. "Laptop Screen Replacement"
+default_description
+TEXT
+NULLABLE
+Auto-fills service description on selection
+sort_order
+INTEGER
+DEFAULT 0
+created_at
+TIMESTAMPTZ
+DEFAULT now()
+6.11 Required Database Indexes
+Index
+Purpose
+tasks(business_id, status, created_at)
+Kanban board — primary query. Composite for business-scoped status filtering.
+tasks(status) WHERE status != 'completed'
+Partial index for active task queries
+tasks(assigned_to) WHERE status = 'in_progress'
+Staff workload count, My Tasks filter
+tasks(business_id, is_draft) WHERE is_draft = true
+Draft reminder queries
+tasks(updated_at)
+Optimistic concurrency checks
+tasks(business_id, task_number)
+Task lookup by display number
+customers(business_id, phone)
+Autocomplete search scoped to business
+customers USING gin(name gin_trgm_ops)
+ILIKE name search
+notifications(user_id) WHERE is_read = false
+Bell badge count
+notifications(task_id, event_type, push_sent_at DESC)
+Remark debounce check
+notifications(created_at)
+TTL cleanup
+push_subscriptions(user_id)
+All devices for a user
+push_subscriptions(last_used_at)
+Stale subscription cleanup
+businesses(account_status)
+Superadmin dashboard status filter
+account_events(business_id, created_at)
+Account history per business
+7. Design System
+7.1 Colour Palette
+Name
+Hex
+Usage
+Navy (Primary)
+#1E3A5F
+App bar, FAB, primary buttons (Owner/Staff)
+Purple (Superadmin)
+#6A1B9A
+Superadmin sidebar, accent, activation badges
+Purple Surface
+#F3E5F5
+Superadmin screen backgrounds, callout boxes
+Amber
+#F9A825
+Unassigned tasks, aging tint, trial warning
+Amber Surface
+#FFF8E1
+Trial banner, aging card tint
+Blue
+#1565C0
+In-progress status
+Blue Surface
+#E3F2FD
+In-progress card tint
+Green
+#2E7D32
+Completed status, active account, success states
+Green Surface
+#E8F5E9
+Active account banner, completed card tint
+Red
+#C62828
+Urgent badge, error, overdue, suspended account, expired trial
+Red Surface
+#FFEBEE
+Suspended banner, error banners
+Grey 100
+#F5F5F5
+Screen background
+Grey 600
+#757575
+Secondary text, captions
+Grey 900
+#212121
+Primary body text
+White
+#FFFFFF
+Card surfaces, modal backgrounds
+7.2 Key Component Specs
+Component
+Spec
+Bottom Tab Bar (Owner/Staff)
+64dp height + safe-area-inset-bottom; navy active, grey inactive; 10sp label
+Superadmin Sidebar
+240dp wide on desktop, collapsible to 60dp icon rail on mobile; purple background #6A1B9A; white icons/text
+FAB
+56×56dp navy, + icon; fixed bottom 80dp right 20dp; hides on scroll down, shows on scroll up
+Task Card
+White, radius-md (12dp), elevation 1, 4dp left accent bar colored by status
+Status Badge
+24dp height, radius-full, 12sp Medium; color per status
+Bottom Sheet
+Slide up 300ms; drag handle 36×4dp; top radius-lg (24dp); full height on keyboard open
+Snackbar
+48dp, radius-md, 80dp above tab bar; Success 2.5s, Error 4s auto-dismiss
+Conflict Snackbar
+Error style with [Refresh] action button; does not auto-dismiss
+Urgent Badge
+Red pill on card top-right: "URGENT" 10sp white
+Account Status Chip
+Color-coded pill: trial_active=amber, active=green, trial_expired=red, suspended=red
+Trial Banner
+Amber banner below app bar: "Trial ends in X days"
+Trial Urgent Banner
+Red banner: "Trial ends in Xh" — shown when ≤ 2 days remain
+Suspended Banner
+Red full-screen card: "Account suspended — contact support"
+Credential Share Card
+White card with copy + WhatsApp share buttons, shown once after creating Owner/Staff
+Workload Chip (Assign Dropdown)
+"Amit (2 active) · 5m ago" — active task count + last_seen_at
+8. Navigation Architecture
+Superadmin Navigation — Sidebar (/sa/*)
+Nav Item
+Label
+Icon
+Route
+Badge
+1 (default)
+Dashboard
+layout-dashboard
+/sa
+—
+2
+Businesses
+building-2
+/sa/businesses
+Count of businesses (max 2)
+3
+Settings
+settings
+/sa/settings
+—
+Owner Navigation — Bottom Tab Bar (4 tabs)
+Tab
+Label
+Icon
+Route
+Badge
+1 (default)
+Dashboard
+layout-dashboard
+/
+Unassigned task count (amber dot)
+2
+Tasks
+list
+/tasks
+—
+3
+Analytics
+bar-chart-2
+/analytics
+—
+4
+Admin
+users
+/admin
+—
+Staff Navigation — Bottom Tab Bar (2 tabs)
+Tab
+Label
+Icon
+Route
+Badge
+1 (default)
+My Tasks
+clipboard-list
+/my-tasks
+Count of active in_progress tasks
+2
+All Tasks
+list
+/tasks
+—
+8.1 Route Map — All Roles
+Route
+Access
+Description
+/login
+Unauthenticated
+Login with email + password + Forgot Password link
+/reset-password
+Unauthenticated (via email token)
+Password reset form
+/change-password
+Authenticated (any role with must_change_password=true)
+Forced first-login password change
+/sa
+Superadmin only
+Superadmin Dashboard
+/sa/businesses
+Superadmin only
+All businesses list (max 2)
+/sa/businesses/new
+Superadmin only
+Create new business + owner account
+/sa/businesses/:id
+Superadmin only
+Business detail — owner info, tasks stats, account history, actions
+/sa/settings
+Superadmin only
+Platform settings (VAPID keys docs, keep-alive status)
+/trial-expired
+Owner (trial expired, not activated)
+Locked screen with "Contact Superadmin" message
+/account
+Owner
+Account status + account history
+/
+Owner
+Kanban dashboard with trial banner
+/tasks
+Owner + Staff
+All tasks list with search + filter
+/{taskId}
+Owner + Staff
+Task Detail
+/analytics
+Owner
+Analytics dashboard
+/admin
+Owner
+Admin panel — staff, service types, phonebook
+/notifications
+Owner + Staff
+Notification centre
+/my-tasks
+Staff
+My Tasks with filter tabs
+/suspended
+Owner + Staff (when account_status=suspended)
+Account suspended screen
+8.2 Deep Link Routing (Push Notification Taps)
+Event
+Deep Link
+Opens To
+Task assigned (staff)
+/{taskId}
+Task Detail
+Task completed (owner)
+/{taskId}
+Task Detail
+Remark added (owner)
+/{taskId}#remarks
+Task Detail scrolled to remarks
+Task reassigned (staff)
+/{taskId}
+Task Detail
+Account activated (owner)
+/account
+Account status screen
+Draft reminder (owner)
+/tasks?filter=drafts
+Tasks list filtered to drafts
+Account suspended (owner)
+/suspended
+Suspended screen
+9. Screen Specifications
+9.0 Global Auth Guards
+Every route checks the following conditions in order before rendering:
+Not authenticated → redirect to /login
+Role mismatch (e.g. staff accessing /) → redirect to role default route
+must_change_password = true → redirect to /change-password (any role including owner)
+account_status = suspended → redirect to /suspended (owner + staff; NOT superadmin)
+account_status = trial_expired → redirect to /trial-expired (owner only; staff sees read-only mode)
+Superadmin: all /sa/* routes; direct / or /my-tasks access → redirect to /sa
+● Superadmin Screens
+9.1 Superadmin Dashboard (/sa)
+Desktop-first layout. On mobile: sidebar collapses to a bottom icon rail with 3 icons. Content scrolls below.
+Page Header
+"TaskPod Admin" wordmark + "Superadmin" role chip (purple)
+Right: avatar + name + logout
+Summary Cards (top row — 4 cards)
+Card
+Value
+Color
+Total Businesses
+COUNT businesses (max 2)
+Navy
+Active
+COUNT account_status = active
+Green
+In Trial
+COUNT account_status = trial_active
+Amber
+Expired / Suspended
+COUNT trial_expired + suspended
+Red
+Business Cards Section
+Both businesses displayed as full-width detail cards (no list needed for 2 items).
+Each Business Card contains:
+Business name (18sp SemiBold)
+Account status chip (large, color-coded)
+Owner: name + phone (tap-to-call) + email
+Trial countdown: "Trial ends in X days" or "Expired Xd ago" (only for trial/expired states)
+Quick stats: Total Tasks | Completed | In Progress | Unassigned | Staff Count
+Action buttons (inline):
+Action
+When Visible
+Behavior
+Activate
+account_status = trial_active OR trial_expired
+Confirm modal → account_status = active, activated_at = now(), activated_by = superadmin_id; inserts account_events row; sends push + in-app notification to owner
+Suspend
+account_status != suspended
+Confirm modal + optional reason → account_status = suspended, suspended_at = now(), sessions invalidated, push_subscriptions deleted; inserts account_events row; sends in-app notification to owner + all staff
+Reactivate
+account_status = suspended
+Confirm modal → account_status = active; inserts account_events row; sessions restored on next login
+Extend Trial
+account_status = trial_active OR trial_expired
+Date picker → updates trial_ends_at; inserts account_events row
+View Details
+Always
+→ /sa/businesses/:id
+Superadmin note: inline editable text field + [Save Note] button
+If account_status = trial_active and ≤ 48 hours remaining: amber highlight border on card
+"Add Business" Button (shown only if < 2 businesses exist)
+Purple outlined button at bottom of business cards section
+→ /sa/businesses/new
+If 2 businesses exist: button hidden
+Recent Activity Feed
+Last 10 account_events across all businesses, sorted newest first
+Each row: colored dot by event_type + business name + event label + timestamp
+Tap row → /sa/businesses/:id
+9.2 Businesses List (/sa/businesses)
+Simple list of both businesses (no search/filter needed for 2 items).
+Business List Item
+Element
+Detail
+Business name
+18sp SemiBold
+Owner name + phone
+Grey, 14sp, tap-to-call phone
+Account status chip
+Color-coded
+Trial countdown
+"X days left" or "Expired Xd ago" — only for trial/expired
+Task count
+"X tasks total"
+Staff count
+"X staff"
+Registered date
+"Registered [date]"
+Action
+[View →] button → /sa/businesses/:id
+"Add Business" Button (shown only if < 2 businesses exist)
+9.3 Create Business (/sa/businesses/new)
+Only accessible when fewer than 2 businesses exist. If 2 businesses exist, this route redirects to /sa/businesses with a snackbar: "Maximum 2 businesses reached."
+Form Fields
+Field
+Required
+Notes
+Business Name
+YES
+e.g. "Sharma Computer Repair"
+Owner Full Name
+YES
+Owner Email
+YES
+Must be unique across platform. Used for login.
+Owner Phone
+YES
+Auto-formats +91
+Temp Password
+YES
+Minimum 8 characters. Set by Superadmin.
+Start as
+YES
+Radio: Trial (7 days) or Active (immediate)
+"Create Business" Button
+On submit:
+Edge Function create-business executes:
+Creates auth.users entry (email + temp password) via Supabase Admin API
+Inserts users row (role = owner, must_change_password = true, business_id will be set)
+Inserts businesses row (account_status = trial_active or active based on selection, trial_ends_at set accordingly, owner_id = new user id)
+Updates users.business_id = new business id
+Inserts account_events row (event_type = created)
+On success: Credential Share Bottom Sheet appears:
+Credential Share Bottom Sheet
+Title: "Business Created Successfully ✓"
+Business name + owner name displayed
+Credential card (grey-100 background):
+Login URL: [app domain]/login
+Email: owner@example.com
+Temp Password: •••••••• with [Show] toggle
+[Share via WhatsApp] button — green, full width
+Opens wa.me/?text= with pre-formatted message:
+text
+🔧 *TaskPod — Your Account is Ready*
+Login here: [app URL]/login
+Email: owner@example.com
+Temp Password: [password]
+Please change your password on first login.
+— TaskPod Admin
+[Copy Credentials] button — outlined, copies to clipboard
+Warning text: "⚠ This is the only time the temp password is shown. Share it securely."
+[Done] button → redirects to /sa/businesses
+9.4 Business Detail (/sa/businesses/:id)
+Header Section
+Business name (24sp Bold)
+Account status chip (large, color-coded)
+Owner: name, email, phone (tap-to-call)
+Registered: [date] · Trial ends: [date] · [X days left / expired / N/A if active]
+Superadmin note: editable text field + [Save Note] button
+Quick Stats Row
+Total Tasks | Completed | In Progress | Unassigned | Staff Count
+Action Buttons (right panel on desktop, stacked on mobile)
+Action
+When Visible
+Behavior
+Activate
+account_status = trial_active or trial_expired
+Confirm modal → account_status = active
+Suspend
+account_status != suspended
+Confirm modal + reason → account_status = suspended, sessions invalidated
+Reactivate
+account_status = suspended
+Confirm modal → account_status = active
+Extend Trial
+account_status = trial_active or trial_expired
+Date picker → updates trial_ends_at
+Force Logout All Users
+Any status
+Calls Supabase admin API to invalidate all sessions for this business
+Tabs
+Account History Tab (default)
+Table of all account_events for this business: date, event_type label, actor name, note
+Sorted newest first
+Staff List Tab
+Read-only list: name + email + phone + is_active + last_seen_at + active task count
+Recent Tasks Tab
+Last 20 tasks for this business: task#, customer name, status chip, assigned to, created date
+9.5 Superadmin Settings (/sa/settings)
+Platform info: Supabase project URL, free-tier usage summary
+Keep-alive status: last GitHub Actions cron run timestamp + status (green/red)
+UptimeRobot status: link to dashboard + current status
+VAPID key management documentation panel: instructions for backup and rotation
+Sentry: link to Sentry dashboard + recent error count
+Superadmin account: change own name/phone/email; change password via Supabase Auth
+● Shared Authentication Screens
+9.6 Login Screen (/login)
+Full screen: top 40% navy with centered TaskPod logo, bottom 60% white card with rounded top corners
+Fields: Email + Password (with show/hide toggle)
+Sign In button: full width 52dp navy, disabled until both fields valid
+Error banner: "Invalid email or password"
+"Forgot your password?" link → triggers Supabase Auth password reset email
+On success: role-based redirect — superadmin → /sa, owner → / (with account status check), staff → /my-tasks
+No self-registration link anywhere
+9.7 Password Reset (/reset-password)
+"Enter your email" → "Send reset link" → Supabase sends email
+User clicks email link → /reset-password?token=...
+"New Password" + "Confirm Password" → submit → password updated
+Redirect to /login with success snackbar
+9.8 First-Login Password Change (/change-password)
+Applies to both Owner and Staff when must_change_password = true.
+User logs in with temp password → must_change_password = true detected
+Redirect to /change-password — full-screen, no back navigation
+"Create your new password" — New Password + Confirm Password (min 8 chars)
+On submit: password updated via Supabase Auth, must_change_password = false → redirect to role default route
+Owner: one-time welcome bottom sheet: "Welcome to TaskPod! Create your first task by tapping the + button."
+Staff: one-time welcome bottom sheet: 3-step visual guide (Receive notification → Open task → Mark complete)
+9.9 Trial Expired Screen (/trial-expired) — Owner
+Shown when account_status = trial_expired
+Heading: "Your 7-day trial has ended"
+Body: "To continue using TaskPod, contact your TaskPod administrator to activate your account."
+Contact card: Superadmin name + phone (tap-to-call) + email (tap-to-email) + [WhatsApp] button (wa.me/[phone])
+Contact info sourced from Superadmin user record (queried via Edge Function — not exposed via RLS)
+Trial stats: Tasks created [X], Staff onboarded [X], Completed tasks [X]
+"View Tasks (read-only)" link → /tasks in read-only mode
+No payment form. No submission flow.
+9.10 Account Suspended Screen (/suspended) — Owner + Staff
+Owner sees: "Your account has been suspended." + suspension reason (from account_events note) + "Contact your TaskPod administrator to reactivate."
+Staff sees: "This account has been temporarily restricted — contact your manager."
+Both: display Superadmin contact card (owner view) or Owner contact card (staff view)
+No feature access for either role while suspended
+● Owner Screens
+9.11 Account Status Screen (/account) — Owner
+Account Info Section
+Business name, owner name, email, phone
+Account status chip (large, color-coded) + status description text:
+trial_active: "Trial active — X days remaining"
+active: "Account Active ✓"
+trial_expired: "Trial expired — contact administrator"
+suspended: redirect to /suspended
+Account History
+Table of account_events for own business: date, event_type label, note
+Sorted newest first
+9.12 Owner Dashboard — Kanban Board (/)
+Account Status Banners (shown below app bar, one at a time)
+Condition
+Banner
+trial_active, > 2 days left
+Amber: "Trial ends in X days."
+trial_active, ≤ 2 days left
+Red: "Trial ends in Xh — contact administrator to activate."
+active
+No banner (clean dashboard)
+Kanban Columns
+Three collapsible sections: Unassigned | In Progress | Completed
+Unassigned: ALL unassigned tasks regardless of age (no time limit)
+In Progress: ALL in-progress tasks regardless of age (no time limit)
+Completed: Last 30 days only. "View older tasks →" at bottom → /tasks with completed + date filter pre-set
+Column header: colored dot + name + count badge + chevron toggle
+Completed column header: unreviewed completion count badge (completed tasks with no owner remark)
+Urgent tasks sort to top of each column
+Task Card
+Row 1: Task # (navy SemiBold) + created timestamp (grey 11sp right) + URGENT badge if applicable
+Row 2: Customer Name (16sp SemiBold)
+Row 3: Address (1 line) or "Draft — tap to complete details" (amber italic) if is_draft
+Row 4: Assigned staff chip OR inline "Assign" button (blue tint)
+Row 5 (conditional): Due date with clock icon — red if overdue
+Row 6 (conditional): Aging label "2 hrs ago" — amber text if > 1 hour unassigned
+Card tint: amber surface if unassigned > 1hr
+Tap card body → Task Detail; tap Assign button → staff picker popover
+FAB
+56×56dp navy, + icon; hides on scroll down, shows on scroll up → New Task bottom sheet
+9.13 New Task Form
+Modes
+Quick Capture (default): Customer Name + Phone only → "Save Draft" (is_draft=true)
+"Add more details" expand link → Full Form
+Full Form Fields
+Field
+Required
+Notes
+Customer Name
+YES
+Autocomplete from customers table (business-scoped)
+Customer Phone
+YES
+Auto-formats +91; triggers customer lookup (debounce 300ms)
+Customer Address
+NO
+Stored on task only. Suggests last known address as optional chip: "Use address from last task: [address]" — user must tap chip to accept
+Service Type
+NO
+Dropdown from service_types (business-scoped); auto-fills description
+Service Description
+NO
+Multi-line 4 rows; auto-filled by service type or free text
+Assign Staff
+NO
+Dropdown: all active staff with workload count + last_seen_at
+Mark as Urgent
+NO
+Toggle
+Due Date
+NO
+Date + time picker
+On Save:
+If customer phone matches existing customer: link customer_id
+If new phone: create customer record, link customer_id
+customer_name and customer_phone stored as snapshots on task
+If is_draft = false (full details provided) and staff assigned: auto-set status = in_progress
+9.14 Task Detail Screen (/{taskId})
+Header
+Task # + Status badge + URGENT badge
+Customer Name (22sp Bold)
+Customer phone: tap-to-call (tel:) blue underlined
+Customer address: map-pin icon; tap → Google Maps intent
+Due date row (if set): red clock if overdue
+Service type chip (label snapshot)
+Timestamps Row
+Created At | Assigned At | Completed At (— if not set)
+Action Buttons by Role
+Role
+Actions Available
+Owner
+Assign/Reassign dropdown ("Amit (2 active) · 5m ago"); Mark Urgent toggle; Set Due Date; Reopen (completed tasks only); Tap-to-call assigned staff
+Staff (own task, in_progress)
+"Mark as Completed" green full-width button
+Both
+WhatsApp Share button (wa.me deep link)
+Remarks & Notes
+Both owner and staff can add remarks (staff: own tasks only; owner: any task)
+Text area 4 rows, 500 char limit, character counter shown at 450+
+Each remark: avatar (initials + color) + name + "(Owner)" or "(Staff)" label + timestamp + text
+System remarks (reassignment, reopen) displayed in grey-100 background with system icon
+Optimistic Concurrency
+All write operations (assign, complete, reopen, urgent toggle, due date) include updated_at check
+If conflict detected: Snackbar "This task was updated by someone else. [Refresh]" — Refresh button reloads task data
+9.15 Task Reopening Flow
+Owner taps "Reopen Task" on completed Task Detail → confirmation bottom sheet
+"Reopen this task? Status will return to Unassigned." → Confirm
+status → unassigned, completed_at → NULL, assigned_to → NULL
+Postgres trigger inserts task_events row (type=reopened) + system remark
+Task reappears in Unassigned column on Kanban
+9.16 Task Search & Filter (/tasks) — Owner + Staff
+Search bar: searches customer name, customer phone, task number (#XXX), service type label
+Debounced 300ms; client-side for < 200 tasks, server-side Supabase ilike for > 200
+Filter chips: [All] [Unassigned] [In Progress] [Completed] [Urgent] [Drafts] [Overdue]
+Date range: [Last 7 days] [Last 30 days] [All time]
+Results: TaskListItem component — same spec as Kanban cards
+9.17 Analytics Dashboard (/analytics) — Owner Only
+Date range selector: [This Week] [This Month] [Custom Range]
+Summary cards (row): Total Tasks | Completed | In Progress | Completion Rate
+Per-staff table: Name | Assigned | Completed | Completion % | Avg Time (assigned→completed)
+Draft tasks alert: count of is_draft = true tasks with [View Drafts →] link to /tasks?filter=drafts
+9.18 Admin Panel (/admin) — Owner Only
+Account Status Card (top of page)
+Business name + account status chip + trial countdown or "Active" badge
+[View Account Details] link → /account
+Staff Management
+Add Staff form: Name, Email, Phone, Temp Password
+"Add Staff" disabled with tooltip when user count ≥ 15: "Maximum 15 users per business"
+On success: Credential Share Bottom Sheet (same design as business creation):
+Staff name, email, temp password (shown once)
+[Share via WhatsApp] button with pre-formatted message:
+text
+📋 *TaskPod — Staff Account Ready*
+Login: [app URL]/login
+Email: staff@example.com
+Temp Password: [password]
+Change your password on first login.
+— [Business Name]
+[Copy Credentials] button
+Warning: "⚠ This is the only time the temp password is shown."
+Staff list: avatar + name + email + phone + last_seen_at + active/inactive chip + active task count
+Per-staff actions:
+Action
+Description
+Reset Password
+Opens modal: new temp password field → submit → updates via Supabase Admin API (Edge Function) → must_change_password = true → shows credential share bottom sheet with new temp password
+Deactivate
+Confirm modal: "Deactivate [Name]? Their X active tasks will be moved to Unassigned." → is_active = false, all tasks → unassigned, session invalidated, push_subscriptions deleted, owner notified with count of unassigned tasks
+Reactivate
+is_active = true → staff can log in again
+Service Types Management
+List with label + default description; Add form; reorder (up/down); delete (if no tasks use this type — soft check: if tasks reference this service_type_id, show warning "X tasks use this type" and prevent deletion)
+Customer Phonebook
+Search by name or phone (debounced 300ms)
+List: name + phone + last task date + total task count
+Tap row → /tasks filtered by customer_id
+9.19 Notification Centre (/notifications) — Owner + Staff
+Full-screen push navigation (not bottom sheet)
+Last 50 notifications for this user, sorted newest first
+Each row: colored dot + message + relative time + unread indicator (blue dot)
+Tap row → Task Detail for that task (or /account for account_activated event, or /tasks?filter=drafts for draft_reminder)
+"Mark all as read" in app bar
+Unread badge on bell icon updates via Realtime
+● Staff Screens
+9.20 My Tasks (/my-tasks) — Staff
+Filter tabs: [Active] [All Mine] [Completed]
+First login: empty state with "No tasks yet — you'll be notified when assigned" + push permission CTA
+Welcome bottom sheet (once, after password change): 3-step visual guide
+Task cards: full width, no assign button
+Action row on own in_progress tasks: [Add Remark] outlined + [Complete] filled green — 44dp each
+Pull-to-refresh
+Tap notification → Task Detail directly (not this list)
+9.21 All Tasks (/tasks) — Staff
+Same search + filter as owner view (§9.16)
+Staff can READ all tasks in their business; cannot update others' tasks (RLS enforced)
+Assign/Reassign buttons not shown for staff
+10. Push Notification System
+10.1 Notification Triggers
+Event
+Recipient
+Title
+Body
+Debounce
+Push or In-App
+Task assigned
+Assigned staff (all devices)
+New Task Assigned
+Task #[N] assigned to you
+None
+Push + In-App
+Task completed
+Owner (all devices)
+Task Completed
+Task #[N] completed by [Staff Name]
+None
+Push + In-App
+Remark added
+Owner (all devices)
+New Remark
+Task #[N] — new remark added
+10 min per task
+Push + In-App
+Task reassigned
+Previous + new staff (all devices)
+Task Reassigned / New Task Assigned
+Respective messages (no customer PII)
+None
+Push + In-App
+Account activated
+Owner (all devices)
+Account Activated!
+Your account is now fully active.
+None
+Push + In-App
+Account suspended
+Owner + all staff (in-app only)
+—
+—
+None
+In-App only
+Draft reminder
+Owner (all devices)
+Incomplete Drafts
+You have X tasks to complete
+8 hours per business
+Push + In-App
+Staff deactivated (tasks unassigned)
+Owner (in-app only)
+—
+X tasks moved to Unassigned — [Staff] deactivated
+None
+In-App only
+PII Redaction: Push notification bodies do NOT include customer name, phone, or address. The notification contains only the task number and generic action description. Full details are loaded when the user taps the notification and opens the Task Detail screen. This prevents customer PII from appearing on lock screens.
+Suspension: In-app only to avoid anxiety-inducing background push notifications.
+Superadmin: Receives no push notifications. They actively monitor the dashboard on desktop.
+10.2 Remark Debounce Logic
+On remarks.INSERT, Edge Function checks notifications WHERE task_id = this AND event_type = remarked AND push_sent_at > NOW() - INTERVAL 10 minutes
+If recent push exists: skip push, insert notification with push_sent_at = NULL (in-app only)
+If no recent push: push to ALL owner devices in push_subscriptions, insert notification
+HTTP 410 Gone response: delete that push_subscriptions row
+10.3 Draft Reminder Logic
+Edge Function check-draft-reminders runs every 4 hours
+For each business where account_status IN (trial_active, active):
+Count tasks WHERE is_draft = true AND created_at < now() - interval '4 hours'
+Check notifications WHERE business_id = this AND event_type = 'draft_reminder' AND push_sent_at > NOW() - INTERVAL 8 hours
+If drafts exist AND no recent reminder: push to owner, insert notification
+Push body: "You have X incomplete draft tasks"
+10.4 Push Subscription Lifecycle
+Event
+Action
+App opens
+Re-register push subscription. Matching endpoint → update last_used_at. New endpoint → insert new row.
+User denies permission
+Insert row with is_denied=true; no endpoint stored. In-app notifications only.
+410 Gone on delivery
+Delete push_subscriptions row. User re-prompted on next open.
+Staff deactivated
+Delete all push_subscriptions for that user. Invalidate Supabase Auth session.
+User logs out
+Delete push_subscriptions row for current device endpoint only.
+Account suspended
+Delete all push_subscriptions for ALL users in that business.
+Stale subscription cleanup
+Weekly cron: DELETE WHERE last_used_at < now() - interval '30 days' AND is_denied = false.
+10.5 Permission Prompt Timing
+Prompt
+When Shown
+Owner push permission
+After first task is created (not on dashboard load)
+Staff push permission
+After password change welcome sheet; or on /my-tasks after 60s if no tasks yet
+A2HS prompt
+3rd session only (not first login)
+11. Security
+11.1 RLS Policy Summary
+All RLS policies require: (a) auth.uid() IS NOT NULL, and (b) EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND is_active = true). Superadmin bypasses business-level policies via service role key in Edge Functions. Superadmin direct DB access uses their role = superadmin check.
+Table
+Operation
+Policy
+businesses
+SELECT
+Owner: own row (owner_id = auth.uid()). Superadmin: all rows via service role.
+businesses
+UPDATE
+Superadmin via Edge Function (service role) only. Owner cannot update business record.
+account_events
+SELECT
+Owner: own business. Superadmin: all.
+account_events
+INSERT
+Edge Function (service role) only.
+tasks
+SELECT
+Active authenticated users — own business_id only. Account status checked: account_status NOT IN (suspended).
+tasks
+INSERT
+Owner only (business_id = own, account_status IN trial_active, active).
+tasks
+UPDATE status/completed_at
+Assigned staff only (assigned_to = auth.uid()). updated_at must match (optimistic concurrency).
+tasks
+UPDATE assign/urgent/due/reopen
+Owner only. updated_at must match.
+task_events
+INSERT
+Postgres triggers only (SECURITY DEFINER).
+remarks
+SELECT
+Active users — own business_id.
+remarks
+INSERT
+Owner (any task in own business) OR staff (own task: assigned_to = auth.uid()). Account status checked.
+customers
+SELECT / INSERT
+Active authenticated users — own business_id only.
+push_subscriptions
+SELECT
+Own rows (user_id = auth.uid()). Edge Functions use service role.
+push_subscriptions
+INSERT / UPDATE / DELETE
+Own rows only.
+notifications
+SELECT / UPDATE is_read
+Own rows (user_id = auth.uid()).
+users (users_public view)
+SELECT
+All active users in same business_id. Superadmin: all. View excludes: email (only visible to owner/superadmin), must_change_password.
+users
+UPDATE is_active
+Owner (staff in own business) or Superadmin (any user via service role).
+users
+INSERT
+Owner only (staff for own business) AND total count < 15. Via Edge Function for auth.users creation.
+service_types
+SELECT
+Active users — own business_id.
+service_types
+INSERT / UPDATE / DELETE
+Owner of that business only.
+11.2 Account Suspension — Security Actions
+On suspension: (1) account_status = suspended on businesses; (2) Supabase Admin API signOut(userId, {scope: "global"}) for owner + all staff; (3) All push_subscriptions rows for all users in business deleted; (4) In-app notification sent to owner and all staff
+Suspended users who use stale JWTs receive 401 on all Supabase operations (RLS account_status check)
+On reactivation: sessions restored naturally on next login; users re-subscribe to push on next app open
+11.3 Superadmin Account Security
+Single Superadmin account — seeded via one-time SQL script, not self-registration
+Superadmin email and initial password stored in secure password manager (not in repo or env files)
+Superadmin can change their own password via Supabase Auth (/sa/settings)
+MFA recommended: Enable Supabase MFA (TOTP) for the Superadmin account via Supabase dashboard. Not enforced in app code for v1.0, but documented as a setup step.
+No forgot password email for Superadmin — recovery via Supabase Dashboard Auth tab directly
+11.4 Additional Security Measures
+Rate limiting on login: Supabase Auth provides basic rate limiting. Additionally, the login form disables the submit button for 30 seconds after 5 consecutive failed attempts (client-side).
+Staff password reset: Only the Owner can reset a staff member's password via Admin Panel. This uses the Edge Function with service role, not a direct Supabase Admin API call from the frontend.
+No customer PII in push bodies: Prevents data leakage on lock screens.
+Service role key isolation: SUPABASE_SERVICE_ROLE_KEY is ONLY in Supabase Edge Function environment. Never in frontend code or Vercel environment.
+12. Infrastructure & Reliability
+12.1 Scheduled Edge Functions
+Function
+Schedule
+Action
+check-trial-expiry
+Every 1 hour
+UPDATE businesses SET account_status = 'trial_expired' WHERE trial_ends_at < now() AND account_status = 'trial_active'. Inserts account_events row with event_type = 'trial_expired', actor_id = superadmin_id.
+check-draft-reminders
+Every 4 hours
+For each active business: count old drafts → push reminder to owner if applicable (see §10.3).
+cleanup-notifications
+Every Sunday 3 AM UTC
+DELETE FROM notifications WHERE created_at < now() - interval '90 days'.
+cleanup-push-subscriptions
+Every Sunday 3 AM UTC
+DELETE FROM push_subscriptions WHERE last_used_at < now() - interval '30 days' AND is_denied = false.
+12.2 Keep-Alive System (Dual Redundancy)
+Mechanism
+Schedule
+Action
+Failure Alert
+GitHub Actions cron (supabase-keepalive.yml)
+Every 5 days
+HTTP GET to Supabase health endpoint
+GitHub Actions email on workflow failure
+UptimeRobot (free tier)
+Every 5 minutes
+HTTP GET to Supabase REST endpoint (/rest/v1/businesses?select=count&limit=0) with anon key
+Email alert on 3 consecutive failures
+Why dual: GitHub Actions cron is unreliable as the sole mechanism — tokens expire, GitHub may skip scheduled runs, and there's no real-time alerting. UptimeRobot provides continuous monitoring and instant email alerts.
+12.3 Free Tier Analysis (2 Businesses, 6-Month Projection)
+Resource
+Supabase Limit
+Projected Usage
+Risk
+Notes
+Database size
+500 MB
+~30-50 MB
+LOW
+2 businesses × ~5K tasks + events
+Bandwidth
+5 GB/month
+~0.5-1 GB
+LOW
+30 users max, text-only data
+Edge Function invocations
+500K/month
+~3-5K/month
+LOW
+Push notifications + cron + business actions
+Realtime concurrent connections
+200
+30 max
+LOW
+Well within limits
+Auth emails
+4/hour
+Rare (password resets only)
+LOW
+Only on explicit user action
+Project auto-pause
+7 days inactivity
+Mitigated by dual keep-alive
+LOW (was CRITICAL)
+UptimeRobot pings every 5 min
+Sentry events
+5K/month
+~200-500/month (20% sampling)
+LOW
+Sampling reduces volume
+Vercel bandwidth
+100 GB/month
+<1 GB
+LOW
+Static SPA, minimal traffic
+13. WhatsApp Share Feature
+Field
+Value in Message
+Header
+*TaskPod — Task #1005*
+Status
+Status: In Progress ⚙
+Customer
+Customer: Ramesh Patel
+Phone
+Phone: +91 98765 43210
+Address
+Address: 12 MG Road, Surat
+Service
+Service: Laptop screen replacement
+Assigned To
+Assigned to: Amit Shah
+Urgent
+🔴 URGENT
+Footer
+Sent from TaskPod
+Note: WhatsApp share is an explicit user action (tap share button). Customer PII is appropriate here because the user intentionally chooses to share task details with a specific contact. This is different from push notifications where PII appears passively on lock screens.
+Implementation: generate message string in JavaScript → encodeURIComponent() → window.open("https://wa.me/?text=" + encoded, "_blank"). No phone number in URL — opens WhatsApp contact picker.
+14. Project Folder Structure
+Path
+Description
+public/manifest.json
+PWA manifest
+public/sw.js
+Service Worker: push, notificationclick, offline cache
+public/icons/
+192px, 512px, 512px maskable, badge-72px PNG icons
+.github/workflows/supabase-keepalive.yml
+Cron — ping Supabase every 5 days
+Superadmin Pages
+src/pages/sa/SuperadminDashboard.jsx
+SA Dashboard: summary cards, business cards, activity — /sa
+src/pages/sa/BusinessesList.jsx
+SA businesses list (max 2) — /sa/businesses
+src/pages/sa/CreateBusiness.jsx
+SA create business + owner account form — /sa/businesses/new
+src/pages/sa/BusinessDetail.jsx
+SA business detail: info, stats, actions, tabs — /sa/businesses/:id
+src/pages/sa/SASettings.jsx
+SA settings + keep-alive status + VAPID docs — /sa/settings
+Auth Pages
+src/pages/Login.jsx
+Login with Forgot Password — /login
+src/pages/ResetPassword.jsx
+Password reset form — /reset-password
+src/pages/ChangePassword.jsx
+Forced first-login password change (Owner + Staff) — /change-password
+Account State Pages
+src/pages/TrialExpired.jsx
+Trial expired + contact Superadmin — /trial-expired
+src/pages/Suspended.jsx
+Account suspended screen (Owner + Staff) — /suspended
+src/pages/AccountStatus.jsx
+Owner account status + history — /account
+Owner Pages
+src/pages/OwnerDashboard.jsx
+Kanban + FAB + trial banner — /
+src/pages/TasksListView.jsx
+Search + filter all tasks — /tasks
+src/pages/TaskDetailPage.jsx
+Full task detail — /{taskId}
+src/pages/AnalyticsDashboard.jsx
+Owner analytics — /analytics
+src/pages/AdminPanel.jsx
+Staff + service types + phonebook — /admin
+Staff Pages
+src/pages/StaffMyTasks.jsx
+My Tasks + filter tabs + welcome sheet — /my-tasks
+Shared Pages
+src/pages/NotificationCentrePage.jsx
+Notification list — /notifications
+Superadmin Components
+src/components/SA/SALayout.jsx
+Sidebar layout with collapsible nav + route guard
+src/components/SA/BusinessCard.jsx
+Full business card with status + actions + stats
+src/components/SA/BusinessStatusChip.jsx
+Color-coded account_status chip
+src/components/SA/AccountEventRow.jsx
+Row in account history table
+src/components/SA/SummaryMetricCard.jsx
+Platform summary stat card (dashboard top row)
+src/components/SA/CredentialShareSheet.jsx
+Bottom sheet with credentials + WhatsApp share + copy (reused for Owner + Staff creation)
+Owner Components
+src/components/Owner/AccountBanner.jsx
+Trial status banner below app bar
+src/components/Owner/AccountStatusCard.jsx
+Account info card for Admin Panel header
+Kanban Components
+src/components/Kanban/KanbanBoard.jsx
+3-column board, Realtime. Unassigned/InProgress: all tasks; Completed: 30 days.
+src/components/Kanban/KanbanColumn.jsx
+Collapsible column + "View older" link (completed only)
+src/components/Kanban/TaskCard.jsx
+Card: aging, urgent, overdue, draft indicator, inline assign
+Task Components
+src/components/Tasks/NewTaskForm.jsx
+Quick capture + full form + customer autocomplete
+src/components/Tasks/TaskDetail.jsx
+Detail: header, timestamps, actions, reopen, WhatsApp, optimistic concurrency
+src/components/Tasks/RemarkForm.jsx
+Remark textarea + submit + char counter
+src/components/Tasks/TaskListItem.jsx
+Row for /tasks list view
+src/components/Tasks/ServiceTypePicker.jsx
+Dropdown from service_types
+src/components/Tasks/TaskSearch.jsx
+Search bar + filter chips
+Staff Management Components
+src/components/Staff/AddStaffForm.jsx
+Name + email + phone + temp password form
+src/components/Staff/StaffListItem.jsx
+Staff row with actions (deactivate, reset password)
+src/components/Staff/ResetPasswordModal.jsx
+New temp password input + confirmation
+Shared Components
+src/components/shared/StatusBadge.jsx
+Task status pill
+src/components/shared/BottomSheet.jsx
+Drag handle, snap, keyboard expansion
+src/components/shared/ConfirmModal.jsx
+Confirm bottom sheet
+src/components/shared/Snackbar.jsx
+Toast: success/error/info/warning
+src/components/shared/ConflictSnackbar.jsx
+Optimistic concurrency conflict with [Refresh] button
+src/components/shared/FAB.jsx
+Floating action button
+src/components/shared/OfflineBanner.jsx
+Amber offline indicator
+src/components/shared/Avatar.jsx
+Initials avatar with configurable color
+src/components/shared/SkeletonCard.jsx
+Shimmer loading placeholder
+src/components/shared/EmptyState.jsx
+Icon + text empty state
+src/components/shared/WhatsAppShareButton.jsx
+wa.me deep link generator
+Notification Components
+src/components/Notifications/NotificationBell.jsx
+Bell + unread badge + Realtime sub
+src/components/Notifications/NotificationCentre.jsx
+Full-screen notification list
+Hooks
+src/hooks/useAuth.js
+Auth state, role, account status, logout, session refresh
+src/hooks/useTrial.js
+trial_ends_at, account_status, days remaining, banner state
+src/hooks/useTasks.js
+Fetch + Realtime + optimistic updates (updated_at check)
+src/hooks/useCustomers.js
+Customer search/autocomplete (business-scoped)
+src/hooks/useAnalytics.js
+Aggregation queries for owner analytics
+src/hooks/useNotifications.js
+Fetch + Realtime on notifications, mark read
+src/hooks/useSABusinesses.js
+Superadmin: fetch businesses + Realtime
+src/hooks/useSnackbar.js
+Global snackbar state (including conflict variant)
+src/hooks/useOnlineStatus.js
+navigator.onLine listener
+Libraries
+src/lib/supabaseClient.js
+Supabase init
+src/lib/pushNotifications.js
+Subscribe, refresh stale, handle 410, multi-device
+src/lib/phoneUtils.js
+E.164 format, display format, tel: link
+src/lib/whatsappShare.js
+Generate wa.me message from task object
+src/lib/credentialShare.js
+Generate WhatsApp credential message for owner/staff
+App Entry
+src/App.jsx
+Routes, auth guards, role redirect, account status gates, providers
+src/main.jsx
+Vite entry, SW registration, Sentry init
+Edge Functions
+supabase/functions/send-push-notification/index.ts
+Webhook → debounce → push to all devices (PII-redacted body)
+supabase/functions/create-business/index.ts
+SA creates business + owner user atomically
+supabase/functions/manage-account/index.ts
+SA activate/suspend/reactivate/extend-trial → updates businesses + sends notifications
+supabase/functions/manage-staff/index.ts
+Owner creates staff / resets staff password via Admin API
+supabase/functions/check-trial-expiry/index.ts
+Hourly cron: trial_active → trial_expired
+supabase/functions/check-draft-reminders/index.ts
+4-hourly cron: draft reminder push to owners
+supabase/functions/cleanup/index.ts
+Weekly cron: notifications TTL + stale push_subscriptions
+supabase/functions/get-superadmin-contact/index.ts
+Returns Superadmin name + phone + email for trial-expired screen (no auth required, returns public contact info only)
+Migrations
+supabase/migrations/001_initial_schema.sql
+All tables, indexes, RLS, triggers, webhooks
+supabase/migrations/002_v6_schema.sql
+Per-business task numbering, max 2 businesses trigger, account_events, notification TTL index, remark length check
+Config
+.env
+Environment variables (see §17)
+vite.config.js
+Vite + vite-plugin-pwa + Workbox
+tailwind.config.js
+Custom colors (navy, purple), font, safe-area plugin
+15. Development Phases
+Phase
+Scope
+Key Deliverable
+Phase 0: Foundation + Superadmin
+Seed Superadmin user. All tables with v6 schema (businesses with max-2 trigger, account_events, per-business task numbering, users with email column, remarks length check). RLS policies for all 3 roles. Auth routes: /login, /reset-password, /change-password. Account status gate redirects (/suspended, /trial-expired). create-business Edge Function. manage-account Edge Function.
+Superadmin can log in, create a business + owner, and activate/suspend. Owner can log in, change password, and see correct account status screen.
+Phase 1: Superadmin Dashboard
+SA layout with sidebar. /sa dashboard: summary cards, business cards with inline actions, activity feed. /sa/businesses: list. /sa/businesses/new: create form + credential share sheet. /sa/businesses/:id: detail with tabs. /sa/settings. Realtime updates on businesses table.
+Superadmin can create both businesses, share credentials via WhatsApp, view detail, activate/suspend — all confirmed E2E.
+Phase 2: Kanban Core
+Kanban board: Unassigned + In Progress (all tasks), Completed (30-day). Task cards with all indicators. Realtime. FAB. Skeleton loading. Empty states. New Task form: quick capture + full form + customer autocomplete + service type. Trial banner. Owner first-login welcome.
+Owner creates tasks, sees live Kanban, Realtime confirmed. Quick capture E2E. Customer autocomplete working.
+Phase 3: Task Lifecycle + Detail
+Task Detail: header, timestamps, action buttons by role, remarks with char counter + DB length check. Reassignment with task_events trigger. Task reopening. Optimistic concurrency with conflict snackbar. WhatsApp share. Tap-to-call. Staff first-login + welcome. Staff My Tasks with filter tabs. Task search + filter (/tasks). manage-staff Edge Function (create + reset password). Staff credential share sheet.
+Full task lifecycle E2E. Reopen confirmed. Optimistic concurrency conflict detected + resolved. Staff creation + credential sharing via WhatsApp confirmed.
+Phase 4: Push + PWA
+VAPID setup. push_subscriptions multi-device. send-push-notification Edge Function with remark debounce + PII redaction. All 8 notification triggers. Permission prompts staggered. Push staleness refresh + 410 handling. Offline banner. A2HS prompt (3rd session).
+Push confirmed on Android Chrome for all triggers. No customer PII in push body. Multi-device tested. Staggered prompts confirmed. 410 recovery confirmed.
+Phase 5: Admin + Analytics + Polish
+Owner analytics. Admin panel (staff management with max-15 enforcement + deactivation cascade + reset password, service types, phonebook). Account status card in admin. /account screen. Draft reminder cron. Notification + push_subscription cleanup crons. Sentry integration (20% sampling). Dual keep-alive (GitHub Actions + UptimeRobot). Lighthouse ≥ 90. Safe area insets. Pull-to-refresh. Vercel deploy.
+Production deploy. PWA audit passing. All 3 roles tested E2E on physical Android device. Sentry receiving events. Dual keep-alive confirmed. Draft reminders firing.
+16. Out of Scope — Version 1.0
+Feature
+Notes
+Self-registration (/setup)
+Removed in v6.0 — Superadmin creates all businesses
+Payment submission form
+Removed in v6.0 — offline payment, Superadmin activates manually
+Payment approval/rejection flow
+Removed in v6.0 — not needed for 2 known clients
+Payment events audit log
+Replaced with simpler account_events
+Subscription fee / period management
+Removed in v6.0 — pricing handled offline
+More than 2 businesses
+Enforced limit — can be raised in v1.1 by modifying trigger
+Drag and drop Kanban
+Removed — conflicts with mobile UX. Not returning.
+iOS push notifications
+Requires iOS 16.4+ — v1.1
+Offline write queue
+v1.1 with IndexedDB
+Dark mode
+v1.1
+File / photo attachments
+Requires Supabase Storage — v1.1
+Invoice / billing
+Out of scope
+Customer-facing portal
+Out of scope — B2C feature
+WhatsApp Business API
+wa.me deep link used instead
+Native Android / iOS app
+PWA covers all requirements
+Automated payment gateway (Razorpay / Stripe)
+Not needed for 2 clients
+Task deletion
+Intentionally excluded to preserve audit trail integrity
+Recurring task templates
+v1.1
+Staff GPS / location tracking
+Privacy concerns — out of scope
+Multi-superadmin
+Single Superadmin in v1.0
+Customer address history (multi)
+v1.1 — task-scoped only in v1.0
+Calendar / schedule view
+v1.1
+Landscape mode
+Portrait locked in manifest
+Bulk task assignment
+v1.1
+Data export (CSV)
+v1.1
+Customer email field
+v1.1
+17. Environment Variables
+Variable
+Location
+Description
+VITE_SUPABASE_URL
+Frontend .env + Vercel
+Supabase project URL
+VITE_SUPABASE_ANON_KEY
+Frontend .env + Vercel
+Supabase public anon key
+VITE_VAPID_PUBLIC_KEY
+Frontend .env + Vercel
+VAPID public key for push subscription
+VITE_SUPPORT_PHONE
+Frontend .env + Vercel
+Superadmin phone shown on /trial-expired + /suspended screens
+VITE_SUPPORT_EMAIL
+Frontend .env + Vercel
+Superadmin email shown on /trial-expired + /suspended screens
+VITE_APP_URL
+Frontend .env + Vercel
+App URL for credential share messages (e.g. https://taskpod.vercel.app)
+VAPID_PRIVATE_KEY
+Supabase Edge Fn env ONLY
+VAPID private key — never in frontend. BACK THIS UP.
+VAPID_PUBLIC_KEY
+Supabase Edge Fn env
+Same VAPID public key (server side)
+VAPID_SUBJECT
+Supabase Edge Fn env
+mailto: address for push sender identity
+SUPABASE_SERVICE_ROLE_KEY
+Supabase Edge Fn env ONLY
+Bypasses RLS for Superadmin actions, push reads, user creation
+SUPERADMIN_USER_ID
+Supabase Edge Fn env
+Superadmin user UUID — used as actor_id for system-triggered events (trial expiry cron)
+SUPABASE_URL
+GitHub Actions secret
+Keep-alive cron
+SUPABASE_ANON_KEY
+GitHub Actions secret
+Keep-alive cron health check
+SENTRY_DSN
+Frontend .env + Vercel
+Sentry error tracking endpoint
+UPTIMEROBOT_API_KEY
+UptimeRobot dashboard
+Not in app — configured directly in UptimeRobot
+Removed from v5: VITE_SETUP_ENABLED — no longer needed since /setup route is removed.

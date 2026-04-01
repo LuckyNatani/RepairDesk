@@ -60,16 +60,22 @@ export default function AdminPanel() {
   const addStaff = async () => {
     if (!addForm.name || !addForm.email || !addForm.phone || !addForm.tempPassword) { show('All fields required', 'error'); return }
     setAddLoading(true)
-    const { error } = await supabase.functions.invoke('manage-staff-fix', { body: { action: 'create', businessId, ...addForm } })
+    const { error } = await supabase.functions.invoke('manage-staff', { body: { action: 'create', businessId, ...addForm } })
     setAddLoading(false)
     if (error) show('Failed to add staff: ' + error.message, 'error')
     else { show('Staff added!', 'success'); setAddForm({ name: '', email: '', phone: '', tempPassword: '' }); loadData() }
   }
 
   const deactivateStaff = async (staffId) => {
+    // 1. Deactivate user
     await supabase.from('users').update({ is_active: false }).eq('id', staffId)
-    await supabase.from('tasks').update({ status: 'unassigned', assigned_to: null }).eq('assigned_to', staffId).eq('status', 'in_progress')
-    setConfirmDeactivate(null); loadData(); show('Staff deactivated', 'info')
+    // 2. Unassign their in_progress tasks
+    const { data: affected } = await supabase.from('tasks').update({ status: 'unassigned', assigned_to: null }).eq('assigned_to', staffId).eq('status', 'in_progress').select('id')
+    const unassignedCount = affected?.length || 0
+    // 3. Delete push subscriptions
+    await supabase.from('push_subscriptions').delete().eq('user_id', staffId)
+    setConfirmDeactivate(null); loadData()
+    show(`Staff deactivated.${unassignedCount > 0 ? ` ${unassignedCount} task${unassignedCount > 1 ? 's' : ''} moved to Unassigned.` : ''}`, 'info')
   }
 
   const reactivateStaff = async (staffId) => {
@@ -151,7 +157,7 @@ export default function AdminPanel() {
                     return
                   }
                   try {
-                    const { error: resetErr } = await supabase.functions.invoke('manage-staff-fix', {
+                    const { error: resetErr } = await supabase.functions.invoke('manage-staff', {
                       body: { action: 'reset_password', businessId, staffId: s.id, tempPassword: newPw }
                     })
                     if (resetErr) throw resetErr
