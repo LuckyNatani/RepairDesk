@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow, format } from 'date-fns'
 import { ArrowLeft, Phone, MapPin, Clock, AlertCircle, RefreshCw, Share2 } from 'lucide-react'
 import { supabase } from '../../lib/supabaseClient'
+import { updateTask } from '../../hooks/useTasks'
 import StatusBadge from '../shared/StatusBadge'
 import ConfirmModal from '../shared/ConfirmModal'
 import ConflictSnackbar from '../shared/ConflictSnackbar'
 import WhatsAppShareButton from '../shared/WhatsAppShareButton'
 import Avatar from '../shared/Avatar'
 import { toTelLink } from '../../lib/phoneUtils'
+import TaskTimeline from './TaskTimeline'
 
 function RemarkItem({ remark }) {
   return (
@@ -99,36 +101,30 @@ export default function TaskDetail({ taskId, currentUser }) {
   }, [taskId])
 
   const assignStaff = async (staffId) => {
-    const { status, error } = await supabase.from('tasks')
-      .update({ assigned_to: staffId, status: 'in_progress', assigned_at: new Date().toISOString() })
-      .eq('id', taskId)
-      .eq('version', lastVersionRef.current)
+    const updates = { assigned_to: staffId, status: 'in_progress', assigned_at: new Date().toISOString() }
+    const res = await updateTask(taskId, updates, { actorId: currentUser.id, expectedVersion: lastVersionRef.current })
 
-    if (error || status === 406 || status === 409) setConflict(true)
+    if (res.conflict || res.error) setConflict(true)
     else fetchTask()
   }
 
   const markComplete = async () => {
     setActionLoading(true)
-    const { status, error } = await supabase.from('tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
-      .eq('id', taskId)
-      .eq('version', lastVersionRef.current)
+    const updates = { status: 'completed', completed_at: new Date().toISOString() }
+    const res = await updateTask(taskId, updates, { actorId: currentUser.id, expectedVersion: lastVersionRef.current })
     
     setActionLoading(false)
-    if (error || status === 406 || status === 409) setConflict(true)
+    if (res.conflict || res.error) setConflict(true)
     else { setConfirmComplete(false); fetchTask() }
   }
 
   const reopenTask = async () => {
     setActionLoading(true)
-    const { status, error } = await supabase.from('tasks')
-      .update({ status: 'unassigned', completed_at: null, assigned_to: null })
-      .eq('id', taskId)
-      .eq('version', lastVersionRef.current)
+    const updates = { status: 'unassigned', completed_at: null, assigned_to: null }
+    const res = await updateTask(taskId, updates, { actorId: currentUser.id, expectedVersion: lastVersionRef.current })
 
     setActionLoading(false)
-    if (error || status === 406 || status === 409) setConflict(true)
+    if (res.conflict || res.error) setConflict(true)
     else { setConfirmReopen(false); fetchTask() }
   }
 
@@ -215,6 +211,8 @@ export default function TaskDetail({ taskId, currentUser }) {
         {!isOwner && task.status === 'completed' && (
           <div style={{ background: 'var(--green-surface)', color: 'var(--green)', borderRadius: 10, padding: '12px 16px', fontSize: 13, fontWeight: 600, marginBottom: 12, textAlign: 'center' }}>This task is completed</div>
         )}
+
+        <TaskTimeline taskId={taskId} />
 
         {/* Remarks */}
         <div className="card" style={{ padding: '14px 16px' }}>

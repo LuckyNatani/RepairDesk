@@ -55,10 +55,12 @@ export function useAnalytics(businessId) {
         unassigned: parseInt(stats.unassigned) || 0,
         completionRate: stats.completion_rate || 0,
         staffStats: (stats.staff_stats || []).sort((a, b) => b.completed - a.completed),
+        serviceTypeStats: (stats.service_type_stats || []).sort((a, b) => b.total - a.total),
+        bottlenecks: stats.bottlenecks || [],
         dateRange: { start, end }
       })
     } else {
-      setData({ total: 0, completed: 0, in_progress: 0, unassigned: 0, completionRate: 0, staffStats: [], dateRange: { start, end } })
+      setData({ total: 0, completed: 0, in_progress: 0, unassigned: 0, completionRate: 0, staffStats: [], serviceTypeStats: [], bottlenecks: [], dateRange: { start, end } })
     }
     setLoading(false)
   }, [businessId])

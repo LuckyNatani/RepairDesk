@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useAnalytics } from '../hooks/useAnalytics'
 import SkeletonCard from '../components/shared/SkeletonCard'
-import { Clock, Download, AlertTriangle } from 'lucide-react'
+import { Clock, Download, AlertTriangle, Zap, Activity } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 
 function MetricCard({ label, value, sub, color = 'var(--teal)' }) {
@@ -96,39 +96,86 @@ export default function AnalyticsDashboard() {
             {/* Per-staff table */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
               <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--gray-900)', margin: 0 }}>Staff Performance</h3>
-              {data.staffStats.length > 0 && (
+              {data.staffStats?.length > 0 && (
                 <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: '1px solid #E0E0E0', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--gray-600)' }}>
-                  <Download size={13} /> Export CSV
+                  <Download size={13} /> Export
                 </button>
               )}
             </div>
-            {data.staffStats.length === 0
-              ? <p style={{ color: 'var(--gray-600)', fontSize: 13 }}>No staff data for this period.</p>
-              : <div className="card" style={{ overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                    <thead>
-                      <tr style={{ background: '#F5F5F5' }}>
-                        {['Name', 'Assigned', 'Done', '%', 'Avg Time'].map(h => (
-                          <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--gray-600)', whiteSpace: 'nowrap' }}>{h}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.staffStats.map((s, i) => (
-                        <tr key={s.id} style={{ borderTop: '1px solid #F0F0F0', background: i % 2 === 0 ? '#fff' : '#FAFAFA' }}>
-                          <td style={{ padding: '10px 12px', fontWeight: 600 }}>{s.name}</td>
-                          <td style={{ padding: '10px 12px' }}>{s.assigned}</td>
-                          <td style={{ padding: '10px 12px', color: 'var(--green)', fontWeight: 600 }}>{s.completed}</td>
-                          <td style={{ padding: '10px 12px' }}>{s.completionRate}%</td>
-                          <td style={{ padding: '10px 12px', color: 'var(--gray-600)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            {s.avgMinutes ? <><Clock size={11} />{s.avgMinutes >= 60 ? `${Math.round(s.avgMinutes/60)}h` : `${s.avgMinutes}m`}</> : '—'}
-                          </td>
-                        </tr>
+            
+            {data.staffStats?.length > 0 && (
+              <div className="card" style={{ overflow: 'hidden', marginBottom: 24 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: '#F5F5F5' }}>
+                      {['Name', 'Done', '%', 'Avg'].map(h => (
+                        <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--gray-600)' }}>{h}</th>
                       ))}
-                    </tbody>
-                  </table>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.staffStats.map((s, i) => (
+                      <tr key={s.id} style={{ borderTop: '1px solid #F0F0F0' }}>
+                        <td style={{ padding: '10px 12px', fontWeight: 600 }}>{s.name}</td>
+                        <td style={{ padding: '10px 12px', color: 'var(--green)', fontWeight: 600 }}>{s.completed}</td>
+                        <td style={{ padding: '10px 12px' }}>{s.completionRate}%</td>
+                        <td style={{ padding: '10px 12px', color: 'var(--gray-600)' }}>
+                          {s.avgMinutes ? `${s.avgMinutes >= 60 ? Math.round(s.avgMinutes/60)+'h' : s.avgMinutes+'m'}` : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Service Type Performance */}
+            <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--gray-900)', marginBottom: 12 }}>Service Efficiency</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+              {data.serviceTypeStats?.length > 0 ? (
+                data.serviceTypeStats.map(st => (
+                  <div key={st.label} className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-900)' }}>{st.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--gray-600)' }}>{st.total} tasks · {st.completed} completed</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--teal)', display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                        <Zap size={14} /> {st.avgMinutes ? (st.avgMinutes >= 60 ? `${Math.round(st.avgMinutes/60)}h` : `${st.avgMinutes}m`) : '—'}
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--gray-400)', fontWeight: 600 }}>AVG. COMPLETION</div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p style={{ color: 'var(--gray-600)', fontSize: 13 }}>No service type data available.</p>
+              )}
+            </div>
+
+            {/* Bottlenecks / Alerts */}
+            {data.bottlenecks?.length > 0 && (
+              <>
+                <h3 style={{ fontFamily: '"Inter", sans-serif', fontSize: 14, fontWeight: 600, color: 'var(--red)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <AlertTriangle size={16} /> Operational Bottlenecks
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {data.bottlenecks.map(b => (
+                    <div key={b.task_number} className="card" style={{ padding: '12px 16px', borderLeft: '4px solid var(--red)', background: '#FEF2F2' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-900)' }}>Task #{b.task_number} — {b.label}</div>
+                          <div style={{ fontSize: 11, color: 'var(--gray-600)', marginTop: 2 }}>Assigned to: <strong>{b.staff}</strong></div>
+                        </div>
+                        <div style={{ textAlign: 'right', color: 'var(--red)', fontWeight: 700 }}>
+                          <div style={{ fontSize: 14 }}>{Math.round(b.duration / 60)}h+</div>
+                          <div style={{ fontSize: 10, uppercase: true }}>ELAPSED</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-            }
+              </>
+            )}
           </>
         ) : null}
       </div>

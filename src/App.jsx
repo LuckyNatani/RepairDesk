@@ -20,6 +20,7 @@ import SABusinessDetail from './pages/SA/SABusinessDetail'
 import SACreateBusiness from './pages/SA/SACreateBusiness'
 import SASettings from './pages/SA/SASettings'
 import AccountStatus from './pages/AccountStatus'
+import PublicStatus from './pages/PublicStatus'
 
 // Components
 import BottomTabBar from './components/layout/BottomTabBar'
@@ -148,6 +149,7 @@ export default function App() {
           <Route path="/" element={<HomeRoute />} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/track/:taskId" element={<PublicStatus />} />
           <Route path="*" element={<RequireAuth><AuthedApp /></RequireAuth>} />
         </Routes>
       </BrowserRouter>

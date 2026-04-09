@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useCustomers } from '../../hooks/useCustomers'
+import { createTask } from '../../hooks/useTasks'
 import { autoFormatPhone } from '../../lib/phoneUtils'
 import { ChevronDown, ChevronUp, User } from 'lucide-react'
 
@@ -55,10 +56,15 @@ export default function NewTaskForm({ businessId, createdBy, staffList = [], ser
       is_urgent: form.isUrgent, is_draft: isDraft, status,
       due_at: form.dueAt ? new Date(form.dueAt).toISOString() : null,
     }
-    const { data, error } = await supabase.from('tasks').insert(payload).select().single()
-    setLoading(false)
-    if (error) setError(error.message)
-    else { onSuccess?.(data); onDismiss?.() }
+    try {
+      const data = await createTask(payload)
+      setLoading(false)
+      onSuccess?.(data)
+      onDismiss?.()
+    } catch (err) {
+      setLoading(false)
+      setError(err.message)
+    }
   }
 
   return (
